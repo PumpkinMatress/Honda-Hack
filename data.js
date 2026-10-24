@@ -25,11 +25,12 @@ const SKILLS = [
 
 // What each rating level means. Shown to the reviewer next to every skill,
 // so ratings mean the same thing no matter who gives them.
+// Listed lowest to highest; core.js uses this order to rank badges.
 const LEVELS = [
-  { id: "beginner",   label: "Beginner",   meaning: "Re-write comment later." },
-  { id: "intermediate",   label: "Intermediate",   meaning: "Re-write comment later." },
-  { id: "proficient", label: "Proficient", meaning: "Re-write comment later." },
-  { id: "advanced",   label: "Advanced",   meaning: "Re-write comment later." },
+  { id: "beginner",     label: "Beginner",     meaning: "Has used the skill with guidance. The basics are there, but the work needed help." },
+  { id: "intermediate", label: "Intermediate", meaning: "Handles common tasks on their own, with some rough edges." },
+  { id: "proficient",   label: "Proficient",   meaning: "Solid, independent work that would hold up on a real engineering team." },
+  { id: "advanced",     label: "Advanced",     meaning: "At or near professional quality. Could teach this skill to others." },
 ];
 
 // ---------- People ----------
@@ -163,6 +164,55 @@ const projects = [
     link: "https://github.com/example/plant-sensor",
     skillTags: [
       { skill: "Circuit Design", people: ["maya"] },
+    ],
+    submittedTo: null,
+  },
+  {
+    id: "bench-psu",
+    title: "Adjustable Bench Power Supply",
+    owner: "maya",
+    members: ["maya"],
+    status: "done",
+    description: "0–24 V lab supply built from a salvaged laptop charger, with current limiting and a small OLED readout.",
+    photos: ["img/bench-psu.jpg"],
+    link: "https://github.com/example/bench-psu",
+    skillTags: [
+      { skill: "Soldering", people: ["maya"] },
+      { skill: "Circuit Design", people: ["maya"] },
+      { skill: "Testing & Validation", people: ["maya"] },
+    ],
+    submittedTo: null,
+  },
+
+  // Jordan's past projects (Maya checks his profile before adding him).
+  {
+    id: "cnc-plotter",
+    title: "Desktop Pen Plotter",
+    owner: "jordan",
+    members: ["jordan"],
+    status: "done",
+    description: "A two-axis drawing machine with a 3D-printed frame and machined aluminum rails.",
+    photos: ["img/cnc-plotter.jpg"],
+    link: "https://github.com/example/pen-plotter",
+    skillTags: [
+      { skill: "CAD (SolidWorks)", people: ["jordan"] },
+      { skill: "3D Printing", people: ["jordan"] },
+      { skill: "Machining", people: ["jordan"] },
+    ],
+    submittedTo: null,
+  },
+  {
+    id: "bike-mount",
+    title: "Bike Phone Mount, Rev 4",
+    owner: "jordan",
+    members: ["jordan"],
+    status: "done",
+    description: "Four design iterations of a vibration-damped phone mount, each one stress-tested on gravel trails.",
+    photos: ["img/bike-mount.jpg"],
+    link: "https://github.com/example/bike-mount",
+    skillTags: [
+      { skill: "CAD (SolidWorks)", people: ["jordan"] },
+      { skill: "Testing & Validation", people: ["jordan"] },
     ],
     submittedTo: null,
   },

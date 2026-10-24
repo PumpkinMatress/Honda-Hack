@@ -1,1 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bridge — show what you built</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
+  <!-- Shared styles (Person A), then each person's own styles. -->
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="teams.css">   <!-- Person B -->
+  <link rel="stylesheet" href="review.css">  <!-- Person C -->
+</head>
+<body>
+
+  <!-- Top bar: logo, navigation, "Viewing as" dropdown, reset button. Filled in by core.js. -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="logo" href="#/profile" aria-label="Bridge home">
+        <span class="logo-mark" aria-hidden="true"></span>
+        <span class="logo-text">Bridge</span>
+      </a>
+      <nav class="nav" id="nav"></nav>
+      <div class="topbar-right">
+        <label class="viewer">
+          <span class="viewer-label">Viewing as</span>
+          <select id="viewer-select"></select>
+        </label>
+        <button class="btn btn-ghost btn-sm" id="reset-demo" title="Clear all saved changes and start the demo over">Reset demo</button>
+      </div>
+    </div>
+  </header>
+
+  <!--
+    One empty box per screen. Only one is visible at a time.
+    Each screen's JavaScript file draws itself into its box.
+    B and C: you never need to edit this file. See README.md.
+  -->
+  <main class="main">
+    <section class="screen" id="screen-profile"    hidden></section> <!-- profile.js   (Person A) -->
+    <section class="screen" id="screen-challenges" hidden></section> <!-- challenge.js (Person B) -->
+    <section class="screen" id="screen-listings"   hidden></section> <!-- listings.js  (Person B) -->
+    <section class="screen" id="screen-messages"   hidden></section> <!-- messages.js  (Person B) -->
+    <section class="screen" id="screen-project"    hidden></section> <!-- project.js   (Person C) -->
+    <section class="screen" id="screen-review"     hidden></section> <!-- review.js    (Person C) -->
+  </main>
+
+  <!-- Order matters: data first, then core, then the screens. -->
+  <script src="data.js"></script>
+  <script src="core.js"></script>
+  <script src="profile.js"></script>   <!-- Person A -->
+  <script src="challenge.js"></script> <!-- Person B -->
+  <script src="listings.js"></script>  <!-- Person B -->
+  <script src="messages.js"></script>  <!-- Person B -->
+  <script src="project.js"></script>   <!-- Person C -->
+  <script src="review.js"></script>    <!-- Person C -->
+  <script>startApp();</script>
+</body>
+</html>
