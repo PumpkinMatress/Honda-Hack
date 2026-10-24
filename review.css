@@ -1,0 +1,271 @@
+/* review.css: styles for Person C's screens (project page and review queue).
+   Buttons, cards, chips, badges and form fields come from style.css (Person A).
+   Project page classes start with "proj-", review screen classes with "rev-",
+   so they can't clash with other people's styles. */
+
+/* ================= Project page (project.js) ================= */
+
+/* Main column on the left, team and challenge on the right. Stacks on small screens. */
+.proj-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 28px;
+  align-items: start;
+}
+
+/* ---------- Banners ---------- */
+
+/* "4 weeks later…" reads like a title card in a video. */
+.proj-later {
+  background: linear-gradient(120deg, #17202b, #2a3a57);
+  border: none;
+  color: #fff;
+  padding: 18px 22px;
+}
+.proj-later-title { font-size: 24px; font-weight: 800; letter-spacing: -0.01em; }
+.proj-later-sub { font-weight: 500; font-size: 14px; opacity: 0.8; margin-top: 2px; }
+
+.proj-banner-done {
+  background: var(--success-soft);
+  color: var(--success);
+  border-color: #bfe3d1;
+}
+
+/* The demo-only "Skip ahead 4 weeks" box. Dashed so it reads as a demo control. */
+.proj-skip {
+  margin-bottom: 20px;
+  background: var(--primary-soft);
+  border: 1.5px dashed #b3c5f3;
+  box-shadow: none;
+}
+.proj-skip > * + * { margin-top: 0; }
+.proj-skip p { margin-top: 2px; }
+.proj-demo-tag {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--primary);
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 1px 7px;
+  margin-right: 6px;
+}
+
+/* ---------- Header card: photos, title, write-up ---------- */
+
+.proj-header { padding: 0; overflow: hidden; }
+.proj-header > * + * { margin-top: 0; }
+.proj-header-body { padding: 18px 20px 20px; }
+.proj-description { white-space: pre-line; max-width: 70ch; }
+
+/* Gallery: one big photo, up to two more stacked beside it. */
+.proj-gallery {
+  display: grid;
+  gap: 4px;
+  grid-auto-rows: 140px;
+}
+.proj-gallery .photo { aspect-ratio: auto; height: 100%; }
+.proj-gallery-1 { grid-template-columns: 1fr; grid-auto-rows: 284px; }
+.proj-gallery-2 { grid-template-columns: 1fr 1fr; grid-auto-rows: 240px; }
+.proj-gallery-3 { grid-template-columns: 2fr 1fr; }
+.proj-gallery-3 .photo:first-child { grid-row: span 2; }
+
+/* ---------- Skills table ---------- */
+
+.proj-table-wrap { overflow-x: auto; }
+
+.proj-skills { width: 100%; border-collapse: collapse; font-size: 14px; }
+.proj-skills th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.proj-skills td { padding: 6px 10px; border-bottom: 1px solid var(--border); height: 48px; }
+.proj-skills tbody tr:last-child td { border-bottom: none; }
+.proj-skills tbody tr:hover td { background: var(--surface-2); }
+.proj-skills .proj-cell { text-align: center; width: 120px; }
+
+/* Team member names in the table header. */
+.proj-person {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--text);
+}
+
+.proj-skill-name { font-weight: 600; }
+.proj-target {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--primary-soft);
+  padding: 1px 7px;
+  border-radius: 999px;
+  margin-left: 6px;
+}
+
+/* The whole cell is clickable, which is easier to hit on camera. */
+.proj-check-cell { display: grid; place-items: center; height: 36px; cursor: pointer; }
+.proj-check-cell input { width: 20px; height: 20px; cursor: pointer; }
+.proj-check { color: var(--success); font-weight: 800; font-size: 16px; }
+.proj-dash { color: #c4cad3; }
+
+.proj-add { display: flex; flex-direction: column; gap: 10px; padding-top: 4px; }
+.proj-add select { width: auto; max-width: 100%; align-self: flex-start; }
+.proj-suggest {
+  border: 1px dashed #9fb4ee;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.proj-suggest:hover { background: #dbe5fb; }
+
+/* ---------- Submit ---------- */
+
+.proj-submit { border-color: #c9d6f7; }
+.proj-submit > * + * { margin-top: 0; }
+.proj-submit p { margin-top: 4px; }
+.proj-submit select { width: auto; }
+.proj-error { color: var(--danger); font-size: 13px; font-weight: 600; }
+.proj-error:not(:empty) { margin-top: 10px; }
+
+/* ---------- Side column ---------- */
+
+.proj-member {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 8px;
+  margin-left: -8px;
+  margin-right: -8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.proj-member:hover { background: var(--surface-2); }
+.proj-member .chips { margin-top: 6px; }
+
+/* ================= Review queue and form (review.js) ================= */
+
+.rev-page { max-width: 900px; margin: 0 auto; }
+
+.rev-count {
+  display: inline-block;
+  min-width: 24px;
+  padding: 1px 8px;
+  margin-left: 4px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* ---------- Queue ---------- */
+
+.rev-item { display: flex; gap: 16px; align-items: center; }
+.rev-item > * + * { margin-top: 0; }
+.rev-thumb { flex: none; width: 150px; border-radius: var(--radius-sm); overflow: hidden; }
+.rev-thumb .photo-fallback { font-size: 20px; }
+.rev-item-body { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+.rev-item-action { flex: none; }
+
+/* ---------- Form ---------- */
+
+/* Project info on the left, photos on the right. */
+.rev-summary { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.rev-summary > * + * { margin-top: 0; }
+.rev-summary-info { align-items: flex-start; }
+.rev-summary-photos { border-radius: var(--radius-sm); overflow: hidden; }
+.rev-member { gap: 6px; font-size: 14px; font-weight: 600; }
+
+/* What each level means, so every reviewer rates the same way. */
+.rev-legend {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+}
+.rev-legend p { margin-top: 6px; line-height: 1.4; }
+
+.rev-skills { margin-top: 18px !important; }
+.rev-skill { border-top: 1px solid var(--border); padding: 14px 0 4px; }
+.rev-skill-head { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
+.rev-target {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--primary-soft);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.rev-rate {
+  display: grid;
+  grid-template-columns: 190px auto;
+  grid-template-areas:
+    "person levels"
+    ".      meaning";
+  align-items: center;
+  gap: 4px 16px;
+  padding: 8px 0;
+}
+.rev-person { grid-area: person; }
+.rev-levels { grid-area: levels; justify-self: start; }
+.rev-meaning { grid-area: meaning; min-height: 18px; }
+
+/* Four level buttons joined together. The chosen one fills with its level color. */
+.rev-levels {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--surface);
+}
+.rev-level { position: relative; }
+.rev-level input { position: absolute; opacity: 0; pointer-events: none; }
+.rev-level span {
+  display: block;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  border-left: 1px solid var(--border);
+  transition: background 0.12s, color 0.12s;
+}
+.rev-level:first-child span { border-left: none; }
+.rev-level span:hover { background: var(--lvl-soft); color: var(--lvl); }
+.rev-level input:checked + span { background: var(--lvl); color: #fff; }
+.rev-level input:focus-visible + span { outline: 2px solid var(--primary); outline-offset: -2px; }
+
+.rev-submit { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 14px; }
+.rev-error { color: var(--danger); font-size: 13px; font-weight: 600; }
+
+/* ================= Small screens ================= */
+
+@media (max-width: 860px) {
+  .proj-layout { grid-template-columns: minmax(0, 1fr); }
+  .rev-summary { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 640px) {
+  .rev-item { flex-wrap: wrap; }
+  .rev-thumb { width: 100%; }
+  .rev-rate { grid-template-columns: 1fr; grid-template-areas: "person" "levels" "meaning"; }
+  .rev-level span { padding: 7px 10px; }
+}
