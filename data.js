@@ -26,9 +26,10 @@ const SKILLS = [
 // What each rating level means. Shown to the reviewer next to every skill,
 // so ratings mean the same thing no matter who gives them.
 const LEVELS = [
-  { id: "beginner",   label: "Beginner",   meaning: "Used the skill with help; results work but need rework." },
-  { id: "proficient", label: "Proficient", meaning: "Used the skill independently; results are solid and repeatable." },
-  { id: "advanced",   label: "Advanced",   meaning: "Made good design choices others could learn from; industry-quality work." },
+  { id: "beginner",   label: "Beginner",   meaning: "Re-write comment later." },
+  { id: "intermediate",   label: "Intermediate",   meaning: "Re-write comment later." },
+  { id: "proficient", label: "Proficient", meaning: "Re-write comment later." },
+  { id: "advanced",   label: "Advanced",   meaning: "Re-write comment later." },
 ];
 
 // ---------- People ----------
