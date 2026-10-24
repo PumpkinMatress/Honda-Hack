@@ -1,149 +1,280 @@
-// ============================================================
-// data.js — all the fake data for the prototype.
-// Every page loads this file, so edit it here and it changes everywhere.
-// Skill levels run 1–5. "verifiedBy" is the id of the professional
-// who confirmed the claim, or null if nobody has yet.
-// ============================================================
+// data.js — all the fake data for the demo.
+// Only Person A edits this file. Ask them if you need a new field.
+//
+// How to read this file:
+//   const NAME = [ ... ]   is a list of things.
+//   { key: value, ... }    is one thing, with named details.
+//   Every thing has an "id" so other things can point to it.
+
+// ---------- Fixed lists ----------
+
+// The skills students can tag. Reviewers rate only these.
+const SKILLS = [
+  "Soldering",
+  "Circuit Design",
+  "Embedded C",
+  "CAD (SolidWorks)",
+  "3D Printing",
+  "Machining",
+  "Python",
+  "Data Analysis",
+  "Testing & Validation",
+  "Technical Writing",
+  "Project Management",
+];
+
+// What each rating level means. Shown to the reviewer next to every skill,
+// so ratings mean the same thing no matter who gives them.
+const LEVELS = [
+  { id: "beginner",   label: "Beginner",   meaning: "Used the skill with help; results work but need rework." },
+  { id: "proficient", label: "Proficient", meaning: "Used the skill independently; results are solid and repeatable." },
+  { id: "advanced",   label: "Advanced",   meaning: "Made good design choices others could learn from; industry-quality work." },
+];
+
+// ---------- People ----------
 
 const users = [
+  // The three people you switch between in the "Viewing as" dropdown.
   {
-    id: "u1",
+    id: "maya",
     name: "Maya Chen",
     role: "student",
-    school: "State University",
-    major: "Computer Engineering, Junior",
-    bio: "I like building things that move. Currently working on robotics and embedded C++.",
-    skills: ["C++", "Embedded Systems", "Python", "Circuit Design"],
-    experience: ["Robotics Club — Software Lead (2025–present)", "Teaching Assistant, Intro to Programming"]
+    major: "Electrical & Computer Engineering",
+    year: "3rd year",
+    bio: "I like building small electronics that solve real problems.",
+    photo: "img/maya.jpg",
+    skills: ["Soldering", "Circuit Design", "Embedded C"],
   },
   {
-    id: "u2",
-    name: "Devon Brooks",
+    id: "jordan",
+    name: "Jordan Reyes",
     role: "student",
-    school: "State University",
-    major: "Computer Science, Sophomore",
-    bio: "Front-end developer who loves making apps people actually use.",
-    skills: ["JavaScript", "HTML/CSS", "UI Design"],
-    experience: ["Web Developer Intern, Campus IT (Summer 2026)"]
+    major: "Mechanical Engineering",
+    year: "2nd year",
+    bio: "CAD nerd. Happiest in the machine shop.",
+    photo: "img/jordan.jpg",
+    skills: ["CAD (SolidWorks)", "3D Printing", "Machining"],
   },
   {
-    id: "u3",
-    name: "Priya Natarajan",
-    role: "professional",
+    id: "priya",
+    name: "Priya Shah",
+    role: "mentor",
+    title: "Battery Systems Engineer",
+    company: "Honda",
     verified: true,
-    company: "Brightline Robotics",
-    title: "Senior Software Engineer",
-    bio: "10 years writing control software for autonomous robots. Happy to mentor students getting into robotics.",
-    skills: ["C++", "Robotics", "Control Systems"],
-    experience: ["Senior Software Engineer, Brightline Robotics", "Software Engineer, Northfield Automation"]
+    bio: "10 years in EV battery systems. Happy to give feedback on hardware projects.",
+    photo: "img/priya.jpg",
+  },
+
+  // Extra people so the site doesn't feel empty.
+  {
+    id: "sam",
+    name: "Sam Okafor",
+    role: "student",
+    major: "Computer Science & Engineering",
+    year: "4th year",
+    bio: "Data and dashboards.",
+    photo: "img/sam.jpg",
+    skills: ["Python", "Data Analysis"],
   },
   {
-    id: "u4",
-    name: "Marcus Hill",
-    role: "professional",
+    id: "lena",
+    name: "Lena Novak",
+    role: "student",
+    major: "Industrial & Systems Engineering",
+    year: "3rd year",
+    bio: "I organize things so other people can build them.",
+    photo: "img/lena.jpg",
+    skills: ["Project Management", "Technical Writing"],
+  },
+  {
+    id: "marcus",
+    name: "Marcus Lee",
+    role: "mentor",
+    title: "Test Engineer",
+    company: "AEP",
     verified: true,
-    company: "Voltaic Systems",
-    title: "Electrical Engineer",
-    bio: "Power electronics and PCB design. I review student hardware projects whenever I can.",
-    skills: ["Circuit Design", "PCB Layout", "Power Electronics"],
-    experience: ["Electrical Engineer, Voltaic Systems"]
-  }
+    bio: "Grid hardware testing. Ask me about soldering.",
+    photo: "img/marcus.jpg",
+  },
 ];
 
-const projects = [
+// ---------- Challenges (posted by companies) ----------
+
+const challenges = [
   {
-    id: "p1",
-    title: "Line-Following Robot",
-    status: "open", // "open" or "past"
-    owner: "u1",
-    authors: ["u1", "u2"],
-    mentors: ["u3"],
-    description: "An autonomous robot that follows a line using infrared sensors and a PID controller written in C++. Next step: adding obstacle avoidance.",
-    images: [],
-    files: ["main.cpp", "pid_controller.h", "motor_control.cpp"],
-    skillClaims: [
-      { skill: "C++", level: 3, verifiedBy: "u3" },
-      { skill: "Embedded Systems", level: 2, verifiedBy: null }
-    ],
-    updated: "2026-10-20"
+    id: "honda-battery",
+    company: "Honda",
+    postedBy: "priya",
+    title: "Build a low-cost EV battery monitor",
+    prompt: "Design and build a device that tracks the health of a small battery pack and shows it in a way a non-expert can understand.",
+    weeks: 4,
+    opens: "2026-10-01",
+    closes: "2026-11-30",
+    targetSkills: ["Circuit Design", "Embedded C", "CAD (SolidWorks)", "Testing & Validation"],
+    whatYouGet: "Every submission gets a review and skill ratings from a Honda engineer.",
   },
   {
-    id: "p2",
-    title: "Campus Event Finder",
-    status: "past",
-    owner: "u2",
-    authors: ["u2"],
-    mentors: [],
-    description: "A web app that collects campus events into one searchable calendar, with filters by category and date.",
-    images: [],
-    files: ["index.html", "app.js", "style.css"],
-    skillClaims: [
-      { skill: "JavaScript", level: 2, verifiedBy: null },
-      { skill: "UI Design", level: 2, verifiedBy: null }
-    ],
-    updated: "2026-05-02"
+    id: "aep-sensor",
+    company: "AEP",
+    postedBy: "marcus",
+    title: "Show off a sensor project",
+    prompt: "Any project that measures something in the real world.",
+    weeks: 1,
+    opens: "2026-09-01",
+    closes: "2026-09-08",
+    targetSkills: ["Soldering", "Data Analysis"],
+    whatYouGet: "Feedback and skill ratings from AEP test engineers.",
   },
-  {
-    id: "p3",
-    title: "Smart Plant Monitor",
-    status: "past",
-    owner: "u1",
-    authors: ["u1"],
-    mentors: ["u4"],
-    description: "A soil moisture and light sensor board that sends readings to a phone. Designed and soldered the circuit from scratch.",
-    images: [],
-    files: ["schematic.pdf", "sensor_reader.cpp"],
-    skillClaims: [
-      { skill: "Circuit Design", level: 2, verifiedBy: "u4" },
-      { skill: "C++", level: 2, verifiedBy: null }
-    ],
-    updated: "2026-03-15"
-  }
 ];
+
+// ---------- Projects ----------
+// status: "open" (still being worked on) or "done"
+// members: who worked on it
+// skillTags: which skill each person did. Filled in by Person C's screen.
+// submittedTo: the challenge id it was submitted to, or null
+
+const projects = [
+  // Maya's past projects (shown on her profile at the start of the demo).
+  {
+    id: "led-cube",
+    title: "8x8x8 LED Cube",
+    owner: "maya",
+    members: ["maya"],
+    status: "done",
+    description: "A 512-LED cube driven by an Arduino with custom animations.",
+    photos: ["img/led-cube.jpg"],
+    link: "https://github.com/example/led-cube",
+    skillTags: [
+      { skill: "Soldering", people: ["maya"] },
+      { skill: "Embedded C", people: ["maya"] },
+    ],
+    submittedTo: null,
+  },
+  {
+    id: "plant-sensor",
+    title: "Smart Plant Moisture Sensor",
+    owner: "maya",
+    members: ["maya"],
+    status: "done",
+    description: "Texts you when your plant needs water. Runs on a coin battery for 6 months.",
+    photos: ["img/plant-sensor.jpg"],
+    link: "https://github.com/example/plant-sensor",
+    skillTags: [
+      { skill: "Circuit Design", people: ["maya"] },
+    ],
+    submittedTo: null,
+  },
+
+  // A finished SAMPLE team project already submitted to the Honda challenge.
+  // It is waiting for Priya's review. It lets Person C build the review screens
+  // before Person B's flow exists, and makes Priya's queue look busy in the demo.
+  {
+    id: "solar-logger",
+    title: "Solar Panel Efficiency Logger",
+    owner: "sam",
+    members: ["sam", "lena"],
+    status: "done",
+    description: "Logs panel output every minute and graphs efficiency against weather.",
+    photos: ["img/solar-logger.jpg"],
+    link: "https://github.com/example/solar-logger",
+    skillTags: [
+      { skill: "Python", people: ["sam"] },
+      { skill: "Data Analysis", people: ["sam", "lena"] },
+      { skill: "Project Management", people: ["lena"] },
+    ],
+    submittedTo: "honda-battery",
+  },
+
+  // Sam's earlier project, already reviewed by AEP (source of the sample certification).
+  {
+    id: "weather-station",
+    title: "Backyard Weather Station",
+    owner: "sam",
+    members: ["sam"],
+    status: "done",
+    description: "Temperature, humidity, and wind sensors feeding a live web dashboard.",
+    photos: ["img/weather-station.jpg"],
+    link: "https://github.com/example/weather-station",
+    skillTags: [
+      { skill: "Soldering", people: ["sam"] },
+      { skill: "Data Analysis", people: ["sam"] },
+    ],
+    submittedTo: "aep-sensor",
+  },
+
+  // NOTE: Maya and Jordan's new team project does NOT exist yet.
+  // Person B's "Add to project" button creates it during the demo.
+];
+
+// ---------- Listings (open positions on projects) ----------
+// Person B's listing form adds Maya's new listing here during the demo.
 
 const listings = [
   {
-    id: "l1",
-    project: "p1",
-    position: "student", // "student" or "mentor"
-    title: "Computer vision helper",
-    description: "Help add a camera so the robot can recognize obstacles. You'd write the image-processing code and test it on the robot.",
-    skillsNeeded: ["Python", "OpenCV", "Basic C++"]
+    id: "listing-drone",
+    projectTitle: "Autonomous Delivery Drone",
+    owner: "sam",
+    challenge: null,
+    lookingFor: "student",
+    role: "Flight controller programmer",
+    details: "Help tune the flight controller and write the waypoint code. About 4 hours a week.",
+    skillsNeeded: ["Embedded C", "Python"],
+    postedOn: "2026-10-20",
   },
   {
-    id: "l2",
-    project: "p1",
-    position: "mentor",
-    title: "Hardware mentor",
-    description: "Looking for someone with motor driver and power supply experience to review our wiring and help us avoid frying another board.",
-    skillsNeeded: ["Power Electronics", "Motor Control"]
-  }
-];
-
-const showcases = [
-  {
-    id: "s1",
-    company: "Brightline Robotics",
-    postedBy: "u3",
-    title: "Autonomy Challenge",
-    prompt: "Build a robot or simulation that makes its own decisions. We'll review every submission and offer summer internship interviews to standout projects.",
-    opens: "2026-10-01",
-    closes: "2027-01-31",
-    prize: "Internship interviews",
-    submissions: ["p1"]
+    id: "listing-mentor",
+    projectTitle: "Solar Panel Efficiency Logger",
+    owner: "lena",
+    challenge: null,
+    lookingFor: "mentor",
+    role: "Energy industry mentor",
+    details: "One 30-minute call to sanity-check our measurements.",
+    skillsNeeded: ["Data Analysis"],
+    postedOn: "2026-10-18",
   },
-  {
-    id: "s2",
-    company: "Voltaic Systems",
-    postedBy: "u4",
-    title: "Show Off Your Circuits",
-    prompt: "Show off any electrical engineering project you've already built. One week only.",
-    opens: "2026-10-22",
-    closes: "2026-10-29",
-    prize: "Feedback from our engineering team",
-    submissions: ["p3"]
-  }
 ];
 
-// Pretend this person is logged in. Change it to test other profiles.
-const currentUserId = "u1";
+// ---------- Messages ----------
+// One list of messages. A conversation = all messages between two people.
+// Person B's chat screen adds to this during the demo.
+
+const messages = [
+  {
+    from: "lena",
+    to: "sam",
+    text: "Marcus said our sensor wiring looks good!",
+    sentAt: "2026-10-19T14:02",
+  },
+];
+
+// ---------- Certifications (skill ratings from reviewers) ----------
+// Person C's review form adds entries here. Person A's profile page shows them.
+// Maya has none at the start of the demo; that's the point of the demo.
+
+const certifications = [
+  // SAMPLE so Person A can design the badge before Person C's form exists.
+  {
+    user: "sam",
+    skill: "Data Analysis",
+    level: "advanced",
+    by: "marcus",
+    project: "weather-station",
+    challenge: "aep-sensor",
+    date: "2026-09-10",
+  },
+];
+
+// ---------- Private feedback ----------
+// Written comments from reviewers. Only the student sees these.
+
+const feedback = [
+  {
+    project: "weather-station",
+    from: "marcus",
+    to: ["sam"],
+    doneWell: "Clean data pipeline and clear graphs.",
+    toImprove: "Calibrate the current sensor against a known load.",
+    date: "2026-09-10",
+  },
+];
