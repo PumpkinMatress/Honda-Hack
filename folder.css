@@ -1,4 +1,5 @@
-/* folder.css — the note card and leaflet that open from a profile folder (folder.js). Owned by Person A.
+/* folder.css — the project view that opens from a profile folder (folder.js): the title card
+ * (an index card) and the project's pages (notebook paper). Owned by Person A.
  * Uses the profile colors from profile.css. No rounded corners, except the punched holes.
  */
 
@@ -36,7 +37,7 @@ body[data-screen="folder"] { background: var(--pf-bg); }
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.55);
 }
 
-/* ---------- Note card (index card) ---------- */
+/* ---------- Title card (index card) ---------- */
 
 .nc {
   background: var(--paper);
@@ -67,6 +68,8 @@ body[data-screen="folder"] { background: var(--pf-bg); }
   padding: 28px 30px 32px;
   background-image: repeating-linear-gradient(to bottom, transparent 0 27px, var(--rule) 27px 28px);
 }
+/* No links (they're optional): the picture gets the whole right side. */
+.nc-body.nc-no-links { grid-template-areas: "desc image"; }
 
 .nc-box {
   background: #fff;
@@ -95,27 +98,67 @@ body[data-screen="folder"] { background: var(--pf-bg); }
   display: grid; place-items: center;
 }
 .nc-image img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.nc-image-empty { font-size: 22px; font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(9, 27, 42, 0.25); }
+.nc-image-empty { font-size: 20px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(9, 27, 42, 0.25); }
+.nc-image-hint {
+  position: absolute; left: 0; right: 0; top: 0; z-index: 1;
+  padding: 8px 12px;
+  font-size: 13px; line-height: 1.4;
+  background: rgba(255, 253, 247, 0.92);
+  border-bottom: 1px solid rgba(9, 27, 42, 0.15);
+}
 .nc-image-tools { position: absolute; left: 12px; bottom: 12px; display: flex; gap: 8px; z-index: 1; }
 .nc-image-tools label { cursor: pointer; }
 
-.nc-links { grid-area: links; display: flex; flex-direction: column; justify-content: center; gap: 10px; font-size: 14px; }
-.nc-link-row { display: grid; grid-template-columns: 78px minmax(0, 1fr); align-items: center; gap: 10px; }
-.nc-link-label { font-weight: 800; }
+/* Important links: any number, each with a name. Optional. */
+.nc-links { grid-area: links; display: flex; flex-direction: column; gap: 12px; font-size: 14px; }
+.nc-box-title { font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.nc-optional { margin-left: 4px; font-size: 12px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--ink-soft); }
+.nc-link-list { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: minmax(0, max-content) minmax(0, 1fr); gap: 8px 14px; }
+.nc-link-row { display: contents; }
+.nc-link-label { font-weight: 800; overflow-wrap: anywhere; }
 .nc-link-row a { color: #1B4FB8; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.nc-link-row input { padding: 6px 8px; font-size: 13px; border-radius: 0; }
+
+.nc-link-rows { display: flex; flex-direction: column; gap: 8px; }
+.nc-link-edit { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.4fr) auto; gap: 8px; align-items: center; }
+.nc-link-edit input { padding: 6px 8px; font-size: 13px; border-radius: 0; }
+.nc-link-remove {
+  font: inherit; font-size: 13px;
+  width: 28px; height: 28px; padding: 0;
+  border: 0; background: none; color: var(--ink-soft);
+  cursor: pointer;
+}
+.nc-link-remove:hover { color: var(--danger); background: rgba(198, 47, 47, 0.08); }
+.nc-add-link {
+  align-self: flex-start;
+  font: inherit; font-size: 13px; font-weight: 700;
+  padding: 5px 10px;
+  border: 1.5px dashed rgba(9, 27, 42, 0.45); border-radius: 0;
+  background: none; color: var(--ink);
+  cursor: pointer;
+}
+.nc-add-link:hover { border-style: solid; background: rgba(9, 27, 42, 0.05); }
 
 .nc-error { color: var(--danger); font-weight: 600; font-size: 14px; padding: 0 30px 16px; }
 .nc-error:empty { display: none; }
 
-/* ---------- Leaflet (notebook paper) ---------- */
+/* ---------- Pages (notebook paper) ---------- */
 
-.lf { display: flex; flex-direction: column; }
+.pgs { display: flex; flex-direction: column; gap: 26px; margin-top: 18px; }
+.pgs-title { display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 700; color: var(--pf-cream); }
+.pgs-count {
+  min-width: 28px; padding: 1px 8px;
+  font-size: 14px; text-align: center;
+  background: var(--pf-cream); color: var(--ink);
+}
+.pg-empty { padding: 22px 24px; border: 2px dashed rgba(244, 229, 212, 0.45); color: var(--pf-cream); font-size: 15px; line-height: 1.55; }
+.pg-add { display: flex; justify-content: center; }
+.pg-add .pf-btn { padding: 12px 26px; font-size: 15px; }
+
+.lf { display: flex; flex-direction: column; scroll-margin-top: 104px; /* clear of the sticky top bar */ }
 
 .lf-paper {
   --margin: 96px; /* where the red margin line sits */
   position: relative;
-  min-height: 760px;
   padding: 0 44px 48px calc(var(--margin) + 26px);
   background-color: var(--paper);
   background-image:
@@ -124,6 +167,23 @@ body[data-screen="folder"] { background: var(--pf-bg); }
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
 }
 .lf-hole { position: absolute; left: calc(var(--margin) / 2 - 10px); top: 24px; }
+/* Page number in the margin, under the punched hole. */
+.lf-num {
+  position: absolute; left: 0; width: var(--margin); top: 58px;
+  text-align: center;
+  font-size: 20px; font-weight: 700; color: var(--red);
+}
+/* Delete: a small trash can in the page's top right corner. */
+.lf-delete {
+  position: absolute; top: 10px; right: 12px;
+  width: 30px; height: 30px;
+  display: grid; place-items: center;
+  padding: 0; border: 0;
+  background: transparent; color: var(--ink-soft);
+  cursor: pointer;
+}
+.lf-delete svg { width: 19px; height: 19px; }
+.lf-delete:hover { color: var(--danger); background: rgba(198, 47, 47, 0.1); }
 
 /* Title and date sit on the second ruled line. */
 .lf-head {
@@ -143,7 +203,7 @@ body[data-screen="folder"] { background: var(--pf-bg); }
 .lf-date-input { width: 130px; font-size: 16px; text-align: right; }
 
 /* Everything the team writes. Each line of text sits on a ruled line. */
-.lf-body { font-size: 15.5px; line-height: var(--line); min-height: calc(var(--line) * 18); overflow-wrap: anywhere; }
+.lf-body { font-size: 15.5px; line-height: var(--line); min-height: calc(var(--line) * 8); overflow-wrap: anywhere; }
 .lf-body::after { content: ""; display: block; clear: both; }
 .lf-body > *, .lf-body li { margin: 0; }
 .lf-body h2 { font-size: 21px; font-weight: 800; line-height: calc(var(--line) * 2); }
@@ -211,8 +271,14 @@ body[data-screen="folder"] { background: var(--pf-bg); }
   .nc-title { font-size: 22px; }
   .nc-date { font-size: 15px; }
   .nc-body { grid-template-columns: 1fr; grid-template-areas: "desc" "image" "links"; gap: 18px; padding: 18px 16px 22px; }
-  .lf-paper { --margin: 44px; padding: 0 16px 32px calc(var(--margin) + 14px); min-height: 520px; }
+  .nc-body.nc-no-links { grid-template-areas: "desc" "image"; }
+  .nc-link-edit { grid-template-columns: minmax(0, 1fr) auto; }
+  .nc-link-edit .nc-link-url { grid-column: 1; }
+  .nc-link-edit .nc-link-remove { grid-column: 2; grid-row: 1 / span 2; }
+  .lf-paper { --margin: 44px; padding: 0 16px 32px calc(var(--margin) + 14px); }
   .lf-hole { width: 16px; height: 16px; left: calc(var(--margin) / 2 - 8px); }
+  .lf-num { top: 50px; font-size: 16px; }
+  .lf-head { padding-right: 30px; } /* room for the trash can */
   .lf-title { font-size: 20px; }
   .lf-toolbar { position: static; } /* the top bar is taller on phones and would cover it */
   .lf-body img.lf-s, .lf-body img.lf-m { width: 70%; }

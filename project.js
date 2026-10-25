@@ -89,13 +89,14 @@ function projectBannerHtml(p, challenge, canEdit) {
   }
 
   // Demo shortcut: jump to "4 weeks later" instead of typing the write-up on camera.
-  if (canEdit && challenge && SAMPLE_PROGRESS[challenge.id]) {
+  // Shown on any open team project (projects aren't tied to a challenge when they're made).
+  if (canEdit && p.members.length > 1) {
     return `
       <div class="card proj-skip row-between wrap">
         <div class="grow">
           <span class="proj-demo-tag">Demo</span>
           <strong>Skip ahead 4 weeks</strong>
-          <p class="muted small">Fills in the write-up and photos the team would have added while building.</p>
+          <p class="muted small">Fills in the summary, photos, links and pages the team would have added while building.</p>
         </div>
         <button class="btn btn-primary" onclick="skipAheadFourWeeks('${esc(p.id)}')">⏩ Skip ahead</button>
       </div>`;
@@ -104,10 +105,9 @@ function projectBannerHtml(p, challenge, canEdit) {
   return "";
 }
 
-// What the project looks like after "Skip ahead 4 weeks", by challenge id.
+// What the project looks like after "Skip ahead 4 weeks" (the demo's battery monitor).
 // Photos fall back to colored boxes until these files are added to img/.
 const SAMPLE_PROGRESS = {
-  "honda-battery": {
     description:
       "We built a pocket-sized monitor that clips onto a 4-cell lithium-ion pack. It reads each cell's voltage, " +
       "the pack current, and two temperature points, then turns all of that into a simple green, yellow, or red " +
@@ -121,16 +121,32 @@ const SAMPLE_PROGRESS = {
       "img/battery-monitor-enclosure.jpg",
       "img/battery-monitor-testing.jpg",
     ],
-    link: "https://github.com/example/battery-monitor",
-  },
+  links: [
+    { label: "GitHub", url: "https://github.com/example/battery-monitor" },
+    { label: "Enclosure CAD", url: "https://cad.onshape.com/documents/example-battery-monitor" },
+  ],
+  // The pages the team wrote along the way: [days ago, title, html].
+  pages: [
+    [27, "Week 1: The plan",
+      "<p>Goal: a monitor for a 4-cell pack that anyone can read. We split it up: <b>Bennett</b> on the board and firmware, <b>Jaron</b> on the enclosure and the test rig.</p>" +
+      "<ul><li>Cell voltages through a resistor divider into the ADC</li><li>Pack current with an INA219</li><li>Two thermistors, one on each end of the pack</li></ul>"],
+    [17, "Week 2: First board",
+      "<p>The first board read every cell, but cell 4 was off by 6%. The divider resistors were 5% parts. Swapping to <mark>0.1% resistors</mark> fixed it.</p>"],
+    [3, "Week 4: Testing",
+      "<h2>40 charge cycles</h2><p>Every reading was checked against a bench multimeter. Voltages stayed within 2%. The third enclosure finally fit the board with room for airflow.</p>"],
+  ],
 };
 
 function skipAheadFourWeeks(projectId) {
   const p = findProject(projectId);
-  const sample = SAMPLE_PROGRESS[projectChallenge(p).id];
+  const sample = SAMPLE_PROGRESS;
   p.description = sample.description;
   p.photos = sample.photos.slice();
-  p.link = sample.link;
+  p.links = sample.links.map((l) => ({ ...l }));
+  const daysAgo = (n) => { const d = new Date(); d.setDate(d.getDate() - n); return d.toISOString().slice(0, 10); };
+  const stamp = Date.now();
+  p.pages = (p.pages || []).concat(sample.pages.map(([days, title, html], i) =>
+    ({ id: `page-${stamp}-${i}`, title, date: shortDate(daysAgo(days)), html })));
   p.fastForwarded = true;
   save();
   refresh();
@@ -152,9 +168,17 @@ function projectMainHtml(p, canEdit, editing) {
           ${p.description
             ? `<p class="proj-description">${esc(p.description)}</p>`
             : `<p class="muted">No write-up yet.</p>`}
-          ${p.link ? `<a href="${esc(p.link)}" target="_blank" rel="noopener">🔗 ${esc(p.link.replace(/^https?:\/\//, ""))}</a>` : ""}`}
+          ${projectLinksHtml(p)}`}
       </div>
     </section>`;
+}
+
+// The title card's "Important links", as a row of links. Also used on the review screen.
+function projectLinksHtml(p) {
+  const links = projectLinks(p).filter((l) => isWebLink(l.url));
+  if (!links.length) return "";
+  return `<div class="row wrap">${links.map((l) =>
+    `<a href="${esc(l.url)}" target="_blank" rel="noopener">🔗 ${esc(l.label || l.url.replace(/^https?:\/\//, ""))}</a>`).join("")}</div>`;
 }
 
 // Up to 3 photos: one big, the rest stacked beside it.
@@ -180,10 +204,7 @@ function projectEditFormHtml(p) {
         <label for="proj-description">Write-up</label>
         <textarea id="proj-description" rows="7" placeholder="What did you build, and how well does it work?">${esc(p.description)}</textarea>
       </div>
-      <div class="field">
-        <label for="proj-link">Code or docs link</label>
-        <input id="proj-link" type="url" value="${esc(p.link)}" placeholder="https://github.com/...">
-      </div>
+      <p class="muted small">Links, the picture and the project's pages are on the project view (open the folder on your profile).</p>
       <div class="row">
         <button class="btn btn-primary" onclick="saveProjectWriteUp('${esc(p.id)}')">Save</button>
         <button class="btn btn-ghost" data-go="project" data-id="${esc(p.id)}">Cancel</button>
@@ -194,10 +215,6 @@ function projectEditFormHtml(p) {
 function saveProjectWriteUp(projectId) {
   const p = findProject(projectId);
   p.description = document.getElementById("proj-description").value.trim();
-  let link = document.getElementById("proj-link").value.trim();
-  // Only allow web links, so a typo can't turn into a broken or unsafe link.
-  if (link && !/^https?:\/\//i.test(link)) link = "https://" + link;
-  p.link = link;
   save();
   showScreen("project", { id: p.id });
 }

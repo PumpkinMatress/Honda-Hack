@@ -156,8 +156,8 @@ function reviewSummaryHtml(p, ch, team) {
         </div>
         ${p.description ? `<p class="proj-description">${esc(p.description)}</p>` : `<p class="muted">No write-up.</p>`}
         <div class="row wrap">
-          ${p.link ? `<a href="${esc(p.link)}" target="_blank" rel="noopener">🔗 ${esc(p.link.replace(/^https?:\/\//, ""))}</a>` : ""}
-          <a href="#" data-go="project" data-id="${esc(p.id)}">Open project page &rarr;</a>
+          ${projectLinksHtml(p)}
+          <a href="#" data-go="folder" data-id="${esc(p.id)}">Open the project's pages &rarr;</a>
         </div>
       </div>
       ${p.photos && p.photos.length ? `<div class="rev-summary-photos">${projectGalleryHtml(p)}</div>` : ""}

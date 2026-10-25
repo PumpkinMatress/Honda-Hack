@@ -1,18 +1,22 @@
-// folder.js — what opens when you click a project folder on a profile. Owned by Person A.
+// folder.js — the project view: what opens when you click a project folder. Owned by Person A.
 // Styles are in folder.css.
 //
-// showScreen("folder", { id: "led-cube" })            -> the project's note card and leaflet
-// showScreen("folder", { id, from: "maya" })          -> "Back" returns to that person's profile
-// showScreen("folder", { id, edit: "card" })          -> a team member editing the note card
-// showScreen("folder", { id, edit: "page" })          -> a team member editing the leaflet
+// showScreen("folder", { id: "led-cube" })                  -> the title card and the pages
+// showScreen("folder", { id, from: "maya" })                -> "Back" returns to that person's profile
+// showScreen("folder", { id, edit: "card" })                -> a team member editing the title card
+// showScreen("folder", { id, edit: "page", page: pageId })  -> a team member editing one page
+// showScreen("folder", { id, page: pageId })                -> scrolled to that page
 //
-// The note card is the summary: title, date, description, a picture, and links.
-// The leaflet is a free page the team writes themselves: text, headings, lists, pictures.
-// Challenge work (tagging skills, submitting, reviews) stays on the project page (project.js).
+// The title card is the summary (the short version): title, date, description, a picture of
+// the project as it is now (or finished), and optional "Important links".
+// Below it are the project's pages, oldest first. The team adds a page as the project goes
+// ("+ Add page"), so a project can be as long as it needs to be. Each page is a free sheet
+// of notebook paper: text, headings, lists, pictures. Pages can be edited or deleted.
+// Tagging skills and submitting to a challenge happen on the skills page (project.js).
 //
 // Project fields used here (see data.js):
-//   title, description, photos[0] (the card picture), link (GitHub), youtube, cad,
-//   leaflet: { title, date, html }
+//   title, description, photos[0] (the title card picture), links: [{ label, url }],
+//   pages: [{ id, title, date, html }], status, completedOn
 
 registerScreen("folder", (box, params) => {
   // Don't lose the last few keystrokes if the page redraws while someone is typing.
@@ -23,7 +27,7 @@ registerScreen("folder", (box, params) => {
     box.innerHTML = `
       <div class="empty-state card">
         <h2>Project not found</h2>
-        <p class="muted">"Reset demo" may have removed it.</p>
+        <p class="muted">It may have been deleted, or "Reset demo" removed it.</p>
         <button class="btn btn-primary" data-go="profile">Back to profile</button>
       </div>`;
     return;
@@ -31,17 +35,22 @@ registerScreen("folder", (box, params) => {
 
   const isMember = p.members.includes(currentUser().id);
   const edit = isMember ? params.edit : "";
+  const editingPage = edit === "page" ? projectPages(p).find((pg) => pg.id === params.page) : null;
   if (edit !== "card") pendingCardImage = undefined;
 
   box.innerHTML = `
     <div class="nb">
       ${folderTopHtml(p, params)}
       ${noteCardHtml(p, edit === "card")}
-      ${isMember && edit !== "page" ? cardActionsHtml(p, edit === "card") : ""}
-      ${leafletHtml(p, isMember, edit === "page")}
+      ${isMember && !editingPage ? cardActionsHtml(p, edit === "card") : ""}
+      ${pagesHtml(p, isMember, editingPage)}
     </div>`;
 
-  if (edit === "page") setupLeafletEditor(p);
+  if (editingPage) setupLeafletEditor(p);
+
+  // Go to the page being edited (or the one just finished, or just added).
+  const target = params.page && document.getElementById("pg-" + params.page);
+  if (target) requestAnimationFrame(() => target.scrollIntoView({ block: "start" }));
 });
 
 // Keeps "from" (whose profile we came from) on every link inside this screen.
@@ -50,28 +59,41 @@ function folderParams(p, extra = {}) {
   return { id: p.id, ...(from ? { from } : {}), ...extra };
 }
 
-// Back link, plus a link to the challenge page for challenge projects.
+// The project's pages, oldest first. A project saved before pages existed had a single
+// "leaflet"; it becomes the first page.
+function projectPages(p) {
+  if (!Array.isArray(p.pages)) {
+    p.pages = p.leaflet ? [{ id: "page-" + p.id, ...p.leaflet }] : [];
+    delete p.leaflet;
+  }
+  return p.pages;
+}
+
+// Back link, plus the project's skills page (tag skills, submit to a challenge, reviews).
 function folderTopHtml(p, params) {
   const viewer = currentUser();
   const from = findUser(params.from);
   const backLabel = !from || from.id === viewer.id ? "Back to your profile" : `Back to ${firstName(from)}'s profile`;
   const challenge = projectChallenge(p);
+  const skillsLabel = challenge ? `🏁 ${challenge.company} challenge: skills and review` : "Skills and challenges";
   return `
     <div class="nb-top">
       <button class="nb-link" data-go="profile" ${from ? `data-user="${esc(from.id)}"` : ""}>&larr; ${esc(backLabel)}</button>
-      ${challenge ? `<button class="nb-link" data-go="project" data-id="${esc(p.id)}">🏁 ${esc(challenge.company)} challenge page &rarr;</button>` : ""}
+      <button class="nb-link" data-go="project" data-id="${esc(p.id)}">${esc(skillsLabel)} &rarr;</button>
     </div>`;
 }
 
-// ---------- The note card ----------
+// ---------- The title card ----------
 
 function folderDate(p) {
   return p.status === "done" ? shortDate(projectDate(p)) : "In progress";
 }
 
 function noteCardHtml(p, editing) {
+  const links = projectLinks(p).filter((l) => isWebLink(l.url));
+  const showLinks = editing || links.length > 0; // the links box is optional
   return `
-    <section class="nc" aria-label="Note card">
+    <section class="nc" aria-label="Title card">
       <header class="nc-head">
         <span class="nb-hole" aria-hidden="true"></span>
         ${editing
@@ -79,32 +101,34 @@ function noteCardHtml(p, editing) {
           : `<h1 class="nc-title">${esc(p.title)}</h1>`}
         <span class="nc-date">${esc(folderDate(p))}</span>
       </header>
-      <div class="nc-body">
+      <div class="nc-body${showLinks ? "" : " nc-no-links"}">
         <div class="nc-box nc-desc">
           ${editing
-            ? `<textarea id="nc-desc" aria-label="Description" placeholder="What is it, and what did you do?">${esc(p.description)}</textarea>`
+            ? `<textarea id="nc-desc" aria-label="Summary" placeholder="The short version: what it is, what it does, and where it's at. The full story goes in the pages.">${esc(p.description)}</textarea>`
             : p.description
               ? p.description.split("\n\n").map((para) => `<p>${esc(para)}</p>`).join("")
-              : `<p class="nb-muted">No description yet.</p>`}
+              : `<p class="nb-muted">No summary yet.</p>`}
         </div>
         ${cardImageHtml(p, editing)}
-        <div class="nc-box nc-links">
-          ${cardLinkHtml("GitHub", "nc-github", p.link, editing, "https://github.com/…")}
-          ${cardLinkHtml("YouTube", "nc-youtube", p.youtube, editing, "https://youtube.com/…")}
-          ${cardLinkHtml("CAD", "nc-cad", p.cad, editing, "Onshape, Fusion or GrabCAD link")}
-        </div>
+        ${showLinks ? `
+          <div class="nc-box nc-links">
+            <h2 class="nc-box-title">Important links${editing ? ` <span class="nc-optional">optional</span>` : ""}</h2>
+            ${editing ? cardLinksEditHtml(projectLinks(p)) : cardLinksHtml(links)}
+          </div>` : ""}
       </div>
       ${editing ? `<p id="nc-error" class="nc-error"></p>` : ""}
     </section>`;
 }
 
+// The picture shows the project as it is right now, or finished once it's done.
 function cardImageHtml(p, editing) {
   const photo = editing && pendingCardImage !== undefined ? pendingCardImage : (p.photos && p.photos[0]) || "";
   return `
     <div class="nc-box nc-image">
-      <span class="nc-image-empty">Image</span>
+      <span class="nc-image-empty">${editing ? "Project photo" : "No photo yet"}</span>
       ${photo ? `<img src="${esc(photo)}" alt="${esc(p.title)}" onerror="this.remove()">` : ""}
       ${editing ? `
+        <p class="nc-image-hint">Show the project as it is right now. Once it's finished, show the finished version.</p>
         <div class="nc-image-tools">
           <label class="pf-btn">Upload picture<input type="file" accept="image/*" hidden onchange="pickCardImage(this)"></label>
           ${photo ? `<button class="pf-btn pf-btn-light" onclick="pickCardImage(null)">Remove</button>` : ""}
@@ -112,31 +136,60 @@ function cardImageHtml(p, editing) {
     </div>`;
 }
 
-function cardLinkHtml(label, id, value, editing, placeholder) {
-  if (editing) {
-    return `
-      <label class="nc-link-row">
-        <span class="nc-link-label">${esc(label)}</span>
-        <input id="${id}" type="url" value="${esc(value || "")}" placeholder="${esc(placeholder)}">
-      </label>`;
-  }
-  const safe = /^https?:\/\//i.test(value || "");
+function cardLinksHtml(links) {
   return `
-    <div class="nc-link-row">
-      <span class="nc-link-label">${esc(label)}</span>
-      ${safe
-        ? `<a href="${esc(value)}" target="_blank" rel="noopener">${esc(value.replace(/^https?:\/\/(www\.)?/i, ""))}</a>`
-        : `<span class="nb-muted">Not added</span>`}
+    <ul class="nc-link-list">
+      ${links.map((l) => `
+        <li class="nc-link-row">
+          <span class="nc-link-label">${esc(l.label || linkHost(l.url))}</span>
+          <a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.url.replace(/^https?:\/\/(www\.)?/i, ""))}</a>
+        </li>`).join("")}
+    </ul>`;
+}
+
+// Any links the team wants: GitHub, a video, CAD files, a datasheet... One row each.
+function cardLinksEditHtml(links) {
+  const rows = links.length ? links : [{ label: "", url: "" }];
+  return `
+    <div class="nc-link-rows" id="nc-link-rows">${rows.map(linkEditRowHtml).join("")}</div>
+    <button type="button" class="nc-add-link" onclick="addLinkRow()">+ Add link</button>`;
+}
+
+function linkEditRowHtml(link) {
+  return `
+    <div class="nc-link-edit">
+      <input class="nc-link-name" value="${esc(link.label)}" placeholder="Name, e.g. GitHub" aria-label="Link name">
+      <input class="nc-link-url" type="url" value="${esc(link.url)}" placeholder="https://…" aria-label="Link address">
+      <button type="button" class="nc-link-remove" onclick="this.closest('.nc-link-edit').remove()" title="Remove link" aria-label="Remove link">✕</button>
     </div>`;
 }
 
+function addLinkRow() {
+  const rows = document.getElementById("nc-link-rows");
+  rows.insertAdjacentHTML("beforeend", linkEditRowHtml({ label: "", url: "" }));
+  rows.lastElementChild.querySelector("input").focus();
+}
+
+// "https://www.github.com/x" -> "github.com"
+function linkHost(url) {
+  try { return new URL(url).hostname.replace(/^www\./, ""); } catch (err) { return url; }
+}
+
+// Under the title card: edit it, and finish (or reopen) the project.
 function cardActionsHtml(p, editing) {
+  const id = esc(p.id);
+  if (editing) {
+    return `
+      <div class="nb-actions">
+        <button class="nb-link" onclick="showScreen('folder', folderParams(findProject('${id}')))">Cancel</button>
+        <button class="pf-btn pf-btn-light" onclick="saveCard('${id}')">Save card</button>
+      </div>`;
+  }
   return `
     <div class="nb-actions">
-      ${editing
-        ? `<button class="pf-btn pf-btn-light" onclick="saveCard('${esc(p.id)}')">Save card</button>
-           <button class="nb-link" onclick="showScreen('folder', folderParams(findProject('${esc(p.id)}')))">Cancel</button>`
-        : `<button class="pf-btn pf-btn-light" onclick="showScreen('folder', folderParams(findProject('${esc(p.id)}'), { edit: 'card' }))">✏️ Edit card</button>`}
+      ${p.status === "open" ? `<button class="pf-btn pf-btn-light" onclick="markProjectComplete('${id}')">✓ Mark as completed</button>` : ""}
+      ${p.status === "done" && !p.submittedTo ? `<button class="nb-link" onclick="reopenProject('${id}')">Reopen project</button>` : ""}
+      <button class="pf-btn pf-btn-light" onclick="showScreen('folder', folderParams(findProject('${id}'), { edit: 'card' }))">✏️ Edit card</button>
     </div>`;
 }
 
@@ -160,8 +213,7 @@ function pickCardImage(input) {
 
 function saveCard(projectId) {
   const p = findProject(projectId);
-  const value = (id) => document.getElementById(id).value.trim();
-  const title = value("nc-title");
+  const title = document.getElementById("nc-title").value.trim();
   if (!title) {
     document.getElementById("nc-error").textContent = "Give the project a title.";
     return;
@@ -172,10 +224,15 @@ function saveCard(projectId) {
   if (listing && title !== p.title) listing.projectTitle = title;
 
   p.title = title;
-  p.description = value("nc-desc");
-  p.link = cleanUrl(value("nc-github"));
-  p.youtube = cleanUrl(value("nc-youtube"));
-  p.cad = cleanUrl(value("nc-cad"));
+  p.description = document.getElementById("nc-desc").value.trim();
+  // Rows with no address are dropped. A link with no name is called by its website.
+  p.links = [...document.querySelectorAll(".nc-link-edit")]
+    .map((row) => {
+      const url = cleanUrl(row.querySelector(".nc-link-url").value);
+      return { label: row.querySelector(".nc-link-name").value.trim() || linkHost(url), url };
+    })
+    .filter((l) => l.url);
+  delete p.link; delete p.youtube; delete p.cad; // the old fixed links, now in p.links
   if (pendingCardImage !== undefined) {
     p.photos = (p.photos || []).slice();
     if (pendingCardImage) p.photos[0] = pendingCardImage;
@@ -197,41 +254,95 @@ function cleanUrl(text) {
   return /^https?:\/\//i.test(t) ? t : "https://" + t;
 }
 
-// ---------- The leaflet ----------
+// ---------- The pages ----------
 
-function leafletHtml(p, isMember, editing) {
-  const lf = p.leaflet || {};
-  const title = lf.title || p.title;
-  const date = lf.date || (p.status === "done" ? shortDate(projectDate(p)) : "");
-  const body = cleanLeafletHtml(lf.html || "");
-  const empty = isMember
-    ? "Nothing here yet. Click Edit page to write about the project and add pictures."
-    : "Nothing written here yet.";
-
+function pagesHtml(p, isMember, editingPage) {
+  const pages = projectPages(p);
   return `
-    <section class="lf ${editing ? "lf-editing" : ""}" aria-label="Leaflet">
-      ${editing ? leafletToolbarHtml(p) : ""}
-      <div class="lf-paper">
-        <span class="nb-hole lf-hole" aria-hidden="true"></span>
-        <header class="lf-head">
-          ${editing
-            ? `<input id="lf-title" class="lf-title-input" value="${esc(title)}" placeholder="Title" aria-label="Page title" oninput="scheduleLeafletSave()">
-               <input id="lf-date" class="lf-date-input" value="${esc(date)}" placeholder="Date" aria-label="Date" oninput="scheduleLeafletSave()">`
-            : `<h2 class="lf-title">${esc(title)}</h2><span class="lf-date">${esc(date)}</span>`}
-        </header>
-        ${editing
-          ? `<div id="lf-body" class="lf-body" contenteditable="true" spellcheck="true" data-project="${esc(p.id)}"
-               data-placeholder="Write anything: how you built it, what went wrong, sketches, photos…">${body}</div>`
-          : `<div class="lf-body">${body || `<p class="nb-muted">${esc(empty)}</p>`}</div>`}
-      </div>
-    </section>
-    ${isMember && !editing ? `
-      <div class="nb-actions">
-        <button class="pf-btn pf-btn-light" onclick="showScreen('folder', folderParams(findProject('${esc(p.id)}'), { edit: 'page' }))">✏️ Edit page</button>
-      </div>` : ""}`;
+    <section class="pgs" aria-label="Pages">
+      <h2 class="pgs-title">Pages${pages.length ? ` <span class="pgs-count">${pages.length}</span>` : ""}</h2>
+      ${pages.length ? "" : `
+        <div class="pg-empty">
+          <p><strong>No pages yet.</strong>
+            ${isMember
+              ? "Pages tell the project's story in order: the plan, sketches, what went wrong, how you fixed it. Add the first page whenever you're ready, then keep adding pages as you go."
+              : "The team hasn't written any pages yet."}</p>
+        </div>`}
+      ${pages.map((pg, i) => pageHtml(p, pg, i, isMember, editingPage)).join("")}
+      ${isMember && !editingPage ? `
+        <div class="pg-add">
+          <button class="pf-btn pf-btn-light" onclick="addPage('${esc(p.id)}')">+ Add page</button>
+        </div>` : ""}
+    </section>`;
 }
 
-function leafletToolbarHtml(p) {
+function pageHtml(p, pg, i, isMember, editingPage) {
+  const editing = Boolean(editingPage) && editingPage.id === pg.id;
+  const number = i + 1;
+  const body = cleanLeafletHtml(pg.html || "");
+  const empty = isMember
+    ? "Nothing on this page yet. Click Edit page to write about this part of the project and add pictures."
+    : "Nothing written here yet.";
+  const pid = esc(p.id);
+  const gid = esc(pg.id);
+
+  return `
+    <section class="lf ${editing ? "lf-editing" : ""}" id="pg-${gid}" aria-label="Page ${number}">
+      ${editing ? leafletToolbarHtml(p, pg) : ""}
+      <div class="lf-paper">
+        <span class="nb-hole lf-hole" aria-hidden="true"></span>
+        <span class="lf-num" title="Page ${number}">${number}</span>
+        ${isMember && !editingPage ? `<button class="lf-delete" type="button" title="Delete page" aria-label="Delete page ${number}" onclick="deletePage('${pid}', '${gid}')">${TRASH_ICON}</button>` : ""}
+        <header class="lf-head">
+          ${editing
+            ? `<input id="lf-title" class="lf-title-input" value="${esc(pg.title)}" placeholder="Page ${number}" aria-label="Page title" oninput="scheduleLeafletSave()">
+               <input id="lf-date" class="lf-date-input" value="${esc(pg.date)}" placeholder="Date" aria-label="Date" oninput="scheduleLeafletSave()">`
+            : `<h2 class="lf-title">${esc(pg.title || `Page ${number}`)}</h2><span class="lf-date">${esc(pg.date)}</span>`}
+        </header>
+        ${editing
+          ? `<div id="lf-body" class="lf-body" contenteditable="true" spellcheck="true" data-project="${pid}" data-page="${gid}"
+               data-placeholder="Write about this part of the project: what you did, sketches, photos, what went wrong…">${body}</div>`
+          : `<div class="lf-body">${body || `<p class="nb-muted">${esc(empty)}</p>`}</div>`}
+      </div>
+      ${isMember && !editingPage ? `
+        <div class="nb-actions">
+          <button class="pf-btn pf-btn-light" onclick="showScreen('folder', folderParams(findProject('${pid}'), { edit: 'page', page: '${gid}' }))">✏️ Edit page</button>
+        </div>` : ""}
+    </section>`;
+}
+
+// A new blank page at the end, dated today, open for writing.
+function addPage(projectId) {
+  const p = findProject(projectId);
+  if (!p) return;
+  const page = { id: "page-" + Date.now(), title: "", date: shortDate(today()), html: "" };
+  projectPages(p).push(page);
+  save();
+  showScreen("folder", folderParams(p, { edit: "page", page: page.id }));
+}
+
+async function deletePage(projectId, pageId) {
+  const p = findProject(projectId);
+  const pages = p ? projectPages(p) : [];
+  const index = pages.findIndex((pg) => pg.id === pageId);
+  if (index === -1) return;
+  const name = pages[index].title || `Page ${index + 1}`;
+  const ok = await confirmDialog({
+    title: "Delete this page?",
+    text: `"${name}" and everything on it will be deleted. This can't be undone.`,
+    confirm: "Delete page",
+    danger: true,
+  });
+  if (!ok) return;
+  pages.splice(index, 1);
+  save();
+  const y = window.scrollY;
+  refresh();
+  window.scrollTo(0, y);
+}
+
+function leafletToolbarHtml(p, pg) {
+
   const tool = (cmd, label, title) => `<button class="lf-tool" data-cmd="${cmd}" title="${esc(title)}" aria-label="${esc(title)}">${label}</button>`;
   const imgTool = (cmd, label, title) => `<button class="lf-tool" data-img="${cmd}" title="${esc(title)}">${label}</button>`;
   return `
@@ -263,12 +374,13 @@ function leafletToolbarHtml(p) {
       </div>
       <div class="lf-tools lf-tools-end">
         <span id="lf-status" class="lf-status">Saved</span>
-        <button class="pf-btn" onclick="finishLeaflet('${esc(p.id)}')">Done</button>
+        <button class="pf-btn" onclick="finishLeaflet('${esc(p.id)}', '${esc(pg.id)}')">Done</button>
       </div>
     </div>`;
 }
 
-// ---------- Leaflet editor ----------
+// ---------- Page editor ----------
+// (Pages used to be called the "leaflet", so the editor's names still say leaflet / lf-.)
 
 const LF_HIGHLIGHT = "#FFE27A";
 let leafletSaveTimer = null;
@@ -492,20 +604,20 @@ function saveLeaflet() {
   const editor = document.getElementById("lf-body");
   if (!editor) return true;
   const p = findProject(editor.dataset.project);
-  if (!p) return true;
-  p.leaflet = {
-    title: document.getElementById("lf-title").value.trim(),
-    date: document.getElementById("lf-date").value.trim(),
-    html: cleanLeafletHtml(editor.innerHTML),
-  };
+  const page = p && projectPages(p).find((pg) => pg.id === editor.dataset.page);
+  if (!page) return true;
+  page.title = document.getElementById("lf-title").value.trim();
+  page.date = document.getElementById("lf-date").value.trim();
+  page.html = cleanLeafletHtml(editor.innerHTML);
   const ok = save();
   setLeafletStatus(ok ? "Saved" : "Couldn't save: the browser's storage is full. Try removing a picture.", !ok);
   return ok;
 }
 
-function finishLeaflet(projectId) {
+// "Done": save, stop editing, and stay on that page.
+function finishLeaflet(projectId, pageId) {
   if (!saveLeaflet()) return;
-  showScreen("folder", folderParams(findProject(projectId)));
+  showScreen("folder", folderParams(findProject(projectId), { page: pageId }));
 }
 
 function setLeafletStatus(text, isError) {
@@ -545,8 +657,8 @@ function shrinkImage(file, maxSide = 1100) {
   });
 }
 
-// ---------- Cleaning leaflet content ----------
-// The leaflet is saved as HTML. Before saving or showing it, everything except a
+// ---------- Cleaning page content ----------
+// Each page is saved as HTML. Before saving or showing it, everything except a
 // short list of safe tags is removed: no scripts, no event handlers, no outside styles.
 
 const LF_TAGS = new Set(["P", "DIV", "BR", "H2", "H3", "B", "STRONG", "I", "EM", "U", "S", "MARK", "UL", "OL", "LI", "BLOCKQUOTE", "A", "IMG", "HR"]);

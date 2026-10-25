@@ -9,7 +9,7 @@
  *   Forms      .field (wrap a <label> + input/select/textarea)  .checkbox
  *   Text       .muted  .small  .xsmall  .clamp-2  .page-title
  *   Tags       .chip  .chips  .status .status-open .status-done  .company-tag  .role-tag  .verified
- *   Levels     .level-pill  .level-beginner / -intermediate / -proficient / -advanced
+ *   Levels     .level-pill  .level-beginner / -intermediate / -advanced / -expert
  *   People     .avatar .avatar-sm/-md/-lg/-xl  .avatar-stack
  *
  * Colors live in the variables below. Use var(--primary) etc. so the site stays consistent.
@@ -30,15 +30,15 @@
   --success: #1a8a5a;
   --success-soft: #e3f4ec;
 
-  /* One color per skill level. */
-  --lvl-beginner: #6b7889;
-  --lvl-beginner-soft: #eef0f3;
-  --lvl-intermediate: #0f8f80;
-  --lvl-intermediate-soft: #e0f3f0;
-  --lvl-proficient: #2f63d8;
-  --lvl-proficient-soft: #e6edfc;
-  --lvl-advanced: #b07612;
+  /* One color per skill level, matching the badge pictures in img/badges/. */
+  --lvl-beginner: #7a4a2b;
+  --lvl-beginner-soft: #f3e8df;
+  --lvl-intermediate: #4b5560;
+  --lvl-intermediate-soft: #eceef1;
+  --lvl-advanced: #9a6b14;
   --lvl-advanced-soft: #fbf1dc;
+  --lvl-expert: #1f2b4d;
+  --lvl-expert-soft: #e3e7f1;
 
   --radius: 12px;
   --radius-sm: 8px;
@@ -349,8 +349,8 @@ input[type="checkbox"], input[type="radio"] { width: auto; accent-color: var(--p
 
 .level-beginner     { --lvl: var(--lvl-beginner);     --lvl-soft: var(--lvl-beginner-soft); }
 .level-intermediate { --lvl: var(--lvl-intermediate); --lvl-soft: var(--lvl-intermediate-soft); }
-.level-proficient   { --lvl: var(--lvl-proficient);   --lvl-soft: var(--lvl-proficient-soft); }
 .level-advanced     { --lvl: var(--lvl-advanced);     --lvl-soft: var(--lvl-advanced-soft); }
+.level-expert       { --lvl: var(--lvl-expert);       --lvl-soft: var(--lvl-expert-soft); }
 
 .level-pill {
   display: inline-block;

@@ -53,7 +53,7 @@ Screen names and the box each one draws into:
 | `project` | project.js | `{ id: "led-cube" }` (project cards and badges send this) |
 | `review` | review.js | `{ project: "solar-logger" }` |
 | `verify` | credential.js | `{ t: "<token>" }` or `{ id: "BRG-K7QM-4XPA" }` (the public certificate page) |
-| `folder` | folder.js | `{ id: "led-cube", from: "maya" }` (note card + leaflet, opens from a profile folder; challenge work stays on `project`) |
+| `folder` | folder.js | `{ id: "led-cube", from: "maya" }` (the project view: title card + pages, opens from a profile folder); `{ id, page: "led-cube-2" }` scrolls to a page; `{ id, edit: "page", page }` edits it |
 
 You choose your own params, except the ones in the table that other screens already send.
 
@@ -68,7 +68,7 @@ You choose your own params, except the ones in the table that other screens alre
 | `refresh()` | Redraw the current screen after changing data |
 | `findUser(id)`, `findProject(id)`, `findChallenge(id)`, `findListing(id)` | Look things up |
 | `esc(text)` | Wrap anything a user typed before putting it in HTML |
-| `avatarHtml(user, "sm")`, `skillChip(skill)`, `levelPill("advanced")`, `certBadgeHtml(cert)`, `photoHtml(src, title)`, `verifiedHtml(user)`, `formatDate(d)`, `today()` | Ready-made bits of HTML that match the site's look |
+| `avatarHtml(user, "sm")`, `skillChip(skill)`, `levelPill("expert")`, `certBadgeHtml(cert)`, `photoHtml(src, title)`, `verifiedHtml(user)`, `formatDate(d)`, `today()` | Ready-made bits of HTML that match the site's look |
 
 Changing data is just changing the lists, then saving:
 
@@ -87,8 +87,8 @@ and the color variables (`var(--primary)` etc.). Put anything extra in your own 
 
 1. **Create project** (profile.js): on your own profile, **+ Create project** is always at the top right
    of your projects, and the empty Current Project folder has one too (plus a link to the Challenges page
-   for ideas). The window asks for a name, a short description, and an optional challenge. You can have
-   as many current projects as you like.
+   for ideas). The window is blank every time and asks only for a name and a short description.
+   You can have as many current projects as you like. Listings and challenges are both optional.
 2. **Create listing** (listings.js): every current project folder on your own profile has a
    **Create listing** button. The window asks who you're looking for (group member, mentor, or either),
    a few sentences about what you need, and the skills needed. Posting it adds a listing with the
@@ -106,6 +106,29 @@ and the color variables (`var(--primary)` etc.). Put anything extra in your own 
 
 Only chats started from a listing get the Add to team stamp, so ordinary chats never do.
 
+## The project view (folder.js)
+
+Clicking a folder on a profile opens the project view.
+
+- **Title card** (the summary): title, date, a short description, a picture of the project as it is
+  now (or finished, once it's done), and **Important links**: any number of named links. Links are optional;
+  with none, the box is hidden. Team members press **Edit card** to change it.
+- **Pages**: the project's story, oldest first. **+ Add page** adds a blank page dated today, so the
+  project grows as the work does. Each page has **Edit page** and a trash can (with an "Are you sure?" window).
+- **Mark as completed** (under the title card, and on the profile folder) moves a current project to the
+  completed folders, dated today. **Reopen project** moves it back (not for projects in a challenge).
+- **Skills and challenges** (top right) opens the skills page (project.js): tag who did which skill,
+  and submit to a challenge. Completed projects can also be entered from the Challenges board.
+- **Deleting a project**: the trash can in the top right corner of a folder on your own profile
+  (projects you own). It also takes down the project's listing.
+
+## Skill stamps and badges
+
+Each skill a person worked on shows on the outside of their project folder as a white circle with the
+skill's name. Once an industry reviewer certifies it, the circle is replaced by that level's badge
+(`img/badges/beginner.png`, `intermediate.png`, `advanced.png`, `expert.png`) with the skill's name underneath.
+The levels are Beginner, Intermediate, Advanced and Expert (`LEVELS` in data.js).
+
 ## Shareable certificates (credential.js)
 
 Every certification can be shared as a public link that anyone can check, for example from LinkedIn.
@@ -118,7 +141,7 @@ Every certification can be shared as a public link that anyone can check, for ex
    - **Download image**: a 1200 × 630 PNG of the badge for posts or slides
    - **Embed on your own website**: an `<iframe>` badge that checks its own signature
 3. The public page (`#/verify?t=...`) checks the signature and shows **✓ Verified credential**.
-   If anyone edits the link (say, Beginner to Advanced), it shows **✕ Not valid** instead.
+   If anyone edits the link (say, Beginner to Expert), it shows **✕ Not valid** instead.
    The **Edit this badge** button on that page shows this happening, which works well in the video.
 
 The certificate's details travel inside the link, so it opens on any computer, even with no server.

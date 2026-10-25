@@ -30,7 +30,7 @@
 //     esc(text)                 make any user-typed text safe inside HTML. Always use it.
 //     avatarHtml(user, size)    round photo with initials fallback. size: "sm" | "md" | "lg" | "xl"
 //     skillChip(skill)          grey pill for a skill name
-//     levelPill(levelId)        colored pill, e.g. "Advanced"
+//     levelPill(levelId)        colored pill, e.g. "Expert"
 //     certBadgeHtml(cert)       the full certification badge used on profiles
 //                               certBadgeHtml(cert, { showStudent: true }) names the student instead of the reviewer
 //                               certBadgeHtml(cert, { share: true }) adds a "Share" button (credential.js)
@@ -40,6 +40,11 @@
 //     verifiedHtml(user)        "✓ Verified · Honda" tag for mentors
 //     formatDate("2026-10-24")  -> "Oct 24, 2026"
 //     today()                   -> "2026-10-24"
+//
+//   projectLinks(p)     -> the project's "Important links": [{ label, url }]
+//   confirmDialog({ title, text, confirm, danger })
+//                       "Are you sure?" window. Returns a Promise of true (confirmed) or false:
+//                         if (!(await confirmDialog({ title: "Delete it?", confirm: "Delete", danger: true }))) return;
 //
 // =======================================================================
 
@@ -56,7 +61,7 @@ const SCREENS = [
   { name: "project",    label: "Project",      file: "project.js",   owner: "Person C", nav: false },
   { name: "review",     label: "Review queue", file: "review.js",    owner: "Person C", nav: true, mentorOnly: true },
   { name: "verify",     label: "Verify",       file: "credential.js", owner: "Person A", nav: false, public: true },
-  { name: "folder",     label: "Project",      file: "folder.js",    owner: "Person A", nav: false }, // note card + leaflet
+  { name: "folder",     label: "Project",      file: "folder.js",    owner: "Person A", nav: false }, // project view: title card + pages
 ];
 
 const screenDrawers = {};
@@ -279,6 +284,23 @@ function photoHtml(src, label) {
   return `<div class="photo" style="--hue:${hueFor(label)}"><span class="photo-fallback">${esc(initials(label))}</span>${img}</div>`;
 }
 
+// A project's "Important links" (title card, folder.js). Projects saved before links
+// existed had fixed GitHub / YouTube / CAD fields, so those are turned into links.
+function projectLinks(p) {
+  if (Array.isArray(p.links)) return p.links;
+  return [["GitHub", p.link], ["YouTube", p.youtube], ["CAD", p.cad]]
+    .filter(([, url]) => url)
+    .map(([label, url]) => ({ label, url }));
+}
+
+// Only web links get drawn as links, so a typo or a "javascript:" link can't do anything.
+function isWebLink(url) {
+  return /^https?:\/\//i.test(String(url || ""));
+}
+
+// A small trash can, for delete buttons (profile folders, project pages).
+const TRASH_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v5.5M14 11v5.5"/></svg>`;
+
 function skillChip(skill) {
   return `<span class="chip">${esc(skill)}</span>`;
 }
@@ -286,7 +308,7 @@ function skillChip(skill) {
 function levelInfo(levelId) {
   const index = LEVELS.findIndex((l) => l.id === levelId);
   const level = LEVELS[index] || { id: levelId, label: levelId, meaning: "" };
-  return { ...level, rank: index + 1 }; // rank: 1 = beginner ... 4 = advanced
+  return { ...level, rank: index + 1 }; // rank: 1 = beginner ... 4 = expert
 }
 
 function levelPill(levelId) {
@@ -327,7 +349,7 @@ function newCredentialId() {
 }
 
 // The full certification badge:
-//   "Advanced Soldering — Verified by Honda · Priya Shah, Battery Systems Engineer".
+//   "Expert Soldering — Verified by Honda · Priya Shah, Battery Systems Engineer".
 // certBadgeHtml(cert, { showStudent: true }) says who received it instead (for reviewers).
 // certBadgeHtml(cert, { share: true }) adds the "Share" button (only on your own profile).
 function certBadgeHtml(cert, options = {}) {
@@ -376,6 +398,43 @@ function today() {
   const d = new Date();
   const pad = (n) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+// ---------- "Are you sure?" window ----------
+// Styled like the profile's windows (np- styles in profile.css). Escape or Cancel = false.
+
+function confirmDialog({ title, text = "", confirm = "OK", cancel = "Cancel", danger = false }) {
+  return new Promise((resolve) => {
+    const dialog = document.createElement("dialog");
+    dialog.className = "np-dialog cf-dialog";
+    dialog.setAttribute("aria-labelledby", "cf-title");
+    dialog.innerHTML = `
+      <div class="np">
+        <header class="np-head"><h2 class="np-title" id="cf-title">${esc(title)}</h2></header>
+        ${text ? `<div class="np-body"><p class="cf-text">${esc(text)}</p></div>` : ""}
+        <footer class="np-foot">
+          <button type="button" class="pf-btn pf-btn-ghost" data-answer="no">${esc(cancel)}</button>
+          <button type="button" class="pf-btn${danger ? " pf-btn-danger" : ""}" data-answer="yes">${esc(confirm)}</button>
+        </footer>
+      </div>`;
+    document.body.appendChild(dialog);
+
+    let answered = false;
+    const answer = (yes) => {
+      if (answered) return;
+      answered = true;
+      if (dialog.open) dialog.close();
+      dialog.remove();
+      resolve(yes);
+    };
+    dialog.querySelector('[data-answer="yes"]').addEventListener("click", () => answer(true));
+    dialog.querySelector('[data-answer="no"]').addEventListener("click", () => answer(false));
+    dialog.addEventListener("cancel", (e) => { e.preventDefault(); answer(false); }); // Escape key
+    dialog.addEventListener("close", () => answer(false));
+
+    dialog.showModal();
+    dialog.querySelector('[data-answer="no"]').focus(); // the safe choice is the default
+  });
 }
 
 // ---------- Start ----------

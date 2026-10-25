@@ -11,7 +11,7 @@
   <!-- Shared styles (Person A), then each person's own styles. -->
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="profile.css"> <!-- Person A: profile page -->
-  <link rel="stylesheet" href="folder.css">  <!-- Person A: note card + leaflet -->
+  <link rel="stylesheet" href="folder.css">  <!-- Person A: project view (title card + pages) -->
   <link rel="stylesheet" href="teams.css">   <!-- Person B -->
   <link rel="stylesheet" href="challenge.css"> <!-- Person B: challenges board -->
   <link rel="stylesheet" href="messages.css">  <!-- Person B: messages -->
@@ -55,7 +55,7 @@
     <section class="screen" id="screen-project"    hidden></section> <!-- project.js   (Person C) -->
     <section class="screen" id="screen-review"     hidden></section> <!-- review.js    (Person C) -->
     <section class="screen" id="screen-verify"     hidden></section> <!-- credential.js: public certificate page -->
-    <section class="screen" id="screen-folder"     hidden></section> <!-- folder.js: note card + leaflet (opens from a profile folder) -->
+    <section class="screen" id="screen-folder"     hidden></section> <!-- folder.js: project view, title card + pages (opens from a profile folder) -->
   </main>
 
   <!-- Order matters: data first, then core, then the screens. -->
@@ -69,7 +69,7 @@
   <script src="project.js"></script>   <!-- Person C -->
   <script src="review.js"></script>    <!-- Person C -->
   <script src="credential.js"></script> <!-- signed, shareable certificates -->
-  <script src="folder.js"></script>    <!-- Person A: note card + leaflet -->
+  <script src="folder.js"></script>    <!-- Person A: project view (title card + pages) -->
   <script>startApp();</script>
 </body>
 </html>

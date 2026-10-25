@@ -239,9 +239,16 @@ function saveListing(event, projectId) {
   showScreen("listings", { id }); // see the new post on the Listings page
 }
 
-function removeListing(listingId) {
+async function removeListing(listingId) {
+  if (!findListing(listingId)) return;
+  const ok = await confirmDialog({
+    title: "Take this listing down?",
+    text: "It will no longer show on the Listings page. You can post a new one any time.",
+    confirm: "Take down",
+    danger: true,
+  });
   const index = listings.findIndex((l) => l.id === listingId);
-  if (index === -1 || !confirm("Take this listing down? It will no longer show on the Listings page.")) return;
+  if (!ok || index === -1) return;
   listings.splice(index, 1);
   save();
   closeListingDialog();

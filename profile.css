@@ -38,6 +38,8 @@ body[data-screen="profile"] { background: var(--pf-bg); }
 .pf-btn-light:hover { background: #fff; border-color: #fff; }
 .pf-btn-ghost { background: transparent; color: var(--pf-ink); }
 .pf-btn-ghost:hover { background: rgba(9, 27, 42, 0.08); border-color: var(--pf-ink); }
+.pf-btn-danger { background: #9b2c1f; border-color: #9b2c1f; color: #fff; }
+.pf-btn-danger:hover { background: #7f2218; border-color: #7f2218; }
 
 /* ---------- Header ----------
  *
@@ -160,6 +162,7 @@ body[data-screen="profile"] { background: var(--pf-bg); }
 /* Front of the folder. Its cut corners line up with the back's.
    Every front is the same height; the photo square is sized to fit inside it. */
 .folder-front {
+  position: relative; /* for the trash can */
   flex: 1;
   height: var(--front-h);
   display: grid;
@@ -195,26 +198,51 @@ body[data-screen="profile"] { background: var(--pf-bg); }
 }
 .folder-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 
-/* One white box per tagged skill, with its name inside.
-   Placeholders until the certification stamps are designed.
-   Widths fit the longest word in SKILLS ("Management") without splitting it. */
-.folder-stamps { grid-area: stamps; display: flex; flex-wrap: wrap; gap: 14px; align-self: end; }
+/* The skills on the outside of the folder. Each is a white circle with the skill's name
+   inside, until a reviewer certifies it: then it's the level's badge picture, with the
+   name underneath. --stamp-d (the circle size) is set per folder size below; it fits
+   the longest word in SKILLS ("Management") without splitting it. */
+.folder-stamps { grid-area: stamps; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 14px; align-self: end; }
 .folder-stamp {
+  flex: none;
+  width: var(--stamp-d); height: var(--stamp-d);
   display: flex; align-items: center; justify-content: center;
-  padding: 4px;
+  padding: 0 4px;
   border: 2px solid rgba(9, 27, 42, 0.45);
+  border-radius: 50%;
   background: #fff;
   color: var(--pf-ink);
-  font-size: 11px; font-weight: 600; line-height: 1.2;
+  font-size: var(--stamp-font); font-weight: 600; line-height: 1.15;
   text-align: center;
   overflow-wrap: break-word;
 }
+/* The name hangs below the badge into the folder's bottom padding, so a badge takes
+   the same room as a circle (the negative margin cancels the name's height). */
+.folder-badge { flex: none; display: flex; flex-direction: column; align-items: center; margin-bottom: -19px; }
+.folder-badge img { width: var(--stamp-d); height: var(--stamp-d); filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.25)); }
+.folder-badge-name { height: 17px; margin-top: 2px; font-size: 11px; font-weight: 700; line-height: 17px; white-space: nowrap; }
+
+/* Delete: a small trash can in the top right corner of your own folders. */
+.folder-delete {
+  position: absolute; top: 1px; right: 20px;
+  width: 26px; height: 26px;
+  display: grid; place-items: center;
+  padding: 0; border: 0;
+  background: transparent;
+  color: rgba(9, 27, 42, 0.55);
+  cursor: pointer;
+}
+.folder-delete svg { width: 18px; height: 18px; }
+.folder-delete:hover { color: #9b2c1f; background: rgba(155, 44, 31, 0.12); }
+.folder-delete:focus-visible { outline: 2px solid var(--pf-ink); }
 
 /* Current project: full width. Title, text and stamps on the left,
    photo on the right as tall as the folder allows. */
 .folder-current .folder-tab { min-width: 250px; }
 .folder-current .folder-front {
   --pad-y: 28px;
+  --stamp-d: 88px;
+  --stamp-font: 11px;
   grid-template-columns: minmax(0, 1fr) calc(var(--front-h) - 2 * var(--pad-y));
   grid-template-areas: "info photo" "stamps photo";
   gap: 20px 36px;
@@ -222,21 +250,22 @@ body[data-screen="profile"] { background: var(--pf-bg); }
 }
 .folder-current .folder-title { font-size: 32px; }
 .folder-current .folder-desc { font-size: 15px; max-width: 600px; }
-.folder-current .folder-stamp { width: 92px; height: 84px; font-size: 12px; }
 
-/* Completed projects: half width. Photo on the right, stamps along the bottom. */
+/* Completed projects: half width. Photo on the right, stamps along the bottom.
+   The top padding leaves room for the trash can above the photo. */
 .folder-completed .folder-front {
-  --pad-y: 22px;
+  --pad-top: 28px;
+  --pad-bottom: 22px;
   --row-gap: 16px;
-  --stamp-h: 66px;
-  grid-template-columns: minmax(0, 1fr) calc(var(--front-h) - 2 * var(--pad-y) - var(--row-gap) - var(--stamp-h));
+  --stamp-d: 76px;
+  --stamp-font: 10px;
+  grid-template-columns: minmax(0, 1fr) calc(var(--front-h) - var(--pad-top) - var(--pad-bottom) - var(--row-gap) - var(--stamp-d));
   grid-template-areas: "info photo" "stamps stamps";
   gap: var(--row-gap) 22px;
-  padding: var(--pad-y) 24px;
+  padding: var(--pad-top) 24px var(--pad-bottom);
 }
 .folder-completed .folder-title { font-size: 21px; }
 .folder-completed .folder-desc { font-size: 13px; }
-.folder-completed .folder-stamp { width: 82px; height: var(--stamp-h); }
 
 /* No current project yet. */
 .folder-empty .folder-front { grid-template-columns: 1fr; grid-template-rows: auto; grid-template-areas: "info"; align-content: center; padding: 28px 34px; }
@@ -306,6 +335,12 @@ body[data-screen="profile"] { background: var(--pf-bg); }
 .np-seg .np-chip span { min-width: 96px; text-align: center; }
 
 .np-hint { font-size: 13px; color: var(--pf-ink-soft); }
+/* "Are you sure?" window (confirmDialog in core.js). */
+.cf-dialog { width: min(460px, calc(100vw - 32px)); }
+.cf-dialog .np-title { font-size: 24px; }
+.cf-text { font-size: 15px; line-height: 1.5; }
+.cf-dialog .np-foot { padding-top: 18px; }
+
 .np-error { min-height: 1.2em; font-size: 13px; font-weight: 700; color: #9b2c1f; }
 .np-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 4px 28px 24px; }
 .np-foot .np-remove { margin-right: auto; color: #9b2c1f; border-color: #9b2c1f; }
@@ -371,5 +406,5 @@ body[data-screen="profile"] { background: var(--pf-bg); }
     padding: 26px 20px 22px;
   }
   .folder-current .folder-title { font-size: 26px; }
-  .folder-current .folder-stamp { width: 82px; height: 70px; font-size: 11px; }
+  .folder-current .folder-front { --stamp-d: 80px; --stamp-font: 10.5px; }
 }

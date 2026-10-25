@@ -26,11 +26,12 @@ const SKILLS = [
 // What each rating level means. Shown to the reviewer next to every skill,
 // so ratings mean the same thing no matter who gives them.
 // Listed lowest to highest; core.js uses this order to rank badges.
+// Each level has a badge picture in img/badges/<id>.png (shown on profile folders).
 const LEVELS = [
   { id: "beginner",     label: "Beginner",     meaning: "Has used the skill with guidance. The basics are there, but the work needed help." },
   { id: "intermediate", label: "Intermediate", meaning: "Handles common tasks on their own, with some rough edges." },
-  { id: "proficient",   label: "Proficient",   meaning: "Solid, independent work that would hold up on a real engineering team." },
-  { id: "advanced",     label: "Advanced",     meaning: "At or near professional quality. Could teach this skill to others." },
+  { id: "advanced",     label: "Advanced",     meaning: "Solid, independent work that would hold up on a real engineering team." },
+  { id: "expert",       label: "Expert",       meaning: "At or near professional quality. Could teach this skill to others." },
 ];
 
 // ---------- People ----------
@@ -137,10 +138,12 @@ const challenges = [
 ];
 
 // ---------- Projects ----------
-// status: "open" (still being worked on) or "done"
+// status: "open" (still being worked on), "submitted" (waiting for a challenge review) or "done"
 // completedOn: the day it was finished (shown on the folder tab on profiles)
-// link (GitHub), youtube, cad: links shown on the note card (folder.js)
-// leaflet: { title, date, html }, the free page the team writes (folder.js)
+// description, photos[0]: the title card's summary and picture (folder.js)
+// links: [{ label, url }], the title card's "Important links". Optional.
+// pages: [{ id, title, date, html }], the pages the team adds as the project goes,
+//        oldest first (folder.js)
 // members: who worked on it
 // skillTags: which skill each person did. Filled in by Person C's screen.
 // submittedTo: the challenge id it was submitted to, or null
@@ -154,25 +157,36 @@ const projects = [
     members: ["maya"],
     status: "done",
     completedOn: "2025-04-19",
-    youtube: "https://www.youtube.com/watch?v=example-led-cube",
-    leaflet: {
-      title: "LED Cube build log",
-      date: "04/19/25",
-      html:
-        "<h2>The build</h2>" +
-        "<p>512 LEDs: 64 per layer, eight layers. I made a wooden jig to hold each layer straight while soldering. All the soldering took about <b>30 hours</b>.</p>" +
-        "<h2>How it's driven</h2>" +
-        "<ul><li>An Arduino Nano runs everything</li>" +
-        "<li>Eight 74HC595 shift registers pick the columns</li>" +
-        "<li>Eight transistors switch on one layer at a time, fast enough that you can't see the flicker</li></ul>" +
-        "<h2>Animations</h2>" +
-        "<p>I wrote the firmware in C: rain, a rotating wave, text that scrolls around the sides, and a playable <mark>3D snake game</mark> with two buttons.</p>" +
-        "<h2>What I learned</h2>" +
-        "<p>Test every layer before stacking them. I had to desolder a whole layer to fix one cold joint.</p>",
-    },
+    pages: [
+      {
+        id: "led-cube-1",
+        title: "Soldering the layers",
+        date: "02/22/25",
+        html:
+          "<h2>The build</h2>" +
+          "<p>512 LEDs: 64 per layer, eight layers. I made a wooden jig to hold each layer straight while soldering. All the soldering took about <b>30 hours</b>.</p>" +
+          "<h2>Lesson learned</h2>" +
+          "<p>Test every layer before stacking them. I had to desolder a whole layer to fix one cold joint.</p>",
+      },
+      {
+        id: "led-cube-2",
+        title: "Driver board and animations",
+        date: "04/19/25",
+        html:
+          "<h2>How it's driven</h2>" +
+          "<ul><li>An Arduino Nano runs everything</li>" +
+          "<li>Eight 74HC595 shift registers pick the columns</li>" +
+          "<li>Eight transistors switch on one layer at a time, fast enough that you can't see the flicker</li></ul>" +
+          "<h2>Animations</h2>" +
+          "<p>I wrote the firmware in C: rain, a rotating wave, text that scrolls around the sides, and a playable <mark>3D snake game</mark> with two buttons.</p>",
+      },
+    ],
     description: "I designed and built an 8x8x8 LED cube with 512 hand-soldered LEDs, driven by an Arduino Nano through a chain of shift registers. I also wrote the animation firmware in C, including a rain effect and a playable 3D snake game.",
     photos: ["img/led-cube.jpg"],
-    link: "https://github.com/example/led-cube",
+    links: [
+      { label: "GitHub", url: "https://github.com/example/led-cube" },
+      { label: "Demo video", url: "https://www.youtube.com/watch?v=example-led-cube" },
+    ],
     skillTags: [
       { skill: "Soldering", people: ["maya"] },
       { skill: "Embedded C", people: ["maya"] },
@@ -186,26 +200,34 @@ const projects = [
     members: ["maya"],
     status: "done",
     completedOn: "2025-11-15",
-    leaflet: {
-      title: "Plant sensor notes",
-      date: "11/15/25",
-      html:
-        "<h2>The problem</h2>" +
-        "<p>I kept forgetting to water the plants in my apartment, so I wanted something that just texts me.</p>" +
-        "<h2>How it works</h2>" +
-        "<ul><li>A capacitive soil sensor (no bare metal in the dirt, so it doesn't corrode)</li>" +
-        "<li>An ESP32 wakes up once an hour, takes a reading, and goes back to deep sleep</li>" +
-        "<li>If the soil is too dry, it sends a text through a free webhook service</li></ul>" +
-        "<h2>Battery life</h2>" +
-        "<p>Version 1 lasted <b>9 days</b>. The voltage regulator was wasting power even while the ESP32 slept. " +
-        "I switched to a low-quiescent-current regulator and cut power to the sensor between readings. " +
-        "Now it should last <mark>about six months on two AA batteries</mark>.</p>" +
-        "<h2>Next time</h2>" +
-        "<p>Design a small PCB so the whole thing fits inside a plant pot.</p>",
-    },
+    pages: [
+      {
+        id: "plant-sensor-1",
+        title: "Version 1",
+        date: "10/04/25",
+        html:
+          "<h2>The problem</h2>" +
+          "<p>I kept forgetting to water the plants in my apartment, so I wanted something that just texts me.</p>" +
+          "<h2>How it works</h2>" +
+          "<ul><li>A capacitive soil sensor (no bare metal in the dirt, so it doesn't corrode)</li>" +
+          "<li>An ESP32 wakes up once an hour, takes a reading, and goes back to deep sleep</li>" +
+          "<li>If the soil is too dry, it sends a text through a free webhook service</li></ul>",
+      },
+      {
+        id: "plant-sensor-2",
+        title: "Fixing the battery life",
+        date: "11/15/25",
+        html:
+          "<p>Version 1 lasted <b>9 days</b>. The voltage regulator was wasting power even while the ESP32 slept. " +
+          "I switched to a low-quiescent-current regulator and cut power to the sensor between readings. " +
+          "Now it should last <mark>about six months on two AA batteries</mark>.</p>" +
+          "<h2>Next time</h2>" +
+          "<p>Design a small PCB so the whole thing fits inside a plant pot.</p>",
+      },
+    ],
     description: "I built a battery-powered soil moisture sensor that sends a text when a plant needs water. It uses a capacitive sensor and an ESP32 that sleeps between hourly readings. After two power-circuit redesigns, it now runs about six months on two AA batteries.",
     photos: ["img/plant-sensor.jpg"],
-    link: "https://github.com/example/plant-sensor",
+    links: [{ label: "GitHub", url: "https://github.com/example/plant-sensor" }],
     skillTags: [
       { skill: "Circuit Design", people: ["maya"] },
     ],
@@ -218,29 +240,45 @@ const projects = [
     members: ["maya"],
     status: "done",
     completedOn: "2026-01-03",
-    youtube: "https://www.youtube.com/watch?v=example-bench-psu",
-    cad: "https://cad.onshape.com/documents/example-bench-psu-enclosure",
-    leaflet: {
-      title: "Bench supply build log",
-      date: "01/03/26",
-      html:
-        "<h2>Why I built it</h2>" +
-        "<p>Our lab only has four bench supplies, and they're all taken the week before a deadline. A decent one costs over $150, so I wanted to see how close I could get for less.</p>" +
-        "<h2>Parts</h2>" +
-        "<ul><li>A salvaged 19 V laptop charger (free, from the e-waste bin)</li>" +
-        "<li>An XL6009 converter, rewired for 0 to 24 V</li>" +
-        "<li>An INA219 current sensor and a small OLED screen</li>" +
-        "<li>An Arduino Nano for the readout and the current limit</li></ul>" +
-        "<h2>What went wrong</h2>" +
-        "<p>Version 1 had no heatsink on the converter. It hit <b>92 °C</b> at 2 A after ten minutes. I added an aluminum heatsink and a small fan, and now it stays under 55 °C.</p>" +
-        "<h2>How I tested it</h2>" +
-        "<p>I checked the output against the lab's bench supply and a Fluke multimeter at 1, 5, 12 and 24 V. Every reading was <mark>within 1%</mark>.</p>" +
-        "<h2>Next time</h2>" +
-        "<p>Add a second channel, and swap the knob for a rotary encoder so I can dial in exact voltages.</p>",
-    },
+    pages: [
+      {
+        id: "bench-psu-1",
+        title: "Plan and parts",
+        date: "11/22/25",
+        html:
+          "<h2>Why I built it</h2>" +
+          "<p>Our lab only has four bench supplies, and they're all taken the week before a deadline. A decent one costs over $150, so I wanted to see how close I could get for less.</p>" +
+          "<h2>Parts</h2>" +
+          "<ul><li>A salvaged 19 V laptop charger (free, from the e-waste bin)</li>" +
+          "<li>An XL6009 converter, rewired for 0 to 24 V</li>" +
+          "<li>An INA219 current sensor and a small OLED screen</li>" +
+          "<li>An Arduino Nano for the readout and the current limit</li></ul>",
+      },
+      {
+        id: "bench-psu-2",
+        title: "Version 1 overheated",
+        date: "12/13/25",
+        html:
+          "<p>Version 1 had no heatsink on the converter. It hit <b>92 °C</b> at 2 A after ten minutes. I added an aluminum heatsink and a small fan, and now it stays under 55 °C.</p>",
+      },
+      {
+        id: "bench-psu-3",
+        title: "Testing and wrap-up",
+        date: "01/03/26",
+        html:
+          "<h2>How I tested it</h2>" +
+          "<p>I checked the output against the lab's bench supply and a Fluke multimeter at 1, 5, 12 and 24 V. Every reading was <mark>within 1%</mark>.</p>" +
+          "<h2>Next time</h2>" +
+          "<p>Add a second channel, and swap the knob for a rotary encoder so I can dial in exact voltages.</p>",
+      },
+    ],
     description: "I built an adjustable 0 to 24 V bench power supply from a salvaged 19 V laptop charger, with current limiting and a live OLED readout. Tested against lab-grade supplies, it's accurate to within 1%, at about a third of the cost of buying one.",
     photos: ["img/bench-psu.jpg"],
-    link: "https://github.com/example/bench-psu",
+    links: [
+      { label: "GitHub", url: "https://github.com/example/bench-psu" },
+      { label: "Demo video", url: "https://www.youtube.com/watch?v=example-bench-psu" },
+      { label: "Enclosure CAD", url: "https://cad.onshape.com/documents/example-bench-psu-enclosure" },
+    ],
     skillTags: [
       { skill: "Soldering", people: ["maya"] },
       { skill: "Circuit Design", people: ["maya"] },
@@ -259,7 +297,7 @@ const projects = [
     completedOn: "2025-12-06",
     description: "I designed a two-axis pen plotter in SolidWorks, 3D printed the frame in PETG, and machined the aluminum rails on a manual mill. It runs GRBL firmware on an Arduino and can draw any SVG file.",
     photos: ["img/cnc-plotter.jpg"],
-    link: "https://github.com/example/pen-plotter",
+    links: [{ label: "GitHub", url: "https://github.com/example/pen-plotter" }],
     skillTags: [
       { skill: "CAD (SolidWorks)", people: ["jordan"] },
       { skill: "3D Printing", people: ["jordan"] },
@@ -276,7 +314,7 @@ const projects = [
     completedOn: "2026-03-21",
     description: "I designed a vibration-damped bike phone mount over four revisions. When version 2 cracked at the clamp, I added ribs and switched to PETG, then added TPU pads to absorb vibration. The final version has held up for more than 300 miles of gravel riding.",
     photos: ["img/bike-mount.jpg"],
-    link: "https://github.com/example/bike-mount",
+    links: [{ label: "GitHub", url: "https://github.com/example/bike-mount" }],
     skillTags: [
       { skill: "CAD (SolidWorks)", people: ["jordan"] },
       { skill: "Testing & Validation", people: ["jordan"] },
@@ -296,7 +334,7 @@ const projects = [
     completedOn: "2026-10-12",
     description: "We built a Raspberry Pi data logger that recorded a 100 W solar panel's output every minute for six weeks, then compared it against local weather data. We found that heat alone cut the panel's output by almost 10% on hot afternoons.",
     photos: ["img/solar-logger.jpg"],
-    link: "https://github.com/example/solar-logger",
+    links: [{ label: "GitHub", url: "https://github.com/example/solar-logger" }],
     skillTags: [
       { skill: "Python", people: ["sam"] },
       { skill: "Data Analysis", people: ["sam", "lena"] },
@@ -315,7 +353,7 @@ const projects = [
     completedOn: "2026-09-10",
     description: "I built a weather station that measures temperature, humidity, pressure, and wind speed with an ESP32, and posts readings every five minutes to a live dashboard I wrote in Python and Flask. It has run outdoors through a full Ohio winter.",
     photos: ["img/weather-station.jpg"],
-    link: "https://github.com/example/weather-station",
+    links: [{ label: "GitHub", url: "https://github.com/example/weather-station" }],
     skillTags: [
       { skill: "Soldering", people: ["sam"] },
       { skill: "Data Analysis", people: ["sam"] },
@@ -332,7 +370,7 @@ const projects = [
     status: "open",
     description: "A quadcopter that carries a small package across campus on its own. The frame is printed, the motors are tuned, and it flies well in manual mode. Next up: waypoint missions and a safe landing routine.",
     photos: ["img/delivery-drone.jpg"],
-    link: "https://github.com/example/delivery-drone",
+    links: [{ label: "GitHub", url: "https://github.com/example/delivery-drone" }],
     skillTags: [
       { skill: "Soldering", people: ["sam"] },
       { skill: "Python", people: ["sam"] },
@@ -349,7 +387,7 @@ const projects = [
     status: "open",
     description: "I put plug-in power meters on 20 dorm rooms to find out where the energy actually goes. Three weeks in, mini fridges and gaming PCs left on overnight are leading by a lot.",
     photos: ["img/dorm-energy.jpg"],
-    link: "",
+    links: [],
     skillTags: [
       { skill: "Data Analysis", people: ["lena"] },
       { skill: "Project Management", people: ["lena"] },
@@ -361,6 +399,7 @@ const projects = [
 
   // NOTE: Maya's new project does NOT exist yet. She makes it with
   // "Create project" on her profile during the demo.
+  // Projects without pages show an empty "Add page" spot.
 ];
 
 // ---------- Listings (posts on the Listings page) ----------
@@ -487,7 +526,7 @@ const certifications = [
     id: "BRG-K7QM-4XPA",
     user: "sam",
     skill: "Data Analysis",
-    level: "advanced",
+    level: "expert",
     by: "marcus",
     project: "weather-station",
     challenge: "aep-sensor",

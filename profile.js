@@ -7,8 +7,9 @@
 // Layout: a header (photo in a big circle, name box, stats box), then each project
 // as a manila folder. Current projects are full width and always come first.
 // Completed projects are half width, newest first, with the date on the tab.
-// On your own profile, "Create project" is always at the top right of your projects,
-// and each current project has a "Create listing" button (listings.js).
+// On your own profile, "Create project" is always at the top right of your projects.
+// Each current project has "Create listing" (listings.js) and "Mark as completed",
+// and each project you own has a trash can (top right of the folder) to delete it.
 
 registerScreen("profile", (box, params) => {
   const viewer = currentUser();
@@ -108,13 +109,13 @@ function studentProfileHtml(user, isOwn) {
       <section class="pf-current" aria-label="Current projects">
         ${isOwn ? `<div class="pf-new"><button class="pf-btn pf-btn-light" onclick="openNewProjectDialog()">+ Create project</button></div>` : ""}
         ${current.length
-          ? current.map((p) => folderHtml(p, user, "current", { actions: isOwn })).join("")
+          ? current.map((p) => folderHtml(p, user, "current", { actions: isOwn, canDelete: isOwn && p.owner === user.id })).join("")
           : emptyFolderHtml(user, isOwn)}
       </section>
 
       ${completed.length ? `
         <section class="pf-completed" aria-label="Completed projects">
-          ${completed.map((p) => folderHtml(p, user, "completed")).join("")}
+          ${completed.map((p) => folderHtml(p, user, "completed", { canDelete: isOwn && p.owner === user.id })).join("")}
         </section>` : ""}
     </div>`;
 }
@@ -143,7 +144,8 @@ function shortDate(text) {
 
 // size: "current" (full width) or "completed" (half width, also used on the Listings page)
 // options:
-//   actions: true  -> "Create listing" / "Edit listing" buttons (your own current projects)
+//   actions: true  -> "Create listing" / "Edit listing" and "Mark as completed" (your own current projects)
+//   canDelete: true -> trash can in the top right corner (projects you own, on your own profile)
 //   tab: "..."     -> different text on the tab
 //   inListing: true -> drawn next to its own listing post, so it doesn't repeat "Looking for"
 //   link: false    -> not clickable (a listing whose project no longer exists)
@@ -172,7 +174,8 @@ function folderHtml(p, user, size, options = {}) {
             ${options.actions ? folderActionsHtml(p, listing) : ""}
           </div>
           ${folderPhotoHtml(p)}
-          ${folderStampsHtml(p)}
+          ${folderStampsHtml(p, user)}
+          ${options.canDelete ? `<button class="folder-delete" type="button" title="Delete project" aria-label="Delete ${esc(p.title)}" onclick="event.stopPropagation(); deleteProject('${esc(p.id)}')">${TRASH_ICON}</button>` : ""}
         </div>
       </div>
     </article>`;
@@ -185,6 +188,7 @@ function folderPhotoHtml(p) {
 }
 
 // "Create listing" on a current project, or "Edit listing" and "View" once it has one.
+// Listings are optional; "Mark as completed" moves the project to the completed folders.
 // stopPropagation: pressing a button shouldn't also open the folder.
 function folderActionsHtml(p, listing) {
   const id = esc(p.id);
@@ -194,17 +198,87 @@ function folderActionsHtml(p, listing) {
         ? `<button class="pf-btn" onclick="event.stopPropagation(); openListingDialog('${id}')">Edit listing</button>
            <button class="pf-btn pf-btn-ghost" onclick="event.stopPropagation(); showScreen('listings', { id: '${esc(listing.id)}' })">View on Listings</button>`
         : `<button class="pf-btn" onclick="event.stopPropagation(); openListingDialog('${id}')">Create listing</button>`}
+      ${p.status === "open" ? `<button class="pf-btn pf-btn-ghost" onclick="event.stopPropagation(); markProjectComplete('${id}')">✓ Mark as completed</button>` : ""}
     </div>`;
 }
 
-// One white box per skill tagged on the project, with the skill's name in it.
-// TODO: placeholders until the certification stamps are designed.
-function folderStampsHtml(p) {
-  const tags = p.skillTags || [];
+// The skills on the outside of a folder: the ones this person worked on.
+// Each one is a circle with the skill's name in it. Once an industry reviewer certifies
+// it, the circle becomes that level's badge (img/badges/), with the skill's name underneath.
+function folderStampsHtml(p, user) {
+  const tags = (p.skillTags || []).filter((t) => !t.people.length || t.people.includes(user.id));
   if (!tags.length) return "";
   return `<div class="folder-stamps" aria-label="Skills">
-    ${tags.map((t) => `<span class="folder-stamp">${esc(t.skill)}</span>`).join("")}
+    ${tags.map((t) => folderStampHtml(p, user, t.skill)).join("")}
   </div>`;
+}
+
+function folderStampHtml(p, user, skill) {
+  const cert = certifications.find((c) => c.project === p.id && c.user === user.id && c.skill === skill);
+  if (!cert) return `<span class="folder-stamp">${esc(skill)}</span>`;
+  const level = levelInfo(cert.level);
+  const reviewer = certReviewer(cert);
+  const label = `${level.label} ${skill}, verified by ${reviewer.company || reviewer.name}`;
+  return `
+    <span class="folder-badge" title="${esc(label)}">
+      <img src="img/badges/${esc(level.id)}.png" alt="${esc(label)}">
+      <span class="folder-badge-name">${esc(skill)}</span>
+    </span>`;
+}
+
+// ---------- Finishing and deleting projects ----------
+// Also used by the project view (folder.js).
+
+async function markProjectComplete(projectId) {
+  const p = findProject(projectId);
+  if (!p || p.status !== "open") return;
+  const ok = await confirmDialog({
+    title: "Mark as completed?",
+    text: `"${p.title}" moves to your completed projects, dated today. Any listing for it comes off the Listings page. ` +
+      "You can still add pages, and you can submit it to a challenge from the Challenges page.",
+    confirm: "Mark as completed",
+  });
+  if (!ok) return;
+  p.status = "done";
+  p.completedOn = today();
+  save();
+  refresh();
+}
+
+// Back to a current project. Not for projects in a challenge (their review depends on them).
+async function reopenProject(projectId) {
+  const p = findProject(projectId);
+  if (!p || p.status !== "done" || p.submittedTo) return;
+  const ok = await confirmDialog({ title: "Reopen this project?", text: `"${p.title}" moves back to your current projects.`, confirm: "Reopen" });
+  if (!ok) return;
+  p.status = "open";
+  delete p.completedOn;
+  save();
+  refresh();
+}
+
+async function deleteProject(projectId) {
+  const p = findProject(projectId);
+  if (!p) return;
+  const ok = await confirmDialog({
+    title: "Delete this project?",
+    text: `"${p.title}", its title card and all of its pages will be deleted` +
+      (p.members.length > 1 ? " for everyone on the team" : "") +
+      ". Any listing for it is taken down. This can't be undone.",
+    confirm: "Delete project",
+    danger: true,
+  });
+  if (!ok) return;
+  const listing = projectListing(p);
+  projects.splice(projects.indexOf(p), 1);
+  for (let i = listings.length - 1; i >= 0; i--) {
+    if (listings[i].project === p.id || listings[i] === listing) listings.splice(i, 1);
+  }
+  for (let i = feedback.length - 1; i >= 0; i--) {
+    if (feedback[i].project === p.id) feedback.splice(i, 1);
+  }
+  save();
+  refresh();
 }
 
 // Shown in place of the current project when there isn't one.
@@ -231,9 +305,10 @@ function emptyFolderHtml(user, isOwn) {
 }
 
 // ---------- Create project ----------
-// "Create project" on your own profile opens this window. It makes an open project
-// with you as the only member. You can have as many current projects as you like.
-// To find a group member or mentor, press "Create listing" on the new folder (listings.js).
+// "Create project" on your own profile opens this window, blank every time. It makes a new
+// open project with you as the only member: a title card with no picture, no links and no
+// pages yet. You can have as many current projects as you like. Every project lives on your
+// profile; from there you can post a listing (optional) or submit it to a challenge (optional).
 
 function openNewProjectDialog() {
   closeNewProjectDialog();
@@ -259,8 +334,6 @@ function closeNewProjectDialog() {
 window.addEventListener("hashchange", closeNewProjectDialog);
 
 function newProjectFormHtml() {
-  const open = challenges.filter((c) => today() <= c.closes);
-
   return `
     <form class="np" onsubmit="createProject(event)" novalidate>
       <header class="np-head">
@@ -275,14 +348,7 @@ function newProjectFormHtml() {
         </label>
         <label class="np-field">
           <span class="np-label">What are you building?</span>
-          <textarea id="np-desc" rows="3" placeholder="A sentence or two. You can tell the whole story on the project's leaflet later."></textarea>
-        </label>
-        <label class="np-field">
-          <span class="np-label">Building it for a challenge?</span>
-          <select id="np-challenge">
-            <option value="">No, it's a personal project</option>
-            ${open.map((c) => `<option value="${esc(c.id)}">${esc(c.company)}: ${esc(c.title)}</option>`).join("")}
-          </select>
+          <textarea id="np-desc" rows="3" placeholder="A sentence or two. Tell the whole story in the project's pages as you go."></textarea>
         </label>
         <p class="np-error" id="np-error" role="alert"></p>
       </div>
@@ -310,7 +376,6 @@ function createProject(event) {
     return;
   }
 
-  const challengeId = value("np-challenge") || null;
   const id = "project-" + Date.now();
   projects.push({
     id,
@@ -320,9 +385,9 @@ function createProject(event) {
     status: "open",
     description: value("np-desc"),
     photos: [],
-    link: "",
+    links: [],
+    pages: [],
     skillTags: [],
-    challenge: challengeId, // the challenge it's for (it isn't submitted yet)
     submittedTo: null,
     startedOn: today(),
   });

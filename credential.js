@@ -6,7 +6,7 @@
 //      company's private key. The result is a "token": the details plus a signature.
 //   2. The token goes inside a public link:   your-site/#/verify?t=<token>
 //   3. The verify page checks the signature with the company's public key. If anyone
-//      edits a detail (say, "Beginner" to "Advanced"), the check fails and the page says so.
+//      edits a detail (say, "Beginner" to "Expert"), the check fails and the page says so.
 //
 // The details travel inside the link, so the link works on any computer, with no server.
 // The token is a standard JSON Web Token (JWT, signed with ES256), so other software,
@@ -268,7 +268,7 @@ function verifyPageHtml(t, token, status, params) {
 
   const strip = params.test
     ? `<div class="verify-strip verify-strip-test">
-         <span>🧪 <strong>Test:</strong> you ${params.test === "level" ? "changed the level to Advanced" : "put a different name on the badge"}
+         <span>🧪 <strong>Test:</strong> you ${params.test === "level" ? "changed the level to Expert" : "put a different name on the badge"}
            in the link, but kept ${esc(c.iss)}'s original signature.</span>
          <button class="btn btn-sm" onclick="history.back()">&larr; Back to the real badge</button>
        </div>`
@@ -345,8 +345,8 @@ function verifyPageHtml(t, token, status, params) {
           <div class="verify-try">
             <div>
               <strong>Try to fake it.</strong>
-              <span class="muted small">${c.level !== "advanced"
-                ? `What if ${esc(String(c.name).split(" ")[0] || "the student")} edits the link so it says Advanced?`
+              <span class="muted small">${c.level !== "expert"
+                ? `What if ${esc(String(c.name).split(" ")[0] || "the student")} edits the link so it says Expert?`
                 : "What if someone puts their own name on this badge?"}</span>
             </div>
             <button class="btn" onclick="tryFakeCredential()">Edit this badge</button>
@@ -409,7 +409,7 @@ function tryFakeCredential() {
   if (!t) return;
   const claims = { ...t.claims };
   let change;
-  if (claims.level !== "advanced") { claims.level = "advanced"; change = "level"; }
+  if (claims.level !== "expert") { claims.level = "expert"; change = "level"; }
   else { claims.name = "Alex Imposter"; change = "name"; }
   const fake = encodeJson(t.header) + "." + encodeJson(claims) + "." + t.signature;
   showScreen("verify", { t: fake, test: change });
