@@ -60,7 +60,7 @@ body[data-screen="profile"] { background: var(--pf-bg); }
   --text-left: calc(var(--half) + var(--photo) / 2 + var(--gap) + 16px); /* name and bio start here, clear of the photo */
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 170px;
+  grid-template-columns: minmax(0, 1fr) 205px; /* wide enough for "skill certifications" beside its menu button */
   grid-template-rows: var(--half) auto;
   gap: var(--gap);
   margin-bottom: 40px;
@@ -167,8 +167,9 @@ body[data-screen="profile"] { background: var(--pf-bg); }
 
 .pf-current { position: relative; display: flex; flex-direction: column; gap: 36px; margin-bottom: 40px; }
 
-/* "Create project": on the dark background, level with the first folder's tab. */
-.pf-new { position: absolute; top: 0; right: 0; height: 46px; display: flex; align-items: center; }
+/* "+ Add project" (only with a current project): on the dark background, level with the first folder's tab. */
+/* z-index: the first folder's clickable area spans this row too, so the button sits above it. */
+.pf-new { position: absolute; top: 0; right: 0; z-index: 2; height: 46px; display: flex; align-items: center; }
 .pf-completed { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 36px 28px; align-items: start; }
 
 .folder {
@@ -436,7 +437,7 @@ body[data-screen="profile"] { background: var(--pf-bg); }
 
 @media (max-width: 1060px) {
   .pf { --front-h: 300px; }
-  .pf-header { --half: 106px; --photo: 104px; grid-template-columns: minmax(0, 1fr) 150px; }
+  .pf-header { --half: 106px; --photo: 104px; grid-template-columns: minmax(0, 1fr) 195px; }
 }
 
 @media (max-width: 860px) {

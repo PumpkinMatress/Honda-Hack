@@ -85,10 +85,11 @@ and the color variables (`var(--primary)` etc.). Put anything extra in your own 
 
 ## Starting a project and building a team
 
-1. **Create project** (profile.js): on your own profile, **+ Create project** is always at the top right
-   of your projects, and the empty Current Project folder has one too (plus a link to the Challenges page
-   for ideas). The window is blank every time and asks only for a name and a short description.
-   You can have as many current projects as you like. Listings and challenges are both optional.
+1. **Create project** (profile.js): on your own profile with no current project, the empty Current Project
+   folder has **Create project** (plus a link to the Challenges page for ideas). Once you have a current
+   project, **+ Add project** at the top right of your projects starts another one. Current projects stack
+   on top of each other, above the completed ones. The window is blank every time and asks only for a name
+   and a short description. Listings and challenges are both optional.
 2. **Create listing** (listings.js): every current project folder on your own profile has a
    **Create listing** button. The window asks who you're looking for (group member, mentor, or either),
    a few sentences about what you need, and the skills needed. Posting it adds a listing with the
@@ -124,7 +125,6 @@ Clicking a folder on a profile opens the project view.
   Once it's submitted, the top right of the project view links to the challenge (or, for the reviewer, to the review).
 - Between the title card and the pages (project.js): **Skills: who did what** (checks, then badges once certified,
   with **Share** on your own skill certifications; clicking one opens its verifiable credential) and the reviewer's private **feedback** (team members only).
-- **Skip ahead 4 weeks** (demo only) sits at the top of any open team project, for its team.
 - **Deleting a project**: the trash can in the top right corner of a folder on your own profile
   (projects you own). It also takes down the project's listing.
 

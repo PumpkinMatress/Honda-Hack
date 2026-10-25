@@ -11,7 +11,6 @@
 // Anyone else (or a project that isn't open any more) is sent to the project view instead.
 //
 // Also drawn on the project view (folder.js), in the same index-card style:
-//   projectProgressHtml(p)      the demo's "Skip ahead 4 weeks" box, then the "4 weeks later…" banner
 //   projectSkillsCardHtml(p)    who did which skill, and the skill certifications (each one opens its
 //                               verifiable credential; students can Share their own)
 //   projectFeedbackCardHtml(p)  the reviewer's private feedback (team members only)
@@ -159,78 +158,6 @@ function finishProject(event, projectId) {
   p.completedOn = today();
   save();
   leaveSkillsPage(p.id);
-}
-
-// ---------- Demo: "4 weeks later" (on the project view) ----------
-
-// Demo shortcut: jump to "4 weeks later" instead of typing the pages on camera.
-// Shown to the team of any open team project (projects aren't tied to a challenge when they're made).
-function projectProgressHtml(p) {
-  if (p.status !== "open" || !p.members.includes(currentUser().id)) return "";
-
-  if (p.fastForwarded) {
-    const names = p.members.map(findUser).filter(Boolean).map(firstName);
-    return `
-      <div class="sk-later">
-        <div class="sk-later-title">4 weeks later…</div>
-        <div class="sk-later-sub">${esc(joinNames(names))} ${names.length > 1 ? "have" : "has"} a working prototype.
-          Press <strong>Mark as completed</strong> to check who used which skills.</div>
-      </div>`;
-  }
-
-  if (p.members.length < 2) return "";
-  return `
-    <div class="sk-skip">
-      <div class="sk-skip-text">
-        <span class="sk-demo-tag">Demo</span>
-        <strong>Skip ahead 4 weeks</strong>
-        <p>Fills in the summary, photos, links and pages the team would have added while building.</p>
-      </div>
-      <button class="pf-btn pf-btn-light" onclick="skipAheadFourWeeks('${esc(p.id)}')">⏩ Skip ahead</button>
-    </div>`;
-}
-
-// What the project looks like after "Skip ahead 4 weeks" (the demo's battery monitor).
-// photos[0] is the picture on the project's title card and folder.
-const SAMPLE_PROGRESS = {
-    description:
-      "We built a pocket-sized monitor that clips onto a 4-cell lithium-ion pack. It reads each cell's voltage, " +
-      "the pack current, and two temperature points, then turns all of that into a simple green, yellow, or red " +
-      "health rating on a small OLED, so you don't need to know anything about batteries to tell if a pack is safe to use. " +
-      "Parts came to about $32.\n\n" +
-      "To test it, we ran the pack through 40 charge and discharge cycles on a rig we put together in the makerspace and " +
-      "checked every reading against a bench multimeter. Voltage readings stayed within 2% of the meter. " +
-      "The enclosure took three printed versions before the board fit with enough room for airflow.",
-    photos: ["img/battery-monitor.jpg"],
-  links: [
-    { label: "GitHub", url: "https://github.com/example/battery-monitor" },
-    { label: "Enclosure CAD", url: "https://cad.onshape.com/documents/example-battery-monitor" },
-  ],
-  // The pages the team wrote along the way: [days ago, title, html].
-  pages: [
-    [27, "Week 1: The plan",
-      "<p>Goal: a monitor for a 4-cell pack that anyone can read. We split it up: <b>Bennett</b> on the board and firmware, <b>Jaron</b> on the enclosure and the test rig.</p>" +
-      "<ul><li>Cell voltages through a resistor divider into the ADC</li><li>Pack current with an INA219</li><li>Two thermistors, one on each end of the pack</li></ul>"],
-    [17, "Week 2: First board",
-      "<p>The first board read every cell, but cell 4 was off by 6%. The divider resistors were 5% parts. Swapping to <mark>0.1% resistors</mark> fixed it.</p>"],
-    [3, "Week 4: Testing",
-      "<h2>40 charge cycles</h2><p>Every reading was checked against a bench multimeter. Voltages stayed within 2%. The third enclosure finally fit the board with room for airflow.</p>"],
-  ],
-};
-
-function skipAheadFourWeeks(projectId) {
-  const p = findProject(projectId);
-  const sample = SAMPLE_PROGRESS;
-  p.description = sample.description;
-  p.photos = sample.photos.slice();
-  p.links = sample.links.map((l) => ({ ...l }));
-  const daysAgo = (n) => { const d = new Date(); d.setDate(d.getDate() - n); return d.toISOString().slice(0, 10); };
-  const stamp = Date.now();
-  p.pages = (p.pages || []).concat(sample.pages.map(([days, title, html], i) =>
-    ({ id: `page-${stamp}-${i}`, title, date: shortDate(daysAgo(days)), html })));
-  p.fastForwarded = true;
-  save();
-  refresh();
 }
 
 // ---------- Skills card (on the project view) ----------

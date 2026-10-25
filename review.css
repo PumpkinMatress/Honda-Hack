@@ -105,34 +105,6 @@ a.sk-level:hover { text-decoration: none; }
 .sk-from span { display: block; font-size: 12.5px; color: var(--ink-soft); }
 .sk-box .nc-box-title { margin-bottom: -6px; }
 
-/* ---------- "4 weeks later" (demo, on the project view) ---------- */
-
-/* Reads like a title card in a video: a strip of cream paper. */
-.sk-later {
-  padding: 16px 26px 18px;
-  background: var(--pf-cream);
-  border-bottom: 3px solid var(--red);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
-}
-.sk-later-title { font-size: 30px; font-weight: 800; font-style: italic; letter-spacing: -0.01em; }
-.sk-later-sub { margin-top: 2px; font-size: 15px; color: var(--ink-soft); }
-
-/* The demo-only "Skip ahead 4 weeks" box. Dashed so it reads as a demo control. */
-.sk-skip {
-  display: flex; align-items: center; justify-content: space-between; gap: 14px 20px; flex-wrap: wrap;
-  padding: 16px 20px;
-  border: 2px dashed rgba(244, 229, 212, 0.5);
-  color: var(--pf-cream);
-}
-.sk-skip-text { flex: 1; min-width: 240px; }
-.sk-skip-text p { margin-top: 2px; font-size: 14px; color: rgba(244, 229, 212, 0.75); }
-.sk-demo-tag {
-  margin-right: 8px;
-  padding: 1px 7px;
-  border: 1.5px solid currentColor;
-  font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
-}
-
 /* ================= Review queue and form (review.js) ================= */
 
 /* Same dark desk as the profile and the project view. */
@@ -294,8 +266,6 @@ body[data-screen="review"] { background: var(--pf-bg); }
   .sk-card-title { font-size: 19px; }
   .sk-cell { width: 64px; }
   .sk-person .avatar { display: none; } /* just the first names, so the columns fit */
-  .sk-later { padding: 14px 16px 16px; }
-  .sk-later-title { font-size: 24px; }
   .rv-strip { padding: 14px 16px 16px; }
   .rv-strip-title { font-size: 20px; }
 }

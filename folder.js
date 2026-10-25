@@ -45,7 +45,6 @@ registerScreen("folder", (box, params) => {
   box.innerHTML = `
     <div class="nb">
       ${folderTopHtml(p, params)}
-      ${projectProgressHtml(p)}
       ${reviewPromptHtml(p)}
       ${noteCardHtml(p, edit === "card")}
       ${isMember && !editingPage ? cardActionsHtml(p, edit === "card") : ""}
