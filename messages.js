@@ -77,12 +77,16 @@ function chatHtml(withId, listingId) {
       <div class="team-bubble-time">${esc(formatDate(m.sentAt))} ${esc(m.sentAt.slice(11, 16))}</div>
     </div>`).join("");
 
-  // Coming from "Message owner": type a friendly first message for them.
+  // Coming from "Message owner": type a friendly first message for them,
+  // mentioning any skills the sender has that the listing asks for.
   let draft = "";
   const listing = findListing(listingId);
   if (listing) {
-    draft = `Hi ${other.name.split(" ")[0]}! I saw your listing for ${listing.projectTitle}. ` +
-      `I'd love to help as the ${listing.role}.`;
+    const mySkills = currentUser().skills || [];
+    const matching = listing.skillsNeeded.filter((s) => mySkills.includes(s));
+    draft = `Hey ${other.name.split(" ")[0]}, I saw your listing for ${listing.projectTitle}. ` +
+      (matching.length ? `I've done a lot of ${matching.join(" and ")} work and ` : "I ") +
+      `would love to help out. Are you free to talk this week?`;
   }
 
   return `
@@ -202,7 +206,7 @@ function addToProject(personId) {
   messages.push({
     from: me.id,
     to: personId,
-    text: `I added you to ${project.title}. Welcome to the team!`,
+    text: `Just added you to ${project.title}. Welcome to the team! I'll send over the schematic and parts list tonight.`,
     sentAt: nowForMessage(),
   });
 

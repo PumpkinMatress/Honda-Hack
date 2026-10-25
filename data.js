@@ -43,9 +43,10 @@ const users = [
     role: "student",
     major: "Electrical & Computer Engineering",
     year: "3rd year",
-    bio: "I like building small electronics that solve real problems.",
+    bio: "I'm an ECE student who loves building hardware that solves everyday problems.\n\n" +
+      "I work mostly in circuit design, soldering, and embedded C, and I don't call a project finished until I've tested it against real lab equipment. Looking for a Summer 2027 co-op in embedded systems or power electronics.",
     photo: "img/maya.jpg",
-    skills: ["Soldering", "Circuit Design", "Embedded C"],
+    skills: ["Soldering", "Circuit Design", "Embedded C", "Python", "Testing & Validation"],
   },
   {
     id: "jordan",
@@ -53,9 +54,10 @@ const users = [
     role: "student",
     major: "Mechanical Engineering",
     year: "2nd year",
-    bio: "CAD nerd. Happiest in the machine shop.",
+    bio: "I'm a Mechanical Engineering student focused on product design and manufacturing.\n\n" +
+      "I've used SolidWorks since high school robotics and work part time in our student machine shop. I love taking a part from sketch to tested prototype. Looking for a Summer 2027 internship in automotive or product design.",
     photo: "img/jordan.jpg",
-    skills: ["CAD (SolidWorks)", "3D Printing", "Machining"],
+    skills: ["CAD (SolidWorks)", "3D Printing", "Machining", "Testing & Validation"],
   },
   {
     id: "priya",
@@ -64,7 +66,8 @@ const users = [
     title: "Battery Systems Engineer",
     company: "Honda",
     verified: true,
-    bio: "10 years in EV battery systems. Happy to give feedback on hardware projects.",
+    bio: "I'm a Battery Systems Engineer at Honda, working on EV battery pack validation.\n\n" +
+      "I review student projects because building something real is the best way to show what you can do. If your project involves batteries, sensors, or power electronics, I'd love to see it.",
     photo: "img/priya.jpg",
   },
 
@@ -75,9 +78,10 @@ const users = [
     role: "student",
     major: "Computer Science & Engineering",
     year: "4th year",
-    bio: "Data and dashboards.",
+    bio: "I'm a CSE senior who turns messy real-world data into something people can use.\n\n" +
+      "My projects pair sensors and microcontrollers with Python data pipelines and dashboards. Graduating May 2027 and looking for full-time roles in data engineering or analytics.",
     photo: "img/sam.jpg",
-    skills: ["Python", "Data Analysis"],
+    skills: ["Python", "Data Analysis", "Soldering"],
   },
   {
     id: "lena",
@@ -85,9 +89,10 @@ const users = [
     role: "student",
     major: "Industrial & Systems Engineering",
     year: "3rd year",
-    bio: "I organize things so other people can build them.",
+    bio: "I'm an ISE student who keeps team projects organized and on schedule.\n\n" +
+      "I usually own the timeline, budget, and documentation so my team can focus on building. Looking for a Summer 2027 internship in operations or project management.",
     photo: "img/lena.jpg",
-    skills: ["Project Management", "Technical Writing"],
+    skills: ["Project Management", "Technical Writing", "Data Analysis"],
   },
   {
     id: "marcus",
@@ -96,7 +101,8 @@ const users = [
     title: "Test Engineer",
     company: "AEP",
     verified: true,
-    bio: "Grid hardware testing. Ask me about soldering.",
+    bio: "I'm a Test Engineer at AEP, validating monitoring hardware for the power grid.\n\n" +
+      "I review student projects because good testing habits are rarely taught in class. My first question will always be: how did you calibrate your sensors?",
     photo: "img/marcus.jpg",
   },
 ];
@@ -109,24 +115,24 @@ const challenges = [
     company: "Honda",
     postedBy: "priya",
     title: "Build a low-cost EV battery monitor",
-    prompt: "Design and build a device that tracks the health of a small battery pack and shows it in a way a non-expert can understand.",
+    prompt: "Design and build a low-cost monitor for a small lithium-ion pack (3 to 4 cells). It should measure cell voltages, pack current, and temperature, estimate the pack's state of health, and show the result so that someone with no battery background can tell whether the pack is safe to use. Aim for under $40 in parts, and show us how you checked that your readings are accurate.",
     weeks: 4,
     opens: "2026-10-01",
     closes: "2026-11-30",
     targetSkills: ["Circuit Design", "Embedded C", "CAD (SolidWorks)", "Testing & Validation"],
-    whatYouGet: "Every submission gets a review and skill ratings from a Honda engineer.",
+    whatYouGet: "A Honda battery engineer reviews every submission and rates each team member on the skills they tagged. Ratings show up as verified certifications on your profile, and every team gets private written feedback.",
   },
   {
     id: "aep-sensor",
     company: "AEP",
     postedBy: "marcus",
-    title: "Show off a sensor project",
-    prompt: "Any project that measures something in the real world.",
+    title: "Show us your sensor project",
+    prompt: "Built something that measures the real world? Temperature, current, vibration, air quality: anything counts. Submit a working project with a short write-up that explains how you know your readings are right.",
     weeks: 1,
     opens: "2026-09-01",
     closes: "2026-09-08",
     targetSkills: ["Soldering", "Data Analysis"],
-    whatYouGet: "Feedback and skill ratings from AEP test engineers.",
+    whatYouGet: "Written feedback and skill ratings from AEP test engineers.",
   },
 ];
 
@@ -144,7 +150,7 @@ const projects = [
     owner: "maya",
     members: ["maya"],
     status: "done",
-    description: "A 512-LED cube driven by an Arduino with custom animations.",
+    description: "I designed and built an 8x8x8 LED cube with 512 hand-soldered LEDs, driven by an Arduino Nano through a chain of shift registers. I also wrote the animation firmware in C, including a rain effect and a playable 3D snake game.",
     photos: ["img/led-cube.jpg"],
     link: "https://github.com/example/led-cube",
     skillTags: [
@@ -159,7 +165,7 @@ const projects = [
     owner: "maya",
     members: ["maya"],
     status: "done",
-    description: "Texts you when your plant needs water. Runs on a coin battery for 6 months.",
+    description: "I built a battery-powered soil moisture sensor that sends a text when a plant needs water. It uses a capacitive sensor and an ESP32 that sleeps between hourly readings. After two power-circuit redesigns, it now runs about six months on two AA batteries.",
     photos: ["img/plant-sensor.jpg"],
     link: "https://github.com/example/plant-sensor",
     skillTags: [
@@ -173,7 +179,7 @@ const projects = [
     owner: "maya",
     members: ["maya"],
     status: "done",
-    description: "0–24 V lab supply built from a salvaged laptop charger, with current limiting and a small OLED readout.",
+    description: "I built an adjustable 0 to 24 V bench power supply from a salvaged 19 V laptop charger, with current limiting and a live OLED readout. Tested against lab-grade supplies, it's accurate to within 1%, at about a third of the cost of buying one.",
     photos: ["img/bench-psu.jpg"],
     link: "https://github.com/example/bench-psu",
     skillTags: [
@@ -191,7 +197,7 @@ const projects = [
     owner: "jordan",
     members: ["jordan"],
     status: "done",
-    description: "A two-axis drawing machine with a 3D-printed frame and machined aluminum rails.",
+    description: "I designed a two-axis pen plotter in SolidWorks, 3D printed the frame in PETG, and machined the aluminum rails on a manual mill. It runs GRBL firmware on an Arduino and can draw any SVG file.",
     photos: ["img/cnc-plotter.jpg"],
     link: "https://github.com/example/pen-plotter",
     skillTags: [
@@ -207,7 +213,7 @@ const projects = [
     owner: "jordan",
     members: ["jordan"],
     status: "done",
-    description: "Four design iterations of a vibration-damped phone mount, each one stress-tested on gravel trails.",
+    description: "I designed a vibration-damped bike phone mount over four revisions. When version 2 cracked at the clamp, I added ribs and switched to PETG, then added TPU pads to absorb vibration. The final version has held up for more than 300 miles of gravel riding.",
     photos: ["img/bike-mount.jpg"],
     link: "https://github.com/example/bike-mount",
     skillTags: [
@@ -226,7 +232,7 @@ const projects = [
     owner: "sam",
     members: ["sam", "lena"],
     status: "done",
-    description: "Logs panel output every minute and graphs efficiency against weather.",
+    description: "We built a Raspberry Pi data logger that recorded a 100 W solar panel's output every minute for six weeks, then compared it against local weather data. We found that heat alone cut the panel's output by almost 10% on hot afternoons.",
     photos: ["img/solar-logger.jpg"],
     link: "https://github.com/example/solar-logger",
     skillTags: [
@@ -244,7 +250,7 @@ const projects = [
     owner: "sam",
     members: ["sam"],
     status: "done",
-    description: "Temperature, humidity, and wind sensors feeding a live web dashboard.",
+    description: "I built a weather station that measures temperature, humidity, pressure, and wind speed with an ESP32, and posts readings every five minutes to a live dashboard I wrote in Python and Flask. It has run outdoors through a full Ohio winter.",
     photos: ["img/weather-station.jpg"],
     link: "https://github.com/example/weather-station",
     skillTags: [
@@ -269,7 +275,7 @@ const listings = [
     challenge: null,
     lookingFor: "student",
     role: "Flight controller programmer",
-    details: "Help tune the flight controller and write the waypoint code. About 4 hours a week.",
+    details: "The frame is built and it flies fine in manual mode. Now I need someone to help tune the PID loops in ArduPilot and script the waypoint missions in Python. Probably 4 to 5 hours a week, mostly weekend test flights.",
     skillsNeeded: ["Embedded C", "Python"],
     postedOn: "2026-10-20",
   },
@@ -280,7 +286,7 @@ const listings = [
     challenge: null,
     lookingFor: "mentor",
     role: "Energy industry mentor",
-    details: "One 30-minute call to sanity-check our measurements.",
+    details: "We have six weeks of solar data and want someone who works in energy to look over our measurement setup before we write it up. Even one 30-minute call would help a lot.",
     skillsNeeded: ["Data Analysis"],
     postedOn: "2026-10-18",
   },
@@ -294,8 +300,14 @@ const messages = [
   {
     from: "lena",
     to: "sam",
-    text: "Marcus said our sensor wiring looks good!",
+    text: "Just got off the call with Marcus. He said the wiring looks good, but we should calibrate the current sensor before we submit.",
     sentAt: "2026-10-19T14:02",
+  },
+  {
+    from: "sam",
+    to: "lena",
+    text: "Nice! I'll grab a known load from the lab Thursday and redo the calibration.",
+    sentAt: "2026-10-19T14:20",
   },
 ];
 
@@ -330,8 +342,8 @@ const feedback = [
     project: "weather-station",
     from: "marcus",
     to: ["sam"],
-    doneWell: "Clean data pipeline and clear graphs.",
-    toImprove: "Calibrate the current sensor against a known load.",
+    doneWell: "Your data pipeline is clean and well documented, and the dashboard is easy to read even for someone seeing it for the first time. Logging the raw readings alongside the averages was a smart call.",
+    toImprove: "Your current readings run about 5% high at low loads. Calibrate the sensor against a known resistive load, and note the calibration date in your README.",
     date: "2026-09-10",
   },
 ];

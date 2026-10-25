@@ -65,7 +65,7 @@ function studentProfileHtml(user, isOwn) {
       <aside class="stack-lg">
         <section class="card">
           <h3>Skills</h3>
-          <p class="muted small">Listed by ${esc(firstName(user))}. Certified skills are marked.</p>
+          <p class="muted small">Skills marked ✓ are certified by industry reviewers.</p>
           <div class="chips">${skillListHtml(user, certs)}</div>
         </section>
 
@@ -184,14 +184,14 @@ function profileHeaderHtml(user, isOwn, stats) {
             ${user.role === "mentor" ? verifiedHtml(user) : `<span class="role-tag">Student</span>`}
           </div>
           <div class="muted">${subtitle}</div>
-          ${user.bio ? `<p class="bio">${esc(user.bio)}</p>` : ""}
+          ${user.bio ? user.bio.split("\n\n").map((para) => `<p class="bio">${esc(para)}</p>`).join("") : ""}
           <div class="stats">
             ${stats.map((s) => `<div class="stat"><strong>${s.n}</strong> ${esc(s.label)}</div>`).join("")}
           </div>
         </div>
         <div class="profile-actions">
           ${isOwn
-            ? `<span class="muted small">This is your profile</span>`
+            ? ""
             : `<button class="btn btn-primary" data-go="messages" data-with="${esc(user.id)}">Message</button>`}
         </div>
       </div>

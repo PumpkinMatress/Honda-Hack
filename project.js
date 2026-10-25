@@ -107,11 +107,13 @@ function projectBannerHtml(p, challenge, canEdit) {
 const SAMPLE_PROGRESS = {
   "honda-battery": {
     description:
-      "A pocket-sized monitor that clips onto a small lithium-ion battery pack. It reads each cell's voltage, " +
-      "the pack current, and temperature, estimates the pack's state of health, and shows a simple green, " +
-      "yellow, or red rating on a small screen, so anyone can tell at a glance whether the battery is safe to use.\n\n" +
-      "We built a test rig and ran a 4-cell pack through 40 charge and discharge cycles, checking every reading " +
-      "against a bench multimeter. The readings stayed within 2% of the meter.",
+      "We built a pocket-sized monitor that clips onto a 4-cell lithium-ion pack. It reads each cell's voltage, " +
+      "the pack current, and two temperature points, then turns all of that into a simple green, yellow, or red " +
+      "health rating on a small OLED, so you don't need to know anything about batteries to tell if a pack is safe to use. " +
+      "Parts came to about $32.\n\n" +
+      "To test it, we ran the pack through 40 charge and discharge cycles on a rig we put together in the makerspace and " +
+      "checked every reading against a bench multimeter. Voltage readings stayed within 2% of the meter. " +
+      "The enclosure took three printed versions before the board fit with enough room for airflow.",
     photos: [
       "img/battery-monitor-board.jpg",
       "img/battery-monitor-enclosure.jpg",
