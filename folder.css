@@ -178,7 +178,7 @@ body[data-screen="folder"] { background: var(--pf-bg); }
 .lf-body img.lf-picked { outline: 3px solid #2453d6; outline-offset: 2px; }
 
 .lf-toolbar {
-  position: sticky; top: 56px; z-index: 5;
+  position: sticky; top: 88px; z-index: 5; /* just under the top bar */
   display: flex; align-items: center; justify-content: space-between; gap: 6px 14px; flex-wrap: wrap;
   margin-bottom: 14px;
   padding: 8px 10px;

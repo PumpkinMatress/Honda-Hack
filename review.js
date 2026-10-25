@@ -237,9 +237,10 @@ function submitReview(projectId) {
     });
   }
 
-  // Reviewed: the project moves to the team's completed projects, dated today.
+  // Reviewed: the project moves to the team's completed projects, dated today
+  // (a project that was already finished keeps the day it was finished).
   p.status = "done";
-  p.completedOn = today();
+  p.completedOn = p.completedOn || today();
   save();
   refresh(); // same screen, now showing the finished review
 

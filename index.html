@@ -6,32 +6,38 @@
   <title>Bridge — show what you built</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:wght@500;700&display=swap" rel="stylesheet">
 
   <!-- Shared styles (Person A), then each person's own styles. -->
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="profile.css"> <!-- Person A: profile page -->
   <link rel="stylesheet" href="folder.css">  <!-- Person A: note card + leaflet -->
   <link rel="stylesheet" href="teams.css">   <!-- Person B -->
+  <link rel="stylesheet" href="challenge.css"> <!-- Person B: challenges board -->
+  <link rel="stylesheet" href="messages.css">  <!-- Person B: messages -->
   <link rel="stylesheet" href="review.css">  <!-- Person C -->
   <link rel="stylesheet" href="credential.css"> <!-- shareable certificates -->
 </head>
 <body>
 
-  <!-- Top bar: logo, navigation, "Viewing as" dropdown, reset button. Filled in by core.js. -->
+  <!-- Top bar on every page: logo, menu (filled in by core.js), search (search.js), "Viewing as", reset. -->
   <header class="topbar">
     <div class="topbar-inner">
-      <a class="logo" href="#/profile" aria-label="Bridge home">
-        <span class="logo-mark" aria-hidden="true"></span>
-        <span class="logo-text">Bridge</span>
+      <span class="tape tape-left" aria-hidden="true"></span>
+      <span class="tape tape-right" aria-hidden="true"></span>
+      <a class="logo" href="#/profile" aria-label="Home">
+        <span class="logo-n" aria-hidden="true">N</span>
       </a>
       <nav class="nav" id="nav"></nav>
       <div class="topbar-right">
-        <label class="viewer">
-          <span class="viewer-label">Viewing as</span>
-          <select id="viewer-select"></select>
-        </label>
-        <button class="btn btn-ghost btn-sm" id="reset-demo" title="Clear all saved changes and start the demo over">Reset demo</button>
+        <div class="search">
+          <input id="search-input" type="search" placeholder="Search" autocomplete="off"
+                 aria-label="Search people, projects and challenges" aria-controls="search-results">
+          <div class="search-results" id="search-results" role="listbox" hidden></div>
+        </div>
+        <!-- Demo only: switch whose screen you're seeing. -->
+        <select id="viewer-select" class="viewer-select" aria-label="Viewing as" title="Viewing as: switch whose screen you see"></select>
+        <button class="reset-btn" id="reset-demo" title="Clear all saved changes and start the demo over">Reset</button>
       </div>
     </div>
   </header>
@@ -55,6 +61,7 @@
   <!-- Order matters: data first, then core, then the screens. -->
   <script src="data.js"></script>
   <script src="core.js"></script>
+  <script src="search.js"></script>    <!-- Person A: top bar search -->
   <script src="profile.js"></script>   <!-- Person A -->
   <script src="challenge.js"></script> <!-- Person B -->
   <script src="listings.js"></script>  <!-- Person B -->

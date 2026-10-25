@@ -142,9 +142,12 @@ function shortDate(text) {
 function folderHtml(p, user, size) {
   const others = p.members.filter((id) => id !== user.id).map(findUser).filter(Boolean);
   const challenge = p.submittedTo ? findChallenge(p.submittedTo) : null;
+  // A project nobody has joined yet says who it's looking for (from its listing).
+  const listing = p.status !== "done" && p.members.length === 1 ? projectListing(p) : null;
   const meta = [
     others.length ? `with ${others.map((u) => u.name).join(", ")}` : "",
     challenge ? `Submitted to the ${challenge.company} challenge` : "",
+    listing ? `Looking for: ${listing.role}` : "",
   ].filter(Boolean).join(" · ");
   const tab = size === "current" ? "Current Project" : shortDate(projectDate(p)) || "Completed";
 
@@ -191,13 +194,168 @@ function emptyFolderHtml(user, isOwn) {
           <div class="folder-info">
             <h2 class="folder-title">No open project right now</h2>
             <p class="folder-desc">${isOwn
-              ? "Find a company challenge and start a project for it."
+              ? "Start a new project, and post a listing if you want a teammate or a mentor."
               : `${esc(firstName(user))} isn't working on a project at the moment.`}</p>
-            ${isOwn ? `<button class="pf-btn" data-go="challenges">Browse challenges</button>` : ""}
+            ${isOwn ? `<button class="pf-btn" onclick="openNewProjectDialog()">Create project</button>` : ""}
           </div>
         </div>
       </div>
     </article>`;
+}
+
+// ---------- Create project ----------
+// The empty "Current Project" folder's button opens this window. It makes an open
+// project with you as the only member, plus (if you tick it) a listing so others can
+// find it. "Message owner" on that listing, then "Add to team" in messages.js, adds them.
+
+function openNewProjectDialog() {
+  closeNewProjectDialog();
+  const dialog = document.createElement("dialog");
+  dialog.className = "np-dialog";
+  dialog.id = "np-dialog";
+  dialog.setAttribute("aria-labelledby", "np-title");
+  dialog.innerHTML = newProjectFormHtml();
+  document.body.appendChild(dialog);
+  dialog.addEventListener("close", () => dialog.remove()); // Escape closes it too
+  dialog.showModal();
+  document.getElementById("np-name").focus();
+}
+
+function closeNewProjectDialog() {
+  const dialog = document.getElementById("np-dialog");
+  if (!dialog) return;
+  if (dialog.open) dialog.close();
+  dialog.remove();
+}
+
+// Going to another screen closes the window.
+window.addEventListener("hashchange", closeNewProjectDialog);
+
+function newProjectFormHtml() {
+  const open = challenges.filter((c) => today() <= c.closes);
+  const skillBoxes = SKILLS.map((s) => `
+    <label class="np-chip"><input type="checkbox" name="np-skill" value="${esc(s)}"><span>${esc(s)}</span></label>`).join("");
+
+  return `
+    <form class="np" onsubmit="createProject(event)" novalidate>
+      <header class="np-head">
+        <h2 class="np-title" id="np-title">New project</h2>
+        <button type="button" class="np-x" onclick="closeNewProjectDialog()" aria-label="Close">✕</button>
+      </header>
+
+      <div class="np-body">
+        <label class="np-field">
+          <span class="np-label">Project name</span>
+          <input id="np-name" type="text" maxlength="80" autocomplete="off" placeholder="e.g. Pocket Battery Health Monitor">
+        </label>
+        <label class="np-field">
+          <span class="np-label">What are you building?</span>
+          <textarea id="np-desc" rows="3" placeholder="A sentence or two. You can tell the whole story on the project's leaflet later."></textarea>
+        </label>
+        <label class="np-field">
+          <span class="np-label">Building it for a challenge?</span>
+          <select id="np-challenge">
+            <option value="">No, it's a personal project</option>
+            ${open.map((c) => `<option value="${esc(c.id)}">${esc(c.company)}: ${esc(c.title)}</option>`).join("")}
+          </select>
+        </label>
+
+        <section class="np-team">
+          <label class="np-toggle">
+            <input type="checkbox" id="np-listing" checked onchange="document.getElementById('np-team-body').hidden = !this.checked">
+            <span>Post a listing to find a teammate</span>
+          </label>
+          <div class="np-team-body" id="np-team-body">
+            <div class="np-field">
+              <span class="np-label" id="np-looking-label">Looking for a</span>
+              <div class="np-seg" role="radiogroup" aria-labelledby="np-looking-label">
+                <label class="np-chip"><input type="radio" name="np-looking" value="student" checked><span>Student</span></label>
+                <label class="np-chip"><input type="radio" name="np-looking" value="mentor"><span>Mentor</span></label>
+              </div>
+            </div>
+            <label class="np-field">
+              <span class="np-label">Role</span>
+              <input id="np-role" type="text" maxlength="80" autocomplete="off" placeholder="e.g. Mechanical designer for the enclosure">
+            </label>
+            <label class="np-field">
+              <span class="np-label">What will they do?</span>
+              <textarea id="np-details" rows="3" placeholder="The work, and roughly how many hours a week."></textarea>
+            </label>
+            <div class="np-field">
+              <span class="np-label">Skills needed</span>
+              <div class="np-chips">${skillBoxes}</div>
+            </div>
+          </div>
+        </section>
+        <p class="np-error" id="np-error" role="alert"></p>
+      </div>
+
+      <footer class="np-foot">
+        <button type="button" class="pf-btn pf-btn-ghost" onclick="closeNewProjectDialog()">Cancel</button>
+        <button type="submit" class="pf-btn">Create project</button>
+      </footer>
+    </form>`;
+}
+
+// "Create project" was pressed: check the form, save the project (and listing), redraw.
+function createProject(event) {
+  event.preventDefault(); // stop the form from reloading the page
+  const me = currentUser();
+  const value = (id) => document.getElementById(id).value.trim();
+  const title = value("np-name");
+  const wantsListing = document.getElementById("np-listing").checked;
+  const role = value("np-role");
+  const skillsNeeded = [...document.querySelectorAll('input[name="np-skill"]:checked')].map((box) => box.value);
+
+  // The listing and the project are matched by owner and title, so titles can't repeat.
+  const taken = projects.some((p) => p.owner === me.id && p.title.toLowerCase() === title.toLowerCase());
+  const problem =
+    !title ? ["Give your project a name.", "np-name"] :
+    taken ? ["You already have a project with that name.", "np-name"] :
+    wantsListing && !role ? ["Say what role you need, or untick the listing.", "np-role"] :
+    wantsListing && !skillsNeeded.length ? ["Pick at least one skill for the listing.", null] :
+    null;
+  if (problem) {
+    document.getElementById("np-error").textContent = problem[0];
+    if (problem[1]) document.getElementById(problem[1]).focus();
+    return;
+  }
+
+  const challengeId = value("np-challenge") || null;
+  const id = "project-" + Date.now();
+  projects.push({
+    id,
+    title,
+    owner: me.id,
+    members: [me.id],
+    status: "open",
+    description: value("np-desc"),
+    photos: [],
+    link: "",
+    skillTags: [],
+    challenge: challengeId, // the challenge it's for (it isn't submitted yet)
+    submittedTo: null,
+    startedOn: today(),
+  });
+
+  if (wantsListing) {
+    listings.push({
+      id: "listing-" + Date.now(),
+      project: id,
+      projectTitle: title,
+      owner: me.id,
+      challenge: challengeId,
+      lookingFor: document.querySelector('input[name="np-looking"]:checked').value,
+      role,
+      details: value("np-details"),
+      skillsNeeded,
+      postedOn: today(),
+    });
+  }
+
+  save();
+  closeNewProjectDialog();
+  refresh(); // the new project fills the Current Project folder
 }
 
 // ---------- Mentors ----------

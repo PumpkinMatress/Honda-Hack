@@ -43,15 +43,17 @@ registerScreen("project", (box, params) => {
 
 // ---------- Finding the project's challenge ----------
 
-// The listing this project was made from (Person B's "Add to project"
-// gives the project the same owner and title as the listing).
+// The listing for this project. "Create project" (profile.js) saves the project's id on
+// the listing; older listings are matched by the same owner and title.
 function projectListing(p) {
-  return listings.find((l) => l.owner === p.owner && l.projectTitle === p.title);
+  return listings.find((l) => l.project === p.id) ||
+    listings.find((l) => l.owner === p.owner && l.projectTitle === p.title);
 }
 
-// The challenge the project was submitted to, or the one its listing was for.
+// The challenge the project was submitted to, or the one it (or its listing) was made for.
 function projectChallenge(p) {
   if (p.submittedTo) return findChallenge(p.submittedTo);
+  if (p.challenge) return findChallenge(p.challenge);
   const listing = projectListing(p);
   return listing ? findChallenge(listing.challenge) : undefined;
 }

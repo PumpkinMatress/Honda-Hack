@@ -215,10 +215,11 @@ function setViewer(id) {
 
 function drawViewerSelect() {
   const select = document.getElementById("viewer-select");
+  // Short labels so they fit in the top bar: "Bennett Dial", "Jose Bonilla · Honda".
   select.innerHTML = DEMO_VIEWERS.map((id) => {
     const u = findUser(id);
-    const tag = u.role === "mentor" ? `${u.company} engineer` : "student";
-    return `<option value="${esc(u.id)}">${esc(u.name)} (${esc(tag)})</option>`;
+    const label = u.role === "mentor" ? `${u.name} · ${u.company}` : u.name;
+    return `<option value="${esc(u.id)}">${esc(label)}</option>`;
   }).join("");
   select.value = viewerId;
   select.onchange = () => setViewer(select.value);

@@ -36,6 +36,8 @@ body[data-screen="profile"] { background: var(--pf-bg); }
 .pf-btn:hover { background: #163049; border-color: #163049; }
 .pf-btn-light { background: var(--pf-cream); border-color: var(--pf-cream); color: var(--pf-ink); }
 .pf-btn-light:hover { background: #fff; border-color: #fff; }
+.pf-btn-ghost { background: transparent; color: var(--pf-ink); }
+.pf-btn-ghost:hover { background: rgba(9, 27, 42, 0.08); border-color: var(--pf-ink); }
 
 /* ---------- Header ----------
  *
@@ -226,6 +228,81 @@ body[data-screen="profile"] { background: var(--pf-bg); }
 .folder-empty .folder-front { grid-template-columns: 1fr; grid-template-rows: auto; grid-template-areas: "info"; align-content: center; padding: 28px 34px; }
 .folder-empty .folder-title { font-size: 26px; }
 .folder-empty .folder-desc { flex: none; -webkit-mask-image: none; mask-image: none; }
+
+/* ---------- "New project" window (Create project button) ----------
+   Cream paper with the profile's green banner along the top. Square corners. */
+
+.np-dialog {
+  width: min(640px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: var(--pf-cream);
+  color: var(--pf-ink);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+  overflow: auto;
+}
+.np-dialog::backdrop { background: rgba(9, 27, 42, 0.7); }
+
+.np-head {
+  position: sticky; top: 0; z-index: 1;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 18px 22px 16px 28px;
+  background: var(--pf-green);
+  color: #fff;
+}
+.np-title { font-family: "Lora", Georgia, serif; font-size: 28px; font-weight: 700; color: #fff; }
+.np-x { font: inherit; font-size: 17px; padding: 4px 8px; border: 0; background: none; color: #fff; cursor: pointer; }
+.np-x:hover { background: rgba(255, 255, 255, 0.12); }
+
+.np-body { padding: 22px 28px 6px; display: flex; flex-direction: column; gap: 16px; }
+.np-field { display: flex; flex-direction: column; gap: 6px; }
+.np-label { font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.np input[type="text"], .np textarea, .np select {
+  width: 100%;
+  font: inherit; font-size: 15px;
+  padding: 9px 11px;
+  border: 2px solid rgba(9, 27, 42, 0.3);
+  border-radius: 0;
+  background: #FFFDF7;
+  color: var(--pf-ink);
+}
+.np textarea { resize: vertical; min-height: 74px; }
+.np input[type="text"]:focus, .np textarea:focus, .np select:focus { outline: none; border-color: var(--pf-ink); }
+
+/* The listing part sits on a manila card, like a folder insert. */
+.np-team { padding: 14px 16px 16px; background: var(--pf-folder); display: flex; flex-direction: column; gap: 14px; }
+.np-toggle { display: flex; align-items: center; gap: 10px; font-weight: 700; cursor: pointer; }
+.np-toggle input { width: 18px; height: 18px; accent-color: var(--pf-ink); }
+.np-team-body { display: flex; flex-direction: column; gap: 14px; }
+
+/* Toggle chips for skills and for student / mentor. The real checkbox stays for
+   keyboards and screen readers, just out of sight. */
+.np-chips, .np-seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.np-chip { position: relative; cursor: pointer; }
+.np-chip input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.np-chip span {
+  display: inline-block;
+  padding: 5px 11px;
+  font-size: 13px; font-weight: 600;
+  border: 1.5px solid rgba(9, 27, 42, 0.45);
+  background: #FFFDF7;
+}
+.np-chip:hover span { border-color: var(--pf-ink); }
+.np-chip input:checked + span { background: var(--pf-ink); border-color: var(--pf-ink); color: var(--pf-cream); }
+.np-chip input:focus-visible + span { outline: 2px solid var(--pf-ink); outline-offset: 2px; }
+.np-seg .np-chip span { min-width: 96px; text-align: center; }
+
+.np-error { min-height: 1.2em; font-size: 13px; font-weight: 700; color: #9b2c1f; }
+.np-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 4px 28px 24px; }
+
+@media (max-width: 560px) {
+  .np-head { padding: 14px 14px 12px 18px; }
+  .np-title { font-size: 23px; }
+  .np-body { padding: 18px 18px 4px; }
+  .np-foot { padding: 4px 18px 18px; }
+}
 
 /* ---------- Mentor profiles: their sections sit on the dark background ---------- */
 

@@ -3,15 +3,15 @@
 A browser-only demo. No server, no logins, no database. All fake data lives in `data.js`.
 
 **Run it:** open the folder in VS Code, right-click `index.html`, choose **Open with Live Server**.
-Use the **Viewing as** dropdown (top right) to switch between Maya, Jordan and Priya.
-**Reset demo** clears every saved change.
+Use the **Viewing as** switch (in the top bar, between Search and Reset) to change whose screen you see.
+**Reset** in the top bar clears every saved change. **Search** in the top bar finds people, projects, challenges and listings.
 
 ## Who owns what
 
 | Person | Files |
 | --- | --- |
-| A: Platform and Profile | `index.html`, `style.css`, `data.js`, `core.js`, `profile.js`, `profile.css` |
-| B: Challenge to Team | `challenge.js`, `listings.js`, `messages.js`, `teams.css` |
+| A: Platform and Profile | `index.html`, `style.css`, `data.js`, `core.js`, `search.js`, `profile.js`, `profile.css`, `folder.js`, `folder.css` |
+| B: Challenge to Team | `challenge.js`, `challenge.css`, `listings.js`, `messages.js`, `messages.css`, `teams.css` |
 | C: Project to Review | `project.js`, `review.js`, `review.css` |
 | Shareable certificates | `credential.js`, `credential.css` (see below) |
 
@@ -47,9 +47,9 @@ Screen names and the box each one draws into:
 | Screen name | File | Example params |
 | --- | --- | --- |
 | `profile` | profile.js | `{ user: "jordan" }` (blank = the viewer) |
-| `challenges` | challenge.js | `{ id: "honda-battery" }` |
+| `challenges` | challenge.js | `{ id: "honda-battery" }` (the corkboard of challenges, scrolled to that one; **Submit** enters a completed project) |
 | `listings` | listings.js | `{ id: "listing-drone" }` |
-| `messages` | messages.js | `{ with: "maya" }` (the profile's Message button sends this) |
+| `messages` | messages.js | `{ with: "maya" }` (the profile's Message button sends this); `{ with: "maya", listing: "listing-..." }` from a listing's Message owner button |
 | `project` | project.js | `{ id: "led-cube" }` (project cards and badges send this) |
 | `review` | review.js | `{ project: "solar-logger" }` |
 | `verify` | credential.js | `{ t: "<token>" }` or `{ id: "BRG-K7QM-4XPA" }` (the public certificate page) |
@@ -83,6 +83,21 @@ showScreen("project", { id: "battery-buddy" });
 Use the classes listed at the top of `style.css` (`card`, `btn btn-primary`, `chip`, `field`, `banner`, `grid`, `row`, ...)
 and the color variables (`var(--primary)` etc.). Put anything extra in your own CSS file.
 
+## Starting a project and building a team
+
+1. **Create project** (profile.js): on your own profile, the empty Current Project folder has a
+   **Create project** button. The window asks for a name, a short description, an optional challenge,
+   and (ticked by default) a listing: student or mentor, the role, what they'll do, and the skills needed.
+   It adds an open project with you as the only member, and a listing with that project's id (`listing.project`).
+2. **Message owner** (listings.js): another student opens the listing and messages the owner.
+   A starter message is typed in for them, and the message they send keeps the listing's id (`message.listing`),
+   shown as a paper-clipped tag on the note.
+3. **Add to team** (messages.js): the owner sees "Jaron wants to join …" with an **Add to team** stamp in that chat.
+   Pressing it adds them to the project's `members` and sends a welcome note. Both people then see
+   "on the team" with an **Open** stamp that goes to the project page.
+
+Only chats started from a listing get the Add to team stamp, so ordinary chats never do.
+
 ## Shareable certificates (credential.js)
 
 Every certification can be shared as a public link that anyone can check, for example from LinkedIn.
@@ -104,6 +119,11 @@ While you run it on Live Server, the link only opens on your computer, and the S
 
 **Demo only:** the companies' private signing keys sit in `credential.js` so this works without a server.
 In a real product each company would keep its private key on its own server.
+
+## Company logos
+
+Put logo files in `img/logos/` (`honda.png`, `aep.png`; the list is at the top of `challenge.js`).
+Until a file exists, the logo box on the challenges board shows the company name.
 
 ## Things to know
 

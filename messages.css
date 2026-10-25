@@ -1,0 +1,353 @@
+/* messages.css — the messages screen (messages.js). Person B owns this file.
+ *
+ *   [ index card: MESSAGES, search, contacts ]  [ clipboard holding graph paper: the chat ]
+ *
+ * Messages are paper notes with a tail, like a speech bubble: theirs on white paper,
+ * yours on a yellow sticky note. Paper has square corners; only the clip, the
+ * circled initials and the send button are round.
+ */
+
+/* Same dark desk as the profile. */
+body[data-screen="messages"] { background: #091B2A; }
+body[data-screen="messages"] .main { padding-bottom: 24px; }
+
+.ms {
+  --ink: #091B2A;
+  --ink-soft: rgba(9, 27, 42, 0.68);
+  --card: #FFFDF7;        /* index card */
+  --rule: #BCD2EA;        /* blue ruled lines */
+  --red: #E08A88;         /* red line under the card's heading */
+  --sheet: #FBFAF4;       /* graph paper */
+  --grid: rgba(86, 126, 168, 0.17);
+  --mine: #FCE38A;        /* sticky note */
+  --stamp-red: #B3261E;
+  --stamp-green: #1E6B3A;
+  /* Fill the window under the top bar. messages.js sets --top from where the page
+     really starts (the bar can take 1 to 3 rows); these values are only a first guess. */
+  --top: 134px;
+  display: grid;
+  grid-template-columns: minmax(250px, 1fr) minmax(0, 2.1fr);
+  gap: 28px;
+  height: max(420px, calc(100vh - var(--top)));
+  height: max(420px, calc(100dvh - var(--top)));
+  color: var(--ink);
+}
+
+/* ---------- Left: the contact card ---------- */
+
+.ms-card {
+  display: flex; flex-direction: column;
+  min-height: 0;
+  background: var(--card);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+}
+.ms-heading {
+  padding: 20px 22px 12px;
+  font-family: "Lora", Georgia, serif; font-size: 34px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  border-bottom: 3px solid var(--red);
+}
+
+.ms-search {
+  display: flex; align-items: center; gap: 8px;
+  margin: 14px 16px 12px;
+  padding: 0 10px;
+  border: 2px solid rgba(9, 27, 42, 0.3);
+  background: #fff;
+}
+.ms-search:focus-within { border-color: var(--ink); }
+.ms-search svg { flex: none; width: 18px; height: 18px; fill: none; stroke: var(--ink-soft); stroke-width: 2.2; stroke-linecap: round; }
+.ms-search input {
+  flex: 1; min-width: 0;
+  padding: 9px 0;
+  font: inherit; font-size: 14px;
+  border: 0; outline: none;
+  background: transparent;
+  color: var(--ink);
+}
+
+.ms-people {
+  flex: 1; min-height: 0;
+  overflow-y: auto;
+  margin: 0; padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--rule);
+}
+.ms-people li { border-bottom: 1px solid var(--rule); }
+.ms-person { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: var(--ink); }
+.ms-person:hover { text-decoration: none; background: rgba(9, 27, 42, 0.04); }
+.ms-person-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.ms-person-name { align-self: flex-start; font-size: 16.5px; font-weight: 700; }
+.ms-person-last { font-size: 13px; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ms-person-date { flex: none; align-self: flex-start; margin-top: 3px; font-size: 12px; font-weight: 600; color: var(--ink-soft); }
+
+/* The open chat's name is marked with a yellow highlighter. */
+.ms-person.is-active .ms-person-name {
+  margin-left: -5px; padding: 0 5px;
+  background: linear-gradient(100deg, rgba(255, 221, 87, 0) 0, rgba(255, 221, 87, 0.95) 4px, rgba(255, 228, 120, 0.9) calc(100% - 5px), rgba(255, 221, 87, 0) 100%);
+}
+
+.ms-none { padding: 14px 18px; font-size: 14px; font-style: italic; color: var(--ink-soft); }
+
+/* A circled first letter, like a name on a contact card. */
+.ms-av {
+  position: relative; flex: none;
+  width: 38px; height: 38px;
+  display: inline-grid; place-items: center;
+  border: 2px solid var(--ink); border-radius: 50%;
+  overflow: hidden;
+  background: var(--card);
+  color: var(--ink);
+  font-family: "Lora", Georgia, serif; font-size: 19px; font-weight: 700; line-height: 1;
+}
+.ms-av img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.ms-av-lg { width: 52px; height: 52px; font-size: 26px; }
+
+/* ---------- Right: the clipboard ---------- */
+
+.ms-board {
+  position: relative;
+  min-width: 0; min-height: 0;
+  display: flex;
+  padding: 22px 16px 16px;
+  background-color: #8E6035;
+  /* Hardboard: a faint grain over a warm brown. */
+  background-image:
+    repeating-linear-gradient(176deg, rgba(255, 255, 255, 0.035) 0 2px, rgba(0, 0, 0, 0.035) 2px 5px),
+    linear-gradient(160deg, #9C6B3E, #7A502B);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+}
+
+/* The metal clip at the top, holding the paper. */
+.ms-clip {
+  position: absolute; top: -12px; left: 50%; z-index: 2;
+  width: 168px; height: 42px;
+  transform: translateX(-50%);
+  background: linear-gradient(#F3F5F7, #C3CAD1 45%, #8F99A3);
+  border-radius: 8px 8px 3px 3px;
+  box-shadow: 0 5px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 -2px 0 rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+}
+.ms-clip::before { /* the wire lever */
+  content: "";
+  position: absolute; top: -12px; left: 50%;
+  width: 76px; height: 20px;
+  transform: translateX(-50%);
+  border: 5px solid #A7B0B9; border-bottom: 0;
+  border-radius: 16px 16px 0 0;
+}
+.ms-clip::after { /* two rivets */
+  content: "";
+  position: absolute; top: 16px; left: 18px; right: 18px; height: 10px;
+  background:
+    radial-gradient(circle at 5px 5px, #737D87 0 3.5px, transparent 4px) left / 10px 10px no-repeat,
+    radial-gradient(circle at 5px 5px, #737D87 0 3.5px, transparent 4px) right / 10px 10px no-repeat;
+}
+
+/* Graph paper. */
+.ms-sheet {
+  flex: 1; min-width: 0; min-height: 0;
+  display: flex; flex-direction: column;
+  background-color: var(--sheet);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.ms-head {
+  display: flex; align-items: center; gap: 14px;
+  padding: 28px 22px 14px 24px;
+  border-bottom: 2px solid var(--ink);
+}
+.ms-head-text { flex: 1; min-width: 0; }
+.ms-name { font-family: "Lora", Georgia, serif; font-size: 26px; font-weight: 700; line-height: 1.2; }
+.ms-sub { font-size: 13px; color: var(--ink-soft); }
+.ms-verified { margin-left: 4px; font-weight: 700; color: var(--stamp-green); }
+.ms-back { display: none; font-size: 14px; font-weight: 700; color: var(--ink); }
+
+.ms-link {
+  flex: none;
+  font: inherit; font-size: 13px; font-weight: 700;
+  padding: 7px 12px;
+  border: 2px solid var(--ink); border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+.ms-link:hover { background: var(--ink); color: #F4E5D4; }
+
+/* ---------- The notes ---------- */
+
+.ms-history {
+  flex: 1; min-height: 0;
+  overflow-y: auto;
+  padding: 24px 28px 14px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.ms-empty { margin: auto; font-style: italic; color: var(--ink-soft); }
+
+.ms-note {
+  --fill: #fff;
+  position: relative;
+  max-width: min(72%, 470px);
+  margin-bottom: 12px; /* room for the tail */
+  padding: 11px 14px 8px;
+  border: 1.5px solid var(--ink);
+  background: var(--fill);
+  filter: drop-shadow(3px 3px 0 rgba(9, 27, 42, 0.12));
+}
+.ms-them { align-self: flex-start; }
+.ms-me { align-self: flex-end; --fill: var(--mine); }
+.ms-text { font-size: 15px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
+.ms-time {
+  display: block;
+  margin-top: 7px; padding-top: 4px;
+  border-top: 1px dashed rgba(9, 27, 42, 0.3);
+  font-size: 11.5px; font-weight: 600;
+  color: var(--ink-soft);
+}
+
+/* The tail under one bottom corner. It covers the note's bottom border there, so
+   note and tail read as one outline. */
+.ms-tail {
+  position: absolute; top: 100%;
+  width: 16px; height: 14px;
+  overflow: visible;
+  fill: var(--fill);
+  stroke: var(--ink); stroke-width: 1.5;
+}
+.ms-them .ms-tail { left: -0.75px; }
+.ms-me .ms-tail { right: -0.75px; }
+
+/* A listing paper-clipped to the message it was sent from. */
+.ms-clipped {
+  display: flex; align-items: center; gap: 8px;
+  width: 100%;
+  margin-top: 9px;
+  padding: 7px 10px;
+  font: inherit; font-size: 13px; font-weight: 600; text-align: left;
+  border: 0;
+  background: #F1CC8C; /* folder manila */
+  color: var(--ink);
+  box-shadow: 1px 2px 0 rgba(9, 27, 42, 0.15);
+  cursor: pointer;
+}
+.ms-clipped:hover { background: #EBC078; }
+.ms-clipped span { min-width: 0; }
+.ms-clipped small {
+  display: block;
+  font-size: 10.5px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.ms-clipped svg { flex: none; width: 20px; height: 20px; fill: none; stroke: #56616D; stroke-width: 2; stroke-linecap: round; transform: rotate(-18deg); }
+
+/* ---------- Team line, then the text box ---------- */
+
+.ms-history + .ms-team,
+.ms-history + .ms-compose { border-top: 2px solid var(--ink); }
+
+.ms-team {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px 16px; flex-wrap: wrap;
+  padding: 12px 24px;
+  border-bottom: 1px dashed rgba(9, 27, 42, 0.35);
+  background: rgba(251, 250, 244, 0.7);
+  font-size: 14.5px;
+}
+.ms-team-text { flex: 1 1 240px; }
+.ms-team.is-waiting .ms-team-text { color: var(--ink-soft); }
+.ms-check {
+  display: inline-grid; place-items: center;
+  width: 22px; height: 22px;
+  margin-right: 6px;
+  border: 2px solid var(--stamp-green);
+  color: var(--stamp-green);
+  font-size: 13px; font-weight: 800; line-height: 1;
+  vertical-align: -3px;
+}
+
+/* A rubber stamp: ink outline with a thin second line inside, tilted a little. */
+.ms-stamp {
+  --c: var(--stamp-red);
+  flex: none;
+  padding: 8px 13px 7px;
+  font: inherit; font-size: 13px; font-weight: 800; line-height: 1;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  border: 2.5px solid var(--c); border-radius: 0;
+  box-shadow: inset 0 0 0 2px var(--sheet), inset 0 0 0 3.5px var(--c);
+  background: var(--sheet);
+  color: var(--c);
+  transform: rotate(-3deg);
+  cursor: pointer;
+  transition: transform 0.12s, background-color 0.12s;
+}
+button.ms-stamp:hover { transform: rotate(-1deg) scale(1.05); background: #F4EEE4; }
+button.ms-stamp:active { transform: rotate(-3deg) scale(0.95); }
+.ms-stamp:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+.ms-stamp-green { --c: var(--stamp-green); }
+.ms-stamp-grey { --c: #6B7480; cursor: default; }
+
+.ms-compose { display: flex; align-items: flex-end; gap: 12px; padding: 14px 22px 18px 24px; }
+.ms-compose textarea {
+  flex: 1; min-width: 0;
+  height: 46px; min-height: 0; /* one line; messages.js grows it to fit the text */
+  padding: 11px 14px;
+  font: inherit; font-size: 15px; line-height: 1.4;
+  border: 2px solid var(--ink); border-radius: 0;
+  background: #fff;
+  color: var(--ink);
+  resize: none;
+}
+.ms-compose textarea:focus { outline: none; box-shadow: 0 0 0 3px rgba(9, 27, 42, 0.16); }
+.ms-send {
+  flex: none;
+  width: 46px; height: 46px;
+  display: grid; place-items: center;
+  border: 2px solid var(--ink); border-radius: 50%;
+  background: var(--ink);
+  color: #F4E5D4;
+  cursor: pointer;
+}
+.ms-send svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.ms-send:hover { background: #123C1D; border-color: #123C1D; }
+.ms-send:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+/* No chats at all. */
+.ms-blank {
+  margin: auto; padding: 32px;
+  max-width: 420px;
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  text-align: center;
+  color: var(--ink-soft);
+}
+.ms-blank .ms-name { color: var(--ink); }
+
+/* ---------- Narrower windows ---------- */
+
+/* The top bar takes two rows here. */
+@media (max-width: 1040px) {
+  .ms { --top: 170px; gap: 22px; grid-template-columns: minmax(230px, 1fr) minmax(0, 1.8fr); }
+  .ms-heading { font-size: 28px; }
+}
+
+/* Phones: the list or the chat, not both. Pick someone to open the chat; "All chats" goes back. */
+@media (max-width: 760px) {
+  .ms { grid-template-columns: minmax(0, 1fr); --top: 156px; }
+  .ms[data-view="chat"] .ms-card,
+  .ms[data-view="list"] .ms-board { display: none; }
+  .ms-board { padding: 20px 10px 10px; }
+  .ms-clip { width: 128px; height: 36px; }
+  .ms-clip::after { top: 13px; }
+  /* Top line: "All chats" and "View profile". Second line: the person. */
+  .ms-head { flex-wrap: wrap; gap: 10px 12px; padding: 24px 16px 12px; }
+  .ms-back { display: block; flex: 1 1 50%; }
+  .ms-link { order: 1; padding: 5px 10px; font-size: 12px; }
+  .ms-head .ms-av { order: 2; }
+  .ms-head-text { order: 3; }
+  .ms-name { font-size: 22px; }
+  .ms-history { padding: 18px 16px 10px; }
+  .ms-note { max-width: 86%; }
+  .ms-team { padding: 10px 16px; }
+  .ms-compose { padding: 12px 14px 14px; }
+}

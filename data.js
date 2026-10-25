@@ -85,7 +85,7 @@ const users = [
   },
   {
     id: "lena",
-    name: "Henry Mcgee",
+    name: "Henry McGee",
     role: "student",
     major: "Industrial & Systems Engineering",
     year: "3rd year",
@@ -357,9 +357,65 @@ const listings = [
 
 // ---------- Messages ----------
 // One list of messages. A conversation = all messages between two people.
-// Person B's chat screen adds to this during the demo.
+// Person B's chat screen adds to this during the demo. Keep them oldest first:
+// the chat list puts the person you talked to last at the top.
+// listing: (optional) the listing a message was sent from, so its owner can add the sender to the team.
 
 const messages = [
+  {
+    from: "sam",
+    to: "maya",
+    text: "Hey Bennett, can I borrow your soldering iron this weekend? The tip on mine finally died.",
+    sentAt: "2026-10-02T19:15",
+  },
+  {
+    from: "maya",
+    to: "sam",
+    text: "Sure! It's in my locker in the ECE lab. Just bring it back with a clean tip.",
+    sentAt: "2026-10-02T19:31",
+  },
+  {
+    from: "maya",
+    to: "priya",
+    text: "Hi Jose! Quick question about the battery monitor challenge: can we test with cells pulled from an old laptop battery, or do they need to be new?",
+    sentAt: "2026-10-06T10:12",
+  },
+  {
+    from: "priya",
+    to: "maya",
+    text: "Salvaged cells are fine. Check each cell's voltage and internal resistance before you build, and explain how you did it in your write-up.",
+    sentAt: "2026-10-06T13:41",
+  },
+  {
+    from: "jordan",
+    to: "lena",
+    text: "Thanks for sharing your Gantt chart template. Our design team finally has a schedule we stick to.",
+    sentAt: "2026-10-12T11:05",
+  },
+  {
+    from: "lena",
+    to: "jordan",
+    text: "Happy to help! Send it my way anytime if you want a second pair of eyes.",
+    sentAt: "2026-10-12T11:20",
+  },
+  {
+    from: "lena",
+    to: "maya",
+    text: "Are you still selling your old Arduino Uno? Our solar logger needs a second board.",
+    sentAt: "2026-10-14T16:40",
+  },
+  {
+    from: "maya",
+    to: "lena",
+    text: "Yep, it's yours! I'll bring it to the makerspace Thursday.",
+    sentAt: "2026-10-14T17:02",
+  },
+  {
+    from: "lena",
+    to: "maya",
+    text: "Perfect, thank you!",
+    sentAt: "2026-10-14T17:04",
+  },
   {
     from: "lena",
     to: "sam",

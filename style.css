@@ -74,28 +74,65 @@ pre { white-space: pre-wrap; background: var(--surface-2); padding: 12px; border
 img { max-width: 100%; display: block; }
 [hidden] { display: none !important; }
 
-/* ---------- Top bar ---------- */
+/* ---------- Top bar (every page) ----------
+   A strip of cream paper taped to the page: logo, menu, search, "Viewing as", reset. */
 
 .topbar {
+  --bar-paper: #F4E5D4;
+  --bar-ink: #0F1E33;
   position: sticky;
-  top: 0;
+  top: 12px;
   z-index: 10;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--border);
+  width: calc(100% - 40px);
+  max-width: 1080px;
+  margin: 18px auto 0;
 }
 
 .topbar-inner {
-  max-width: 1120px;
-  margin: 0 auto;
-  padding: 10px 20px;
+  position: relative;
   display: flex;
-  align-items: center;
-  gap: 24px;
+  align-items: stretch;
+  min-height: 64px;
+  padding: 0 14px 0 16px;
+  background: var(--bar-paper);
+  color: var(--bar-ink);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.28);
 }
 
-.logo { display: flex; align-items: center; gap: 8px; color: var(--text); font-weight: 800; font-size: 19px; }
+/* Masking tape over the two top corners. It only hangs out as far as the
+   space beside the bar (20px, or 12px on narrow windows), so the page never
+   scrolls sideways. */
+.tape {
+  position: absolute; top: -10px;
+  width: 84px; height: 24px;
+  background: rgba(238, 224, 178, 0.82);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+  pointer-events: none;
+}
+.tape-left { left: -16px; transform: rotate(-34deg); }
+.tape-right { right: -16px; transform: rotate(34deg); }
+
+/* A short divider line after the logo and after each menu item. */
+.logo, .nav-link { position: relative; }
+.logo::after, .nav-link::after {
+  content: "";
+  position: absolute; right: 0; top: 12px; bottom: 12px;
+  width: 2px;
+  background: rgba(15, 30, 51, 0.45);
+}
+
+.logo { display: flex; align-items: center; padding: 8px 20px 8px 0; color: var(--bar-ink); }
 .logo:hover { text-decoration: none; }
+/* The "N": a letter cut out of paper. */
+.logo-n {
+  display: grid; place-items: center;
+  width: 40px; height: 46px;
+  background: #FBF8F1;
+  color: var(--bar-ink);
+  font-family: "Lora", Georgia, serif; font-size: 38px; font-weight: 700; line-height: 1;
+  transform: rotate(-4deg);
+  box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.35);
+}
 .logo-mark {
   width: 26px; height: 26px; border-radius: 7px;
   background: linear-gradient(135deg, var(--primary), #6b8cff);
@@ -108,21 +145,74 @@ img { max-width: 100%; display: block; }
   border: 2.5px solid #fff; border-bottom: none; border-radius: 10px 10px 0 0;
 }
 
-.nav { display: flex; gap: 4px; flex: 1; }
+.nav { display: flex; align-items: stretch; flex: 1; min-width: 0; }
 .nav-link {
-  padding: 7px 12px;
-  border-radius: var(--radius-sm);
-  color: var(--muted);
-  font-weight: 600;
-  font-size: 14px;
+  display: flex; align-items: center;
+  padding: 0 22px;
+  color: var(--bar-ink);
+  font-size: 14px; font-weight: 500;
+  white-space: nowrap;
 }
-.nav-link:hover { background: var(--surface-2); color: var(--text); text-decoration: none; }
-.nav-link.active { background: var(--primary-soft); color: var(--primary); }
+.nav-link:hover { text-decoration: none; background: rgba(15, 30, 51, 0.05); }
+.nav-link.active { font-weight: 700; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
 
-.topbar-right { display: flex; align-items: center; gap: 10px; }
-.viewer { display: flex; align-items: center; gap: 8px; }
-.viewer-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
-.viewer select { width: auto; padding: 6px 30px 6px 10px; font-weight: 600; }
+.topbar-right { display: flex; align-items: center; gap: 10px; margin-left: auto; padding-left: 16px; }
+
+.search { position: relative; }
+.search input {
+  width: 140px;
+  padding: 7px 10px;
+  font-size: 13px;
+  border: 1.5px solid rgba(15, 30, 51, 0.6);
+  border-radius: 6px;
+  background: #FBF6EE;
+  color: var(--bar-ink);
+}
+.search-results {
+  position: absolute; right: 0; top: calc(100% + 8px);
+  width: 320px; max-height: 60vh; overflow: auto;
+  padding: 6px;
+  background: #FBF6EE;
+  border: 1.5px solid rgba(15, 30, 51, 0.5);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+  z-index: 12;
+}
+.search-group { padding: 8px 8px 4px; font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.search-item { display: flex; flex-direction: column; padding: 7px 8px; cursor: pointer; color: var(--bar-ink); font-size: 14px; font-weight: 600; }
+.search-item small { font-size: 12px; font-weight: 500; color: var(--muted); }
+.search-item:hover, .search-item.on { background: rgba(15, 30, 51, 0.08); }
+.search-empty { padding: 10px; font-size: 13px; color: var(--muted); }
+
+.reset-btn {
+  font: inherit; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 7px 12px;
+  border: 1.5px solid rgba(15, 30, 51, 0.6);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--bar-ink);
+  cursor: pointer;
+}
+.reset-btn:hover { background: rgba(15, 30, 51, 0.07); }
+
+/* Demo only: "Viewing as" switch, between search and reset. */
+.viewer-select {
+  width: auto; max-width: 190px;
+  padding: 7px 26px 7px 10px;
+  font-size: 13px; font-weight: 600;
+  border: 1.5px solid rgba(15, 30, 51, 0.6);
+  border-radius: 6px;
+  background-color: #FBF6EE;
+  color: var(--bar-ink);
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+/* Narrower windows: tighter menu so everything stays on one line. */
+@media (max-width: 1100px) {
+  .nav-link { padding: 0 14px; }
+  .search input { width: 110px; }
+  .viewer-select { max-width: 170px; }
+}
 
 /* ---------- Page ---------- */
 
@@ -355,10 +445,22 @@ input[type="checkbox"], input[type="radio"] { width: auto; accent-color: var(--p
 
 /* ---------- Small screens ---------- */
 
-@media (max-width: 860px) {
-  .topbar-inner { flex-wrap: wrap; gap: 10px; }
-  .nav { order: 3; flex-basis: 100%; overflow-x: auto; scrollbar-width: none; }
-  .topbar-right { margin-left: auto; min-width: 0; }
-  .viewer-label { display: none; }
-  .viewer select { max-width: 48vw; }
+@media (max-width: 1040px) {
+  /* Logo, search, "Viewing as" and reset on top; the menu scrolls sideways underneath. */
+  .topbar { top: 6px; width: calc(100% - 24px); margin-top: 12px; }
+  .tape-left { left: -8px; }
+  .tape-right { right: -8px; }
+  .topbar-inner { flex-wrap: wrap; padding: 0 10px; }
+  .nav { order: 3; flex-basis: 100%; overflow-x: auto; scrollbar-width: none; border-top: 1.5px solid rgba(15, 30, 51, 0.2); }
+  .nav-link { padding: 12px 16px; }
+  .topbar-right { padding-left: 8px; gap: 8px; min-width: 0; }
+  .search input { width: 140px; }
+  .search-results { width: min(320px, calc(100vw - 40px)); }
+}
+
+@media (max-width: 560px) {
+  .logo { padding-right: 10px; }
+  .search input { width: 72px; }
+  .viewer-select { max-width: 132px; padding-right: 22px; }
+  .reset-btn { padding: 7px 8px; }
 }
