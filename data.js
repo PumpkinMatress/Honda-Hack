@@ -139,6 +139,8 @@ const challenges = [
 // ---------- Projects ----------
 // status: "open" (still being worked on) or "done"
 // completedOn: the day it was finished (shown on the folder tab on profiles)
+// link (GitHub), youtube, cad: links shown on the note card (folder.js)
+// leaflet: { title, date, html }, the free page the team writes (folder.js)
 // members: who worked on it
 // skillTags: which skill each person did. Filled in by Person C's screen.
 // submittedTo: the challenge id it was submitted to, or null
@@ -152,6 +154,22 @@ const projects = [
     members: ["maya"],
     status: "done",
     completedOn: "2025-04-19",
+    youtube: "https://www.youtube.com/watch?v=example-led-cube",
+    leaflet: {
+      title: "LED Cube build log",
+      date: "04/19/25",
+      html:
+        "<h2>The build</h2>" +
+        "<p>512 LEDs: 64 per layer, eight layers. I made a wooden jig to hold each layer straight while soldering. All the soldering took about <b>30 hours</b>.</p>" +
+        "<h2>How it's driven</h2>" +
+        "<ul><li>An Arduino Nano runs everything</li>" +
+        "<li>Eight 74HC595 shift registers pick the columns</li>" +
+        "<li>Eight transistors switch on one layer at a time, fast enough that you can't see the flicker</li></ul>" +
+        "<h2>Animations</h2>" +
+        "<p>I wrote the firmware in C: rain, a rotating wave, text that scrolls around the sides, and a playable <mark>3D snake game</mark> with two buttons.</p>" +
+        "<h2>What I learned</h2>" +
+        "<p>Test every layer before stacking them. I had to desolder a whole layer to fix one cold joint.</p>",
+    },
     description: "I designed and built an 8x8x8 LED cube with 512 hand-soldered LEDs, driven by an Arduino Nano through a chain of shift registers. I also wrote the animation firmware in C, including a rain effect and a playable 3D snake game.",
     photos: ["img/led-cube.jpg"],
     link: "https://github.com/example/led-cube",
@@ -168,6 +186,23 @@ const projects = [
     members: ["maya"],
     status: "done",
     completedOn: "2025-11-15",
+    leaflet: {
+      title: "Plant sensor notes",
+      date: "11/15/25",
+      html:
+        "<h2>The problem</h2>" +
+        "<p>I kept forgetting to water the plants in my apartment, so I wanted something that just texts me.</p>" +
+        "<h2>How it works</h2>" +
+        "<ul><li>A capacitive soil sensor (no bare metal in the dirt, so it doesn't corrode)</li>" +
+        "<li>An ESP32 wakes up once an hour, takes a reading, and goes back to deep sleep</li>" +
+        "<li>If the soil is too dry, it sends a text through a free webhook service</li></ul>" +
+        "<h2>Battery life</h2>" +
+        "<p>Version 1 lasted <b>9 days</b>. The voltage regulator was wasting power even while the ESP32 slept. " +
+        "I switched to a low-quiescent-current regulator and cut power to the sensor between readings. " +
+        "Now it should last <mark>about six months on two AA batteries</mark>.</p>" +
+        "<h2>Next time</h2>" +
+        "<p>Design a small PCB so the whole thing fits inside a plant pot.</p>",
+    },
     description: "I built a battery-powered soil moisture sensor that sends a text when a plant needs water. It uses a capacitive sensor and an ESP32 that sleeps between hourly readings. After two power-circuit redesigns, it now runs about six months on two AA batteries.",
     photos: ["img/plant-sensor.jpg"],
     link: "https://github.com/example/plant-sensor",
@@ -183,6 +218,26 @@ const projects = [
     members: ["maya"],
     status: "done",
     completedOn: "2026-01-03",
+    youtube: "https://www.youtube.com/watch?v=example-bench-psu",
+    cad: "https://cad.onshape.com/documents/example-bench-psu-enclosure",
+    leaflet: {
+      title: "Bench supply build log",
+      date: "01/03/26",
+      html:
+        "<h2>Why I built it</h2>" +
+        "<p>Our lab only has four bench supplies, and they're all taken the week before a deadline. A decent one costs over $150, so I wanted to see how close I could get for less.</p>" +
+        "<h2>Parts</h2>" +
+        "<ul><li>A salvaged 19 V laptop charger (free, from the e-waste bin)</li>" +
+        "<li>An XL6009 converter, rewired for 0 to 24 V</li>" +
+        "<li>An INA219 current sensor and a small OLED screen</li>" +
+        "<li>An Arduino Nano for the readout and the current limit</li></ul>" +
+        "<h2>What went wrong</h2>" +
+        "<p>Version 1 had no heatsink on the converter. It hit <b>92 °C</b> at 2 A after ten minutes. I added an aluminum heatsink and a small fan, and now it stays under 55 °C.</p>" +
+        "<h2>How I tested it</h2>" +
+        "<p>I checked the output against the lab's bench supply and a Fluke multimeter at 1, 5, 12 and 24 V. Every reading was <mark>within 1%</mark>.</p>" +
+        "<h2>Next time</h2>" +
+        "<p>Add a second channel, and swap the knob for a rotary encoder so I can dial in exact voltages.</p>",
+    },
     description: "I built an adjustable 0 to 24 V bench power supply from a salvaged 19 V laptop charger, with current limiting and a live OLED readout. Tested against lab-grade supplies, it's accurate to within 1%, at about a third of the cost of buying one.",
     photos: ["img/bench-psu.jpg"],
     link: "https://github.com/example/bench-psu",

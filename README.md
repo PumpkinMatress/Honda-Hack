@@ -53,6 +53,7 @@ Screen names and the box each one draws into:
 | `project` | project.js | `{ id: "led-cube" }` (project cards and badges send this) |
 | `review` | review.js | `{ project: "solar-logger" }` |
 | `verify` | credential.js | `{ t: "<token>" }` or `{ id: "BRG-K7QM-4XPA" }` (the public certificate page) |
+| `folder` | folder.js | `{ id: "led-cube", from: "maya" }` (note card + leaflet, opens from a profile folder; challenge work stays on `project`) |
 
 You choose your own params, except the ones in the table that other screens already send.
 

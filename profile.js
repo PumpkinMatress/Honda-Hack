@@ -16,6 +16,72 @@ registerScreen("profile", (box, params) => {
   box.innerHTML = user.role === "mentor"
     ? mentorProfileHtml(user, isOwn)
     : studentProfileHtml(user, isOwn);
+  fitProfileName(box);
+});
+
+// ---------- Name size ----------
+
+// How big the name is compared to filling the whole green banner (1 = fills it).
+const NAME_SCALE = 2 / 3;
+
+// Sizes the name from the green banner: at NAME_SCALE = 1 the letters would reach from
+// the top of the banner's padding to the bottom (or across the full width, for long names).
+// It measures the actual letters, so names with tails (g, y, p) still fit.
+function fitProfileName(box) {
+  const banner = box.querySelector(".pf-banner");
+  const name = banner && banner.querySelector(".pf-name");
+  const h1 = name && name.querySelector("h1");
+  if (!h1 || !banner.clientWidth) return;
+
+  const bs = getComputedStyle(banner);
+  let height = banner.clientHeight - parseFloat(bs.paddingTop) - parseFloat(bs.paddingBottom);
+  let width = banner.clientWidth - parseFloat(bs.paddingLeft) - parseFloat(bs.paddingRight);
+
+  // Leave room for the Message button (beside the name, or above it on phones)
+  // and the Verified tag.
+  const button = banner.querySelector(".pf-btn");
+  if (button && getComputedStyle(button).position === "absolute") {
+    height -= button.offsetTop + button.offsetHeight + 4 - parseFloat(bs.paddingTop);
+  } else if (button) {
+    width -= button.offsetWidth + 16;
+  }
+  const tag = name.querySelector(".verified");
+  if (tag && tag.offsetParent) width -= tag.offsetWidth + 12;
+
+  // Measure the letters at 100px.
+  const hs = getComputedStyle(h1);
+  const ctx = (fitProfileName.canvas = fitProfileName.canvas || document.createElement("canvas")).getContext("2d");
+  ctx.font = `${hs.fontWeight} 100px ${hs.fontFamily}`;
+  if ("letterSpacing" in ctx) ctx.letterSpacing = "-2px"; // matches letter-spacing: -0.02em
+  const m = ctx.measureText(h1.textContent);
+  const inkTop = m.actualBoundingBoxAscent;
+  const inkBottom = m.actualBoundingBoxDescent;
+  if (!m.width || !(inkTop + inkBottom)) return;
+
+  const fill = Math.min((100 * height) / (inkTop + inkBottom), (100 * width) / m.width);
+  const size = Math.max(14, fill * NAME_SCALE);
+  const s = size / 100;
+
+  // Make the line exactly as tall as the letters, then nudge it so the letters' top
+  // lines up with the line's top. (The browser puts the baseline at
+  // half the leftover space + the font's ascent.)
+  const lineHeight = (inkTop + inkBottom) * s;
+  const baseline = (lineHeight - (m.fontBoundingBoxAscent + m.fontBoundingBoxDescent) * s) / 2 + m.fontBoundingBoxAscent * s;
+  h1.style.fontSize = size + "px";
+  h1.style.lineHeight = lineHeight + "px";
+  h1.style.transform = `translateY(${inkTop * s - baseline}px)`;
+}
+
+// Fit again once the web font has loaded, and when the window changes size.
+function refitProfileName() {
+  const box = document.getElementById("screen-profile");
+  if (box && !box.hidden) fitProfileName(box);
+}
+if (document.fonts) document.fonts.ready.then(refitProfileName);
+let profileResizeTimer;
+window.addEventListener("resize", () => {
+  clearTimeout(profileResizeTimer);
+  profileResizeTimer = setTimeout(refitProfileName, 100);
 });
 
 // ---------- Students ----------
@@ -83,7 +149,7 @@ function folderHtml(p, user, size) {
   const tab = size === "current" ? "Current Project" : shortDate(projectDate(p)) || "Completed";
 
   return `
-    <article class="folder folder-${size}" data-go="project" data-id="${esc(p.id)}">
+    <article class="folder folder-${size}" data-go="folder" data-id="${esc(p.id)}" data-from="${esc(user.id)}">
       <div class="folder-tab">${esc(tab)}</div>
       <div class="folder-back">
         <div class="folder-front">
@@ -185,8 +251,8 @@ function challengeCardHtml(ch) {
 
 // ---------- Header ----------
 
-// The photo sits in a big circle: green on top (the banner), cream below (the name box).
-// The stats box is on the right, under the banner.
+// The photo sits in a big circle: green on top (the banner, with the name),
+// cream below (major and bio). The stats box is on the right, under the banner.
 function profileHeaderHtml(user, isOwn, stats) {
   const subtitle = user.role === "mentor"
     ? `${esc(user.title)} at ${esc(user.company)}`
@@ -194,14 +260,15 @@ function profileHeaderHtml(user, isOwn, stats) {
   return `
     <section class="pf-header">
       <div class="pf-banner">
-        ${isOwn ? "" : `<button class="pf-btn pf-btn-light" data-go="messages" data-with="${esc(user.id)}">Message</button>`}
-      </div>
-      <div class="pf-info">
         <div class="pf-name">
           <h1>${esc(user.name)}</h1>
           ${user.role === "mentor" ? verifiedHtml(user) : ""}
         </div>
+        ${isOwn ? "" : `<button class="pf-btn pf-btn-light" data-go="messages" data-with="${esc(user.id)}">Message</button>`}
+      </div>
+      <div class="pf-info">
         <div class="pf-sub">${subtitle}</div>
+        ${user.role === "mentor" ? `<div class="pf-verified-small">${verifiedHtml(user)}</div>` : ""}
         ${user.bio ? user.bio.split("\n\n").map((para) => `<p class="pf-bio">${esc(para)}</p>`).join("") : ""}
       </div>
       <div class="pf-stats">

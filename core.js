@@ -22,6 +22,7 @@
 //   currentUser()      The user object chosen in "Viewing as".
 //   save()             Call after you change any list from data.js
 //                      (projects, listings, messages, certifications, feedback, ...).
+//                      Returns false if the browser couldn't store it (storage full).
 //
 //   findUser(id), findProject(id), findChallenge(id), findListing(id)
 //
@@ -55,6 +56,7 @@ const SCREENS = [
   { name: "project",    label: "Project",      file: "project.js",   owner: "Person C", nav: false },
   { name: "review",     label: "Review queue", file: "review.js",    owner: "Person C", nav: true, mentorOnly: true },
   { name: "verify",     label: "Verify",       file: "credential.js", owner: "Person A", nav: false, public: true },
+  { name: "folder",     label: "Project",      file: "folder.js",    owner: "Person A", nav: false }, // note card + leaflet
 ];
 
 const screenDrawers = {};
@@ -150,11 +152,14 @@ const SAVED_LISTS = { users, challenges, projects, listings, messages, certifica
 // changes no longer match and are thrown away, so new data always shows up.
 const DATA_SNAPSHOT = JSON.stringify(SAVED_LISTS);
 
+// Returns false if the browser refused (for example, its storage is full of pictures).
 function save() {
   try {
     localStorage.setItem(STORE_KEY, JSON.stringify({ snapshot: DATA_SNAPSHOT, lists: SAVED_LISTS }));
+    return true;
   } catch (err) {
     console.warn("Could not save to the browser:", err);
+    return false;
   }
 }
 

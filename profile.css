@@ -39,35 +39,44 @@ body[data-screen="profile"] { background: var(--pf-bg); }
 
 /* ---------- Header ----------
  *
- *   ( photo )=========== green banner ==========
- *   (       )  name box (cream)     | stats box
+ *   ( photo )=== green banner: name ===========
+ *   (       )  major, bio (cream)   | stats box
  *
- * The banner's top-left corner and the name box's bottom-left corner are
+ * The banner's top-left corner and the cream box's bottom-left corner are
  * quarter circles of the same size, so together they make one big circle
  * around the photo, split by the gap. The sizes below fit a two-paragraph
- * bio. A longer bio (or a narrow window) makes the name box grow downward,
+ * bio. A longer bio (or a narrow window) makes the cream box grow downward,
  * and the circle stretches a little instead of covering the text.
  */
 
 .pf-header {
-  --half: 186px;    /* banner height = radius of the big circle */
+  --half: 120px;    /* banner height = radius of the big circle */
   --gap: 24px;      /* dark gap between the banner and the boxes below, and the ring around the photo */
-  --photo: 190px;   /* profile photo size */
+  --photo: 128px;   /* profile photo size */
+  --text-left: calc(var(--half) + var(--photo) / 2 + var(--gap) + 16px); /* name and bio start here, clear of the photo */
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 180px;
+  grid-template-columns: minmax(0, 1fr) 170px;
   grid-template-rows: var(--half) auto;
   gap: var(--gap);
-  margin-bottom: 44px;
+  margin-bottom: 40px;
 }
 
+/* The name sits at the bottom of the banner, in white. fitProfileName() in profile.js
+   sizes it to 2/3 of what would fill the banner (NAME_SCALE there).
+   The 30px below is only used until that runs. */
 .pf-banner {
+  position: relative;
   grid-column: 1 / -1;
   background: var(--pf-green);
   border-top-left-radius: var(--half);
-  display: flex; align-items: flex-start; justify-content: flex-end;
-  padding: 18px;
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 16px;
+  padding: 14px 18px 14px var(--text-left);
 }
+.pf-banner .pf-btn { align-self: flex-start; }
+.pf-name { flex: 1; min-width: 0; display: flex; align-items: flex-end; gap: 12px; }
+.pf-name h1 { font-size: 30px; line-height: 1.15; color: #fff; white-space: nowrap; letter-spacing: -0.02em; }
+.pf-name .verified { flex: none; border-radius: 0; margin-bottom: 2px; }
 
 .pf-info {
   grid-column: 1; grid-row: 2;
@@ -75,24 +84,23 @@ body[data-screen="profile"] { background: var(--pf-bg); }
   background: var(--pf-cream);
   color: var(--pf-ink);
   border-bottom-left-radius: var(--half);
-  padding: 14px 26px 16px calc(var(--half) + var(--photo) / 2 + var(--gap) + 16px); /* clear of the photo and its ring */
+  padding: 8px 26px 9px var(--text-left);
   display: flex; flex-direction: column; justify-content: center;
 }
-.pf-name { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.pf-name h1 { font-size: 30px; color: var(--pf-ink); }
-.pf-name .verified { border-radius: 0; }
-.pf-sub { font-size: 14.5px; font-weight: 600; color: var(--pf-ink-soft); margin-top: 2px; }
-.pf-bio { font-size: 13.5px; line-height: 1.45; margin-top: 7px; max-width: 640px; }
+.pf-sub { font-size: 14px; font-weight: 700; color: var(--pf-ink-soft); }
+.pf-bio { font-size: 13px; line-height: 1.4; margin-top: 4px; max-width: 720px; }
+.pf-verified-small { display: none; margin-top: 6px; } /* phones only, see below */
+.pf-verified-small .verified { border-radius: 0; }
 
 .pf-stats {
   grid-column: 2; grid-row: 2;
   background: var(--pf-cream);
   color: var(--pf-ink);
-  padding: 20px 22px;
-  display: flex; flex-direction: column; justify-content: center; gap: 14px;
+  padding: 12px 22px;
+  display: flex; flex-direction: column; justify-content: center; gap: 8px;
 }
-.pf-stat { display: flex; align-items: baseline; gap: 8px; font-size: 15px; font-weight: 600; color: var(--pf-ink-soft); }
-.pf-stat strong { font-size: 34px; font-weight: 800; line-height: 1; color: var(--pf-ink); }
+.pf-stat { display: flex; align-items: baseline; gap: 8px; font-size: 14px; font-weight: 600; color: var(--pf-ink-soft); }
+.pf-stat strong { font-size: 28px; font-weight: 800; line-height: 1; color: var(--pf-ink); }
 
 /* The photo, centered on the gap at the big circle's center. */
 .pf-photo {
@@ -232,16 +240,24 @@ body[data-screen="profile"] { background: var(--pf-bg); }
 
 @media (max-width: 1060px) {
   .pf { --front-h: 300px; }
-  .pf-header { --half: 160px; --photo: 150px; grid-template-columns: minmax(0, 1fr) 160px; }
-  .pf-name h1 { font-size: 28px; }
+  .pf-header { --half: 106px; --photo: 104px; grid-template-columns: minmax(0, 1fr) 150px; }
 }
 
 @media (max-width: 860px) {
-  /* Stack everything: banner, then the name box with the photo on top, then stats. */
-  .pf-header { --half: 96px; --gap: 16px; --photo: 128px; grid-template-columns: 1fr; }
-  .pf-banner { border-radius: 0; }
-  .pf-info { min-height: 0; border-radius: 0; padding: calc(var(--photo) / 2 + var(--gap) / 2 + 16px) 18px 20px; }
-  .pf-stats { grid-column: 1; grid-row: 3; flex-direction: row; justify-content: flex-start; gap: 28px; padding: 16px 18px; }
+  /* Stack everything: banner with the name, then the cream box with the photo
+     overlapping its top, then stats. */
+  .pf-header {
+    --half: 76px; --gap: 16px; --photo: 96px;
+    --text-left: calc(var(--gap) + 10px + var(--photo) + var(--gap) + 12px); /* right of the photo */
+    grid-template-columns: 1fr;
+  }
+  .pf-banner { border-radius: 0; padding: 8px 14px 8px var(--text-left); }
+  .pf-banner .pf-btn { position: absolute; top: 8px; right: 10px; padding: 5px 10px; font-size: 13px; }
+  /* No room for the verified tag next to the name: it moves under the job title. */
+  .pf-name .verified { display: none; }
+  .pf-verified-small { display: block; }
+  .pf-info { min-height: 0; border-radius: 0; padding: calc(var(--photo) / 2 + var(--gap) / 2 + 14px) 18px 18px; }
+  .pf-stats { grid-column: 1; grid-row: 3; flex-direction: row; justify-content: flex-start; gap: 28px; padding: 14px 18px; }
   .pf-photo { left: calc(var(--gap) + 10px); }
 }
 
