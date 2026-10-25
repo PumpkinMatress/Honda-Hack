@@ -1,5 +1,6 @@
 /* challenge.css — the challenges board and the Submit window (challenge.js). Person B owns this file.
- * Each challenge is a note pinned to a corkboard, inside a dark frame.
+ * Each challenge is a note pinned to a corkboard. The board sits on the dark blue page,
+ * a little wider than the top bar menu.
  */
 
 :root {
@@ -9,30 +10,33 @@
   --ch-frame: #0B1A2B;
 }
 
-/* Corkboard: warm brown with a fine woven speckle and some grain. */
+/* The board runs from under the top bar to the bottom of the window (or further, if
+   the notes need it). The page, the screen box and the board stretch down to fill it. */
 body[data-screen="challenges"] {
-  background-color: #b5844f;
+  background: var(--ch-frame);
+  display: flex; flex-direction: column;
+  min-height: 100vh; min-height: 100dvh;
+}
+body[data-screen="challenges"] .main { flex: 1; width: 100%; display: flex; flex-direction: column; padding-bottom: 0; }
+#screen-challenges { flex: 1; display: flex; flex-direction: column; }
+
+/* Corkboard: dark brown with a fine woven speckle and some grain.
+   50px wider than the top bar on each side (the bar is 1080px wide, the same as the
+   page). Narrower windows: see the bottom of this file. The notes stay about 960px wide. */
+.ch-board {
+  flex: 1;
+  width: 1180px;
+  margin: 8px 0 0 calc(50% - 590px); /* centered on the page, spilling past its edges */
+  padding: 48px clamp(16px, 8.5vw, 110px) 60px;
+  display: flex; flex-direction: column; gap: 36px;
+  background-color: #7f5530;
   background-image:
-    radial-gradient(rgba(70, 38, 10, 0.38) 1px, transparent 1.7px),
-    radial-gradient(rgba(255, 226, 180, 0.22) 1px, transparent 1.7px),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.28 0 0 0 0 0.15 0 0 0 0 0.04 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    radial-gradient(rgba(40, 20, 4, 0.42) 1px, transparent 1.7px),
+    radial-gradient(rgba(255, 220, 170, 0.14) 1px, transparent 1.7px),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.2 0 0 0 0 0.1 0 0 0 0 0.02 0 0 0 0.6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 7px 7px, 7px 7px, 220px 220px;
   background-position: 0 0, 3.5px 3.5px, 0 0;
-}
-/* The dark frame around the board, always at the window's edges. */
-body[data-screen="challenges"]::before {
-  content: "";
-  position: fixed; inset: 0;
-  z-index: 9;
-  border: 16px solid var(--ch-frame);
-  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.45);
-  pointer-events: none;
-}
-
-.ch-board {
-  max-width: 960px;
-  margin: 8px auto 0;
-  display: flex; flex-direction: column; gap: 36px;
+  box-shadow: inset 0 0 36px rgba(0, 0, 0, 0.5), 0 0 28px rgba(0, 0, 0, 0.45);
 }
 
 /* ---------- One pinned note ---------- */
@@ -68,15 +72,18 @@ body[data-screen="challenges"]::before {
 /* Company logo box. Shows the company name until the logo file exists. */
 .ch-logo {
   position: relative; flex: none;
-  width: 58px; height: 58px;
+  width: 96px; height: 96px;
   display: grid; place-items: center;
   overflow: hidden;
+  border: 3px solid #000;
   border-radius: 5px;
   background: var(--ch-ink);
   color: #fff;
 }
-.ch-logo-name { font-size: 11px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; text-align: center; padding: 0 4px; }
-.ch-logo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 6px; background: #fff; }
+.ch-logo-name { font-size: 14px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; text-align: center; padding: 0 4px; }
+/* No padding, so a square logo (AEP) fills the box. Logos with white around them
+   (Honda) bring their own margin in the file. */
+.ch-logo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #fff; }
 
 .ch-title {
   margin-top: 18px;
@@ -161,11 +168,17 @@ body[data-screen="challenges"]::before {
 
 /* ---------- Small screens ---------- */
 
+/* Not enough room for 1180px: the board reaches 12px past the page on each side
+   (the page has 20px of padding), so it's still a little wider than the top bar. */
+@media (max-width: 1220px) {
+  .ch-board { width: calc(100% + 24px); margin-left: -12px; }
+}
+
 @media (max-width: 720px) {
-  body[data-screen="challenges"]::before { border-width: 8px; }
+  .ch-board { padding-top: 28px; padding-bottom: 36px; }
   .ch-card { padding: 30px 22px 24px; }
   .ch-title { font-size: 27px; }
-  .ch-logo { width: 46px; height: 46px; }
-  .ch-logo-name { font-size: 9px; letter-spacing: 0; }
+  .ch-logo { width: 68px; height: 68px; }
+  .ch-logo-name { font-size: 11px; letter-spacing: 0; }
   .ch-dates { gap: 24px; }
 }
