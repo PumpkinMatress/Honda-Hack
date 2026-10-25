@@ -169,7 +169,7 @@ function loadSaved() {
 }
 
 function resetDemo() {
-  if (!confirm("Clear all demo changes and start over as Maya?")) return;
+  if (!confirm("Clear all demo changes and start over as Bennett?")) return;
   try {
     localStorage.removeItem(STORE_KEY);
     localStorage.removeItem(VIEWER_KEY);

@@ -39,7 +39,7 @@ const users = [
   // The three people you switch between in the "Viewing as" dropdown.
   {
     id: "maya",
-    name: "Maya Chen",
+    name: "Bennett Dial",
     role: "student",
     major: "Electrical & Computer Engineering",
     year: "3rd year",
@@ -49,7 +49,7 @@ const users = [
   },
   {
     id: "jordan",
-    name: "Jordan Reyes",
+    name: "Jaron Jordan",
     role: "student",
     major: "Mechanical Engineering",
     year: "2nd year",
@@ -59,7 +59,7 @@ const users = [
   },
   {
     id: "priya",
-    name: "Priya Shah",
+    name: "Jose Bonilla",
     role: "mentor",
     title: "Battery Systems Engineer",
     company: "Honda",
@@ -71,7 +71,7 @@ const users = [
   // Extra people so the site doesn't feel empty.
   {
     id: "sam",
-    name: "Sam Okafor",
+    name: "Max Long",
     role: "student",
     major: "Computer Science & Engineering",
     year: "4th year",
@@ -81,7 +81,7 @@ const users = [
   },
   {
     id: "lena",
-    name: "Lena Novak",
+    name: "Henry Mcgee",
     role: "student",
     major: "Industrial & Systems Engineering",
     year: "3rd year",
