@@ -121,7 +121,7 @@ const challenges = [
     opens: "2026-10-01",
     closes: "2026-11-30",
     targetSkills: ["Circuit Design", "Embedded C", "CAD (SolidWorks)", "Testing & Validation"],
-    whatYouGet: "A Honda battery engineer reviews every submission and rates each team member on the skills they tagged. Ratings show up as verified certifications on your profile, and every team gets private written feedback.",
+    whatYouGet: "A Honda battery engineer reviews every submission and rates each team member on the skills they tagged. Ratings show up as verified skill certifications on your profile, and every team gets private written feedback.",
   },
   {
     id: "aep-sensor",
@@ -406,7 +406,7 @@ const projects = [
 // "Create listing" on a current project's folder (listings.js) adds one here.
 // project:     the project's id (its folder shows next to the post)
 // lookingFor:  "student" (a group member), "mentor", or "any" (either)
-// role:        a short name for who they want, e.g. "Mentor" or "Flight controller programmer"
+// role:        a short name for who they want, like "Mentor" or "Flight controller programmer"
 // details:     the post itself: what they're looking for, in their own words
 
 const listings = [
@@ -523,7 +523,7 @@ const messages = [
 const certifications = [
   // SAMPLE so Person A can design the badge before Person C's form exists.
   {
-    id: "BRG-K7QM-4XPA",
+    id: "NXS-K7QM-4XPA",
     user: "sam",
     skill: "Data Analysis",
     level: "expert",

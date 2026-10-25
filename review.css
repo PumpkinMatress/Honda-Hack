@@ -1,271 +1,319 @@
-/* review.css: styles for Person C's screens (project page and review queue).
-   Buttons, cards, chips, badges and form fields come from style.css (Person A).
-   Project page classes start with "proj-", review screen classes with "rev-",
-   so they can't clash with other people's styles. */
+/* review.css: styles for Person C's screens (the skills page and the review queue).
+   Both use the project view's paper look (folder.css: manila folders, index cards, ruled
+   lines, square corners, on the dark page). Skills page and skill card classes start
+   with "sk-", review screen classes with "rv-", so they can't clash. */
 
-/* ================= Project page (project.js) ================= */
+/* ================= Skills page and project cards (project.js) ================= */
 
-/* Main column on the left, team and challenge on the right. Stacks on small screens. */
-.proj-layout {
+/* Same dark desk as the project view. The page's paper colors come from .nb (folder.css). */
+body[data-screen="project"] { background: var(--pf-bg); }
+
+/* Heading: "FINISHING UP" over the project's title. */
+.sk-head-text { flex: 1; min-width: 0; }
+.sk-kicker { display: block; font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); }
+.sk-card-title { font-size: 22px; }
+
+/* The card's body: white boxes on blue ruled lines, like the title card. */
+.sk-body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
-  gap: 28px;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 26px 30px;
   align-items: start;
+  padding: 28px 30px 32px;
+  background-image: repeating-linear-gradient(to bottom, transparent 0 27px, var(--rule) 27px 28px);
+}
+/* On the project view: the table and the certifications get the same width. */
+.sk-card .sk-body { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.sk-body.sk-body-1 { grid-template-columns: minmax(0, 1fr); }
+.sk-box { display: flex; flex-direction: column; gap: 12px; font-size: 15px; line-height: 1.55; }
+.sk-box p a { color: #1B4FB8; text-decoration: underline; } /* links in the text, not the badge links */
+.sk-list { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
+
+/* ---------- Who did which skill ---------- */
+/* A red line under the names, blue rules between the rows, like an index card. */
+
+.sk-table-wrap { overflow-x: auto; margin: 0 -6px; }
+.sk-table { width: 100%; border-collapse: collapse; }
+.sk-table thead th {
+  padding: 2px 6px 8px;
+  border-bottom: 2px solid var(--red);
+  font-size: 14px; font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+}
+.sk-table thead th:first-child { text-align: left; font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.sk-person { display: inline-flex; align-items: center; gap: 6px; }
+.sk-table tbody th { padding: 4px 6px; text-align: left; font-weight: 600; color: var(--ink-soft); }
+.sk-table tbody th, .sk-table td { border-bottom: 1px solid var(--rule); }
+.sk-table tbody tr:last-child > * { border-bottom: 0; }
+/* A checked row stands out, so it's easy to see what's been picked. */
+.sk-table tbody tr.is-on th, .sk-read tbody th { color: var(--ink); font-weight: 800; }
+.sk-cell { width: 108px; padding: 2px 6px; text-align: center; }
+
+/* "In listing": the listing asked for this skill. */
+.sk-tag {
+  margin-left: 8px;
+  padding: 1px 6px;
+  border: 1.5px solid currentColor;
+  font-size: 10.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--pf-green);
+  white-space: nowrap;
 }
 
-/* ---------- Banners ---------- */
-
-/* "4 weeks later…" reads like a title card in a video. */
-.proj-later {
-  background: linear-gradient(120deg, #17202b, #2a3a57);
-  border: none;
-  color: #fff;
-  padding: 18px 22px;
+/* The checkbox: an inked square. The whole cell is clickable, which is easier to hit on camera.
+   The real checkbox stays for keyboards and screen readers, just out of sight. */
+.sk-check { position: relative; display: grid; place-items: center; height: 42px; cursor: pointer; }
+.sk-check input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.sk-check span, .sk-done {
+  display: inline-grid; place-items: center;
+  width: 26px; height: 26px;
+  border: 2px solid rgba(9, 27, 42, 0.5);
+  background: #fff;
+  font-size: 16px; font-weight: 800; line-height: 1;
+  color: transparent;
 }
-.proj-later-title { font-size: 24px; font-weight: 800; letter-spacing: -0.01em; }
-.proj-later-sub { font-weight: 500; font-size: 14px; opacity: 0.8; margin-top: 2px; }
+.sk-check:hover span { border-color: var(--ink); }
+.sk-check input:checked + span, .sk-done { background: var(--ink); border-color: var(--ink); color: var(--pf-cream); }
+.sk-check input:focus-visible + span { outline: 2px solid var(--ink); outline-offset: 2px; }
+.sk-none { color: rgba(9, 27, 42, 0.3); font-weight: 700; }
 
-.proj-banner-done {
-  background: var(--success-soft);
-  color: var(--success);
-  border-color: #bfe3d1;
+/* A certified cell: that level's badge (img/badges/) with its name underneath, like the folder stamps. */
+.sk-level { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 0 4px; font-size: 11.5px; font-weight: 800; color: inherit; }
+a.sk-level:hover { text-decoration: none; }
+.sk-level img { width: 36px; height: 36px; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25)); }
+
+/* ---------- Certifications ---------- */
+
+.sk-certs { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; }
+.sk-cert { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--rule); }
+.sk-cert:first-child { padding-top: 0; }
+.sk-cert:last-child { padding-bottom: 0; border-bottom: 0; }
+.sk-cert img { flex: none; width: 46px; height: 46px; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25)); }
+.sk-cert-text { flex: 1; min-width: 0; font-size: 14px; line-height: 1.4; }
+.sk-cert-text span { display: block; font-size: 12.5px; color: var(--ink-soft); }
+.sk-share { flex: none; padding: 5px 10px; font-size: 12.5px; }
+/* Each skill certification opens its verifiable credential (credential.js). */
+.sk-cert[data-go] { cursor: pointer; }
+.sk-cert-link { color: inherit; font-weight: 800; }
+.sk-cert[data-go]:hover .sk-cert-link { text-decoration: underline; }
+.sk-cert[data-go]:hover img, a.sk-level:hover img { transform: translateY(-2px); }
+.sk-cert img, .sk-level img { transition: transform 0.12s; }
+
+/* ---------- Reviewer feedback ---------- */
+
+.sk-from { display: flex; align-items: center; gap: 10px; font-size: 14px; line-height: 1.35; }
+.sk-from span { display: block; font-size: 12.5px; color: var(--ink-soft); }
+.sk-box .nc-box-title { margin-bottom: -6px; }
+
+/* ---------- "4 weeks later" (demo, on the project view) ---------- */
+
+/* Reads like a title card in a video: a strip of cream paper. */
+.sk-later {
+  padding: 16px 26px 18px;
+  background: var(--pf-cream);
+  border-bottom: 3px solid var(--red);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
 }
+.sk-later-title { font-size: 30px; font-weight: 800; font-style: italic; letter-spacing: -0.01em; }
+.sk-later-sub { margin-top: 2px; font-size: 15px; color: var(--ink-soft); }
 
 /* The demo-only "Skip ahead 4 weeks" box. Dashed so it reads as a demo control. */
-.proj-skip {
-  margin-bottom: 20px;
-  background: var(--primary-soft);
-  border: 1.5px dashed #b3c5f3;
-  box-shadow: none;
+.sk-skip {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px 20px; flex-wrap: wrap;
+  padding: 16px 20px;
+  border: 2px dashed rgba(244, 229, 212, 0.5);
+  color: var(--pf-cream);
 }
-.proj-skip > * + * { margin-top: 0; }
-.proj-skip p { margin-top: 2px; }
-.proj-demo-tag {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--primary);
-  border: 1px solid currentColor;
-  border-radius: 999px;
+.sk-skip-text { flex: 1; min-width: 240px; }
+.sk-skip-text p { margin-top: 2px; font-size: 14px; color: rgba(244, 229, 212, 0.75); }
+.sk-demo-tag {
+  margin-right: 8px;
   padding: 1px 7px;
-  margin-right: 6px;
+  border: 1.5px solid currentColor;
+  font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
 }
-
-/* ---------- Header card: photos, title, write-up ---------- */
-
-.proj-header { padding: 0; overflow: hidden; }
-.proj-header > * + * { margin-top: 0; }
-.proj-header-body { padding: 18px 20px 20px; }
-.proj-description { white-space: pre-line; max-width: 70ch; }
-
-/* Gallery: one big photo, up to two more stacked beside it. */
-.proj-gallery {
-  display: grid;
-  gap: 4px;
-  grid-auto-rows: 140px;
-}
-.proj-gallery .photo { aspect-ratio: auto; height: 100%; }
-.proj-gallery-1 { grid-template-columns: 1fr; grid-auto-rows: 284px; }
-.proj-gallery-2 { grid-template-columns: 1fr 1fr; grid-auto-rows: 240px; }
-.proj-gallery-3 { grid-template-columns: 2fr 1fr; }
-.proj-gallery-3 .photo:first-child { grid-row: span 2; }
-
-/* ---------- Skills table ---------- */
-
-.proj-table-wrap { overflow-x: auto; }
-
-.proj-skills { width: 100%; border-collapse: collapse; font-size: 14px; }
-.proj-skills th {
-  text-align: left;
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--muted);
-  padding: 8px 10px;
-  border-bottom: 1px solid var(--border);
-}
-.proj-skills td { padding: 6px 10px; border-bottom: 1px solid var(--border); height: 48px; }
-.proj-skills tbody tr:last-child td { border-bottom: none; }
-.proj-skills tbody tr:hover td { background: var(--surface-2); }
-.proj-skills .proj-cell { text-align: center; width: 120px; }
-
-/* Team member names in the table header. */
-.proj-person {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  text-transform: none;
-  letter-spacing: 0;
-  color: var(--text);
-}
-
-.proj-skill-name { font-weight: 600; }
-.proj-target {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--primary);
-  background: var(--primary-soft);
-  padding: 1px 7px;
-  border-radius: 999px;
-  margin-left: 6px;
-}
-
-/* The whole cell is clickable, which is easier to hit on camera. */
-.proj-check-cell { display: grid; place-items: center; height: 36px; cursor: pointer; }
-.proj-check-cell input { width: 20px; height: 20px; cursor: pointer; }
-.proj-check { color: var(--success); font-weight: 800; font-size: 16px; }
-.proj-dash { color: #c4cad3; }
-
-.proj-add { display: flex; flex-direction: column; gap: 10px; padding-top: 4px; }
-.proj-add select { width: auto; max-width: 100%; align-self: flex-start; }
-.proj-suggest {
-  border: 1px dashed #9fb4ee;
-  background: var(--primary-soft);
-  color: var(--primary);
-  font: inherit;
-  font-size: 12.5px;
-  font-weight: 600;
-  cursor: pointer;
-}
-.proj-suggest:hover { background: #dbe5fb; }
-
-/* ---------- Submit ---------- */
-
-.proj-submit { border-color: #c9d6f7; }
-.proj-submit > * + * { margin-top: 0; }
-.proj-submit p { margin-top: 4px; }
-.proj-submit select { width: auto; }
-.proj-error { color: var(--danger); font-size: 13px; font-weight: 600; }
-.proj-error:not(:empty) { margin-top: 10px; }
-
-/* ---------- Side column ---------- */
-
-.proj-member {
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-  padding: 8px;
-  margin-left: -8px;
-  margin-right: -8px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-}
-.proj-member:hover { background: var(--surface-2); }
-.proj-member .chips { margin-top: 6px; }
 
 /* ================= Review queue and form (review.js) ================= */
 
-.rev-page { max-width: 900px; margin: 0 auto; }
+/* Same dark desk as the profile and the project view. */
+body[data-screen="review"] { background: var(--pf-bg); }
 
-.rev-count {
-  display: inline-block;
-  min-width: 24px;
-  padding: 1px 8px;
-  margin-left: 4px;
-  border-radius: 999px;
-  background: var(--surface-2);
-  color: var(--muted);
-  font-size: 13px;
-  text-align: center;
-  vertical-align: middle;
+/* ---------- The queue: like the Listings page (teams.css) ---------- */
+
+.rv {
+  --front-h: 330px; /* folder height, same as on the profile */
+  --tab-h: 46px;    /* folder tab height (profile.css) */
+  display: flex; flex-direction: column; gap: 36px;
 }
+.rv-head { color: var(--pf-cream); }
+.rv-title { font-size: 34px; font-weight: 700; color: var(--pf-cream); }
+.rv-intro { max-width: 720px; margin-top: 6px; font-size: 15px; color: rgba(244, 229, 212, 0.75); }
 
-/* ---------- Queue ---------- */
+.rv-section { display: flex; flex-direction: column; gap: 32px; }
+.rv-section-title { display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 700; color: var(--pf-cream); }
+.rv-count {
+  min-width: 28px; padding: 1px 8px;
+  font-size: 14px; text-align: center;
+  background: var(--pf-cream); color: var(--pf-ink);
+}
+.rv-none { color: rgba(244, 229, 212, 0.75); font-style: italic; }
 
-.rev-item { display: flex; gap: 16px; align-items: center; }
-.rev-item > * + * { margin-top: 0; }
-.rev-thumb { flex: none; width: 150px; border-radius: var(--radius-sm); overflow: hidden; }
-.rev-thumb .photo-fallback { font-size: 20px; }
-.rev-item-body { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
-.rev-item-action { flex: none; }
+/* Folder on the left, the submission's details on the right. */
+.rv-item { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; align-items: start; }
 
-/* ---------- Form ---------- */
+.rv-box {
+  position: relative;
+  margin-top: var(--tab-h); /* top lines up with the folder, below its tab */
+  min-height: calc(var(--front-h) + 14px);
+  display: flex; flex-direction: column;
+  background: var(--pf-cream);
+  color: var(--pf-ink);
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.35);
+}
+/* A small point toward the folder. */
+.rv-box::before {
+  content: "";
+  position: absolute; left: -12px; top: 34px;
+  border: 12px solid transparent; border-left: 0;
+  border-right-color: var(--pf-cream);
+}
+.rv-box-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 16px 20px 14px;
+  border-bottom: 2px solid rgba(9, 27, 42, 0.18);
+}
+.rv-tag {
+  padding: 4px 10px;
+  font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  background: var(--pf-ink); color: var(--pf-cream);
+}
+.rv-date { font-size: 12.5px; font-weight: 600; color: var(--pf-ink-soft); white-space: nowrap; }
+.rv-box-body { flex: 1; display: flex; flex-direction: column; gap: 14px; padding: 16px 20px; }
+.rv-challenge { font-size: 17px; font-weight: 700; line-height: 1.35; }
+.rv-team { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.rv-person { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }
+.rv-label { display: block; margin-bottom: 4px; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.rv-skills { margin: 0; padding: 0; list-style: none; }
+.rv-skills li {
+  display: flex; justify-content: space-between; gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(9, 27, 42, 0.15);
+  font-size: 14px;
+}
+.rv-skills li:last-child { border-bottom: 0; }
+.rv-skills li span { color: var(--pf-ink-soft); text-align: right; }
+.rv-box-foot { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 12px; padding: 0 20px 18px; }
+.rv-done-mark { margin-right: auto; font-size: 13px; font-weight: 700; color: var(--pf-green); }
 
-/* Project info on the left, photos on the right. */
-.rev-summary { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 20px; align-items: start; }
-.rev-summary > * + * { margin-top: 0; }
-.rev-summary-info { align-items: flex-start; }
-.rev-summary-photos { border-radius: var(--radius-sm); overflow: hidden; }
-.rev-member { gap: 6px; font-size: 14px; font-weight: 600; }
+/* ---------- The review form and the finished review (index cards, folder.css) ---------- */
 
-/* What each level means, so every reviewer rates the same way. */
-.rev-legend {
+/* A strip of cream paper above the cards: the challenge and the team, or "Review sent". */
+.rv-strip {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 16px 26px 18px;
+  background: var(--pf-cream);
+  border-bottom: 3px solid var(--red);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+}
+.rv-strip-kicker { font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); }
+.rv-strip-title { font-size: 24px; font-weight: 800; line-height: 1.25; }
+.rv-strip-text { max-width: 820px; font-size: 15px; line-height: 1.5; color: var(--ink-soft); }
+.rv-strip .rv-team { margin-top: 6px; }
+/* What each level means, with the badge the student gets, so every reviewer rates the same way. */
+.rv-legend { margin: 4px 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+.rv-legend li { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; font-size: 13px; line-height: 1.4; }
+.rv-legend img { width: 72px; height: 72px; }
+.rv-legend strong { font-size: 14px; font-weight: 800; }
+.rv-legend span { color: var(--ink-soft); }
+
+/* One box per skill, one row per person who did it. */
+.rv-skill-head { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; padding-bottom: 8px; border-bottom: 2px solid var(--red); }
+.rv-skill-name { font-size: 18px; font-weight: 800; }
+.rv-skill .sk-tag { margin-left: 0; }
+.rv-shared { font-size: 13px; font-style: italic; color: var(--ink-soft); }
+
+.rv-rate {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  gap: 12px;
-  padding: 12px 14px;
-  background: var(--surface-2);
-  border-radius: var(--radius-sm);
-}
-.rev-legend p { margin-top: 6px; line-height: 1.4; }
-
-.rev-skills { margin-top: 18px !important; }
-.rev-skill { border-top: 1px solid var(--border); padding: 14px 0 4px; }
-.rev-skill-head { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
-.rev-target {
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--primary);
-  background: var(--primary-soft);
-  padding: 2px 8px;
-  border-radius: 999px;
-}
-
-.rev-rate {
-  display: grid;
-  grid-template-columns: 190px auto;
+  grid-template-columns: 210px auto;
   grid-template-areas:
     "person levels"
     ".      meaning";
   align-items: center;
-  gap: 4px 16px;
-  padding: 8px 0;
+  gap: 6px 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--rule);
 }
-.rev-person { grid-area: person; }
-.rev-levels { grid-area: levels; justify-self: start; }
-.rev-meaning { grid-area: meaning; min-height: 18px; }
+.rv-rate:last-child { border-bottom: 0; padding-bottom: 0; }
+.rv-rate .rv-person { grid-area: person; }
 
-/* Four level buttons joined together. The chosen one fills with its level color. */
-.rev-levels {
-  display: inline-flex;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  background: var(--surface);
-}
-.rev-level { position: relative; }
-.rev-level input { position: absolute; opacity: 0; pointer-events: none; }
-.rev-level span {
+/* Four square level buttons joined together. The chosen one fills with its level color. */
+.rv-levels { grid-area: levels; justify-self: start; display: inline-flex; border: 2px solid var(--ink); background: #fff; }
+.rv-level { position: relative; }
+.rv-level input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.rv-level span {
   display: block;
   padding: 7px 14px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--muted);
+  font-size: 13px; font-weight: 700;
+  color: var(--ink);
+  border-left: 2px solid var(--ink);
   cursor: pointer;
-  border-left: 1px solid var(--border);
   transition: background 0.12s, color 0.12s;
 }
-.rev-level:first-child span { border-left: none; }
-.rev-level span:hover { background: var(--lvl-soft); color: var(--lvl); }
-.rev-level input:checked + span { background: var(--lvl); color: #fff; }
-.rev-level input:focus-visible + span { outline: 2px solid var(--primary); outline-offset: -2px; }
+.rv-level:first-child span { border-left: 0; }
+.rv-level span:hover { background: var(--lvl-soft); }
+.rv-level input:checked + span { background: var(--lvl); color: #fff; }
+.rv-level input:focus-visible + span { outline: 2px dashed currentColor; outline-offset: -5px; }
 
-.rev-submit { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 14px; }
-.rev-error { color: var(--danger); font-size: 13px; font-weight: 600; }
+/* Under the buttons: the chosen level's badge and what it means. */
+.rv-meaning { grid-area: meaning; display: flex; align-items: center; gap: 8px; min-height: 32px; font-size: 13px; line-height: 1.4; color: var(--ink-soft); }
+.rv-meaning img { flex: none; width: 32px; height: 32px; }
+.rv-meaning strong { color: var(--ink); }
+
+/* Feedback: the whole box is the text field, like the title card's summary while editing. */
+.rv-note { cursor: text; }
+.rv-note textarea {
+  width: 100%; min-height: 130px;
+  padding: 0; border: 0; border-radius: 0;
+  background: transparent; resize: vertical;
+  font: inherit; line-height: 1.6; color: var(--ink);
+}
+.rv-note textarea:focus { outline: none; }
+
+.rv-error { margin-right: auto; font-size: 14px; font-weight: 700; color: #F4B4A6; }
+.rv-error:empty { display: none; }
 
 /* ================= Small screens ================= */
 
 @media (max-width: 860px) {
-  .proj-layout { grid-template-columns: minmax(0, 1fr); }
-  .rev-summary { grid-template-columns: minmax(0, 1fr); }
+  .sk-body, .sk-card .sk-body { grid-template-columns: minmax(0, 1fr); }
+  .rv-legend { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 760px) {
+  .sk-body { gap: 18px; padding: 18px 16px 22px; }
+  .sk-card-title { font-size: 19px; }
+  .sk-cell { width: 64px; }
+  .sk-person .avatar { display: none; } /* just the first names, so the columns fit */
+  .sk-later { padding: 14px 16px 16px; }
+  .sk-later-title { font-size: 24px; }
+  .rv-strip { padding: 14px 16px 16px; }
+  .rv-strip-title { font-size: 20px; }
+}
+
+/* One column: folder on top, details underneath, pointing up at it. */
+@media (max-width: 720px) {
+  .rv { --tab-h: 40px; }
+  .rv-title { font-size: 28px; }
+  .rv-item { grid-template-columns: 1fr; gap: 16px; }
+  .rv-box { margin-top: 0; min-height: 0; }
+  .rv-box::before {
+    left: 28px; top: -12px;
+    border: 12px solid transparent; border-top: 0;
+    border-bottom-color: var(--pf-cream);
+  }
 }
 
 @media (max-width: 640px) {
-  .rev-item { flex-wrap: wrap; }
-  .rev-thumb { width: 100%; }
-  .rev-rate { grid-template-columns: 1fr; grid-template-areas: "person" "levels" "meaning"; }
-  .rev-level span { padding: 7px 10px; }
+  .rv-rate { grid-template-columns: 1fr; grid-template-areas: "person" "levels" "meaning"; }
+  .rv-level span { padding: 7px 9px; font-size: 12.5px; }
 }

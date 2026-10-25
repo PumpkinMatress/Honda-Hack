@@ -9,7 +9,7 @@
  *   Forms      .field (wrap a <label> + input/select/textarea)  .checkbox
  *   Text       .muted  .small  .xsmall  .clamp-2  .page-title
  *   Tags       .chip  .chips  .status .status-open .status-done  .company-tag  .role-tag  .verified
- *   Levels     .level-pill  .level-beginner / -intermediate / -advanced / -expert
+ *   Levels     .level-beginner / -intermediate / -advanced / -expert (set --lvl and --lvl-soft)
  *   People     .avatar .avatar-sm/-md/-lg/-xl  .avatar-stack
  *
  * Colors live in the variables below. Use var(--primary) etc. so the site stays consistent.
@@ -134,17 +134,6 @@ button { font-family: inherit; } /* buttons don't pick up the page font on their
   transform: rotate(-4deg);
   box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.35);
 }
-.logo-mark {
-  width: 26px; height: 26px; border-radius: 7px;
-  background: linear-gradient(135deg, var(--primary), #6b8cff);
-  position: relative;
-}
-/* A little bridge arch inside the logo square. */
-.logo-mark::after {
-  content: "";
-  position: absolute; left: 5px; right: 5px; bottom: 6px; height: 9px;
-  border: 2.5px solid #fff; border-bottom: none; border-radius: 10px 10px 0 0;
-}
 
 .nav { display: flex; align-items: stretch; flex: 1; min-width: 0; }
 .nav-link {
@@ -251,7 +240,7 @@ button { font-family: inherit; } /* buttons don't pick up the page font on their
 .empty-icon { font-size: 30px; }
 .empty-state.error { border-color: #f1c4c4; }
 
-/* A wide colored strip, e.g. Person C's "4 weeks later" banner. */
+/* A wide colored strip. */
 .banner {
   background: var(--primary-soft);
   color: var(--primary);
@@ -352,48 +341,6 @@ input[type="checkbox"], input[type="radio"] { width: auto; accent-color: var(--p
 .level-advanced     { --lvl: var(--lvl-advanced);     --lvl-soft: var(--lvl-advanced-soft); }
 .level-expert       { --lvl: var(--lvl-expert);       --lvl-soft: var(--lvl-expert-soft); }
 
-.level-pill {
-  display: inline-block;
-  font-size: 12px; font-weight: 700;
-  padding: 2px 9px;
-  border-radius: 999px;
-  color: var(--lvl);
-  background: var(--lvl-soft);
-}
-
-.level-meter { display: inline-flex; gap: 3px; }
-.level-meter i { width: 14px; height: 5px; border-radius: 3px; background: rgba(0, 0, 0, 0.1); }
-.level-meter i.on { background: var(--lvl); }
-
-/* Certification badge (certBadgeHtml in core.js) */
-.cert-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
-.cert {
-  display: flex; gap: 14px; align-items: center;
-  padding: 14px 16px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-left: 4px solid var(--lvl);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-}
-.cert[data-go] { cursor: pointer; }
-.cert[data-go]:hover { box-shadow: var(--shadow-hover); }
-.cert-seal {
-  flex: none;
-  width: 44px; height: 44px;
-  border-radius: 50%;
-  display: grid; place-items: center;
-  font-weight: 800; font-size: 18px;
-  color: #fff;
-  background: var(--lvl);
-  box-shadow: 0 0 0 4px var(--lvl-soft);
-}
-.cert-body { min-width: 0; flex: 1; }
-.cert-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.cert-title { font-weight: 700; font-size: 15px; }
-.cert-by { font-size: 13px; color: var(--text); }
-.cert-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
-
 /* ---------- People ---------- */
 
 /* Initials show underneath; the photo covers them if it loads. */
@@ -435,13 +382,8 @@ input[type="checkbox"], input[type="radio"] { width: auto; accent-color: var(--p
 /* ---------- Profile page ---------- */
 /* The profile's own styles are in profile.css. */
 
-/* Grid of cards, e.g. a mentor's challenges on their profile. */
+/* Grid of cards: a mentor's challenges on their profile. */
 .project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
-
-/* Reviewer feedback (feedbackItemHtml, used on project and review pages) */
-.feedback-item { border-top: 1px solid var(--border); padding-top: 12px; }
-.feedback-item > * + * { margin-top: 8px; }
-.feedback-item p { font-size: 14px; }
 
 
 /* ---------- Small screens ---------- */

@@ -10,12 +10,12 @@
 //
 //   showScreen(name, params)
 //       Go to a screen. Names: "profile", "challenges", "listings",
-//       "messages", "project", "review".
-//         showScreen("project", { id: "led-cube" })
+//       "messages", "folder", "project", "review", "verify".
+//         showScreen("folder", { id: "led-cube" })     // a project (title card + pages)
 //         showScreen("profile", { user: "jordan" })   // no user = the viewer
 //         showScreen("messages", { with: "maya" })
 //       Shortcut in HTML, no JavaScript needed:
-//         <button data-go="project" data-id="led-cube">Open</button>
+//         <button data-go="folder" data-id="led-cube">Open</button>
 //       Every data-* attribute on the element becomes a param.
 //
 //   refresh()          Redraw the current screen (after you change data).
@@ -30,12 +30,8 @@
 //     esc(text)                 make any user-typed text safe inside HTML. Always use it.
 //     avatarHtml(user, size)    round photo with initials fallback. size: "sm" | "md" | "lg" | "xl"
 //     skillChip(skill)          grey pill for a skill name
-//     levelPill(levelId)        colored pill, e.g. "Expert"
-//     certBadgeHtml(cert)       the full certification badge used on profiles
-//                               certBadgeHtml(cert, { showStudent: true }) names the student instead of the reviewer
-//                               certBadgeHtml(cert, { share: true }) adds a "Share" button (credential.js)
 //     certReviewer(cert)        -> { name, title, company } of whoever gave the certification
-//     newCredentialId()         -> a new certification ID like "BRG-7F3K-9Q2M"
+//     newCredentialId()         -> a new certification ID like "NXS-7F3K-9Q2M"
 //     photoHtml(src, label)     project photo with a colored fallback if the file is missing
 //     verifiedHtml(user)        "✓ Verified · Honda" tag for mentors
 //     formatDate("2026-10-24")  -> "Oct 24, 2026"
@@ -58,7 +54,7 @@ const SCREENS = [
   { name: "challenges", label: "Challenges",   file: "challenge.js", owner: "Person B", nav: true },
   { name: "listings",   label: "Listings",     file: "listings.js",  owner: "Person B", nav: true },
   { name: "messages",   label: "Messages",     file: "messages.js",  owner: "Person B", nav: true },
-  { name: "project",    label: "Project",      file: "project.js",   owner: "Person C", nav: false },
+  { name: "project",    label: "Skills",       file: "project.js",   owner: "Person C", nav: false }, // skills page: opens from "Mark as completed"
   { name: "review",     label: "Review queue", file: "review.js",    owner: "Person C", nav: true, mentorOnly: true },
   { name: "verify",     label: "Verify",       file: "credential.js", owner: "Person A", nav: false, public: true },
   { name: "folder",     label: "Project",      file: "folder.js",    owner: "Person A", nav: false }, // project view: title card + pages
@@ -70,7 +66,7 @@ let currentParams = {};
 
 function registerScreen(name, drawFn) {
   screenDrawers[name] = drawFn;
-  // If this screen is already showing (e.g. its file loaded late), draw it now.
+  // If this screen is already showing (its file loaded late), draw it now.
   if (appStarted && name === currentScreen) refresh();
 }
 
@@ -99,7 +95,7 @@ function refresh() {
   currentParams = params;
   const info = SCREENS.find((s) => s.name === name);
 
-  // Lets a screen's CSS style the whole page, e.g. body[data-screen="profile"].
+  // Lets a screen's CSS style the whole page, like body[data-screen="profile"].
   document.body.dataset.screen = name;
   // Public pages (like a shared certificate link) look the way a visitor without an account sees them.
   document.body.classList.toggle("is-public", Boolean(info.public));
@@ -157,7 +153,7 @@ const SAVED_LISTS = { users, challenges, projects, listings, messages, certifica
 // changes no longer match and are thrown away, so new data always shows up.
 const DATA_SNAPSHOT = JSON.stringify(SAVED_LISTS);
 
-// Returns false if the browser refused (for example, its storage is full of pictures).
+// Returns false if the browser refused (when its storage is full of pictures).
 function save() {
   try {
     localStorage.setItem(STORE_KEY, JSON.stringify({ snapshot: DATA_SNAPSHOT, lists: SAVED_LISTS }));
@@ -311,16 +307,6 @@ function levelInfo(levelId) {
   return { ...level, rank: index + 1 }; // rank: 1 = beginner ... 4 = expert
 }
 
-function levelPill(levelId) {
-  const level = levelInfo(levelId);
-  return `<span class="level-pill level-${esc(level.id)}" title="${esc(level.meaning)}">${esc(level.label)}</span>`;
-}
-
-function levelMeter(levelId) {
-  const { rank } = levelInfo(levelId);
-  return `<span class="level-meter" aria-hidden="true">${LEVELS.map((_, i) => `<i class="${i < rank ? "on" : ""}"></i>`).join("")}</span>`;
-}
-
 function verifiedHtml(user) {
   if (!user || !user.verified) return "";
   return `<span class="verified" title="Identity and employer verified">✓ Verified · ${esc(user.company)}</span>`;
@@ -338,50 +324,14 @@ function certReviewer(cert) {
   };
 }
 
-// A short, readable certification ID like "BRG-7F3K-9Q2M".
+// A short, readable certification ID like "NXS-7F3K-9Q2M".
 // No 0/O or 1/I, so it's easy to read out loud or type.
 function newCredentialId() {
   const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   const block = () => Array.from({ length: 4 }, () => letters[Math.floor(Math.random() * letters.length)]).join("");
   let id;
-  do id = `BRG-${block()}-${block()}`; while (certifications.some((c) => c.id === id));
+  do id = `NXS-${block()}-${block()}`; while (certifications.some((c) => c.id === id));
   return id;
-}
-
-// The full certification badge:
-//   "Expert Soldering — Verified by Honda · Priya Shah, Battery Systems Engineer".
-// certBadgeHtml(cert, { showStudent: true }) says who received it instead (for reviewers).
-// certBadgeHtml(cert, { share: true }) adds the "Share" button (only on your own profile).
-function certBadgeHtml(cert, options = {}) {
-  const level = levelInfo(cert.level);
-  const reviewer = certReviewer(cert);
-  const student = findUser(cert.user);
-  const project = findProject(cert.project);
-  const reviewerLine = reviewer.name + (reviewer.title ? ", " + reviewer.title : "");
-  const who = options.showStudent && student
-    ? `Awarded to <strong>${esc(student.name)}</strong>`
-    : reviewer.company
-      ? `Verified by <strong>${esc(reviewer.company)}</strong> <span class="cert-reviewer">${esc(reviewerLine)}</span>`
-      : `Verified by ${esc(reviewerLine)}`;
-  // stopPropagation: clicking Share shouldn't also open the project.
-  const share = options.share && cert.id && typeof openShareDialog === "function"
-    ? `<button class="cert-share" type="button" onclick="event.stopPropagation(); openShareDialog('${esc(cert.id)}')">Share ↗</button>`
-    : "";
-  return `
-    <div class="cert level-${esc(level.id)}" ${project ? `data-go="project" data-id="${esc(project.id)}"` : ""}>
-      <div class="cert-seal" aria-hidden="true">${esc(level.label[0])}</div>
-      <div class="cert-body">
-        <div class="cert-top">
-          <div class="cert-title">${esc(level.label)} ${esc(cert.skill)}</div>
-          ${levelMeter(cert.level)}
-        </div>
-        <div class="cert-by">${who}</div>
-        <div class="cert-foot">
-          <div class="cert-meta">${project ? esc(project.title) + " · " : ""}${esc(formatDate(cert.date))}</div>
-          ${share}
-        </div>
-      </div>
-    </div>`;
 }
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];

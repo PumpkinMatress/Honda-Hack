@@ -104,7 +104,51 @@ body[data-screen="profile"] { background: var(--pf-bg); }
   display: flex; flex-direction: column; justify-content: center; gap: 8px;
 }
 .pf-stat { display: flex; align-items: baseline; gap: 8px; font-size: 14px; font-weight: 600; color: var(--pf-ink-soft); }
-.pf-stat strong { font-size: 28px; font-weight: 800; line-height: 1; color: var(--pf-ink); }
+.pf-stat > strong, .pf-certs summary > strong { font-size: 28px; font-weight: 800; line-height: 1; color: var(--pf-ink); }
+
+/* Skill certifications: the count, with a menu of them (one per skill, its highest level). */
+.pf-certs { position: relative; display: block; }
+.pf-certs summary {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 0 8px;
+  list-style: none;
+  cursor: pointer;
+}
+.pf-certs summary::-webkit-details-marker { display: none; }
+.pf-certs summary > span { line-height: 1.2; }
+.pf-certs summary:hover > span { color: var(--pf-ink); }
+.pf-certs summary:focus-visible { outline: 2px solid var(--pf-ink); outline-offset: 3px; }
+.pf-certs-arrow {
+  width: 22px; height: 22px;
+  display: grid; place-items: center;
+  border: 1.5px solid rgba(9, 27, 42, 0.45);
+  font-size: 12px; color: var(--pf-ink);
+  transition: transform 0.15s;
+}
+.pf-certs[open] .pf-certs-arrow { transform: rotate(180deg); }
+
+/* The menu: an index card hanging under the stats box. */
+.pf-certs-menu {
+  position: absolute; right: -22px; top: calc(100% + 14px); z-index: 6;
+  width: 300px; max-height: 360px; overflow-y: auto;
+  padding: 6px 0;
+  background: #FFFDF7;
+  border-top: 3px solid #E08A88;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
+}
+.pf-cert {
+  display: flex; align-items: center; gap: 12px;
+  padding: 8px 16px;
+  border-bottom: 1px solid #BCD2EA;
+  color: var(--pf-ink);
+}
+.pf-cert:last-child { border-bottom: 0; }
+.pf-cert:hover { text-decoration: none; background: rgba(9, 27, 42, 0.05); }
+.pf-cert img { flex: none; width: 44px; height: 44px; }
+.pf-cert-text { display: flex; flex-direction: column; min-width: 0; }
+.pf-cert-name { font-size: 14px; font-weight: 800; }
+.pf-cert:hover .pf-cert-name { text-decoration: underline; }
+.pf-cert-by { font-size: 12.5px; font-weight: 500; color: var(--pf-ink-soft); }
+.pf-certs-none { padding: 10px 16px; font-size: 13.5px; font-weight: 500; font-style: italic; color: var(--pf-ink-soft); }
 
 /* The photo, centered on the gap at the big circle's center. */
 .pf-photo {
@@ -218,9 +262,38 @@ body[data-screen="profile"] { background: var(--pf-bg); }
 }
 /* The name hangs below the badge into the folder's bottom padding, so a badge takes
    the same room as a circle (the negative margin cancels the name's height). */
-.folder-badge { flex: none; display: flex; flex-direction: column; align-items: center; margin-bottom: -19px; }
+/* Each badge is a link to its verifiable credential (credential.js). */
+.folder-badge { position: relative; flex: none; display: flex; flex-direction: column; align-items: center; margin-bottom: -19px; color: inherit; }
+.folder-badge:hover { text-decoration: none; }
 .folder-badge img { width: var(--stamp-d); height: var(--stamp-d); filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.25)); }
 .folder-badge-name { height: 17px; margin-top: 2px; font-size: 11px; font-weight: 700; line-height: 17px; white-space: nowrap; }
+.folder-badge:focus-visible { outline: 2px solid var(--pf-ink); outline-offset: 3px; }
+
+/* Hover (or keyboard focus) on a badge: a small note above it with the level and who verified it.
+   It opens up and to the right, because the folder's cut corners (clip-path) would hide
+   anything that sticks out past its left edge. */
+.folder-badge-tip {
+  position: absolute; left: 0; bottom: calc(100% + 10px); z-index: 2;
+  width: max-content; max-width: 230px;
+  padding: 8px 12px;
+  background: var(--pf-ink);
+  color: var(--pf-cream);
+  font-size: 12.5px; font-weight: 600; line-height: 1.35; text-align: left;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  opacity: 0; visibility: hidden; transform: translateY(4px);
+  transition: opacity 0.12s, transform 0.12s, visibility 0.12s;
+  pointer-events: none;
+}
+.folder-badge-tip strong { display: block; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #fff; }
+.folder-badge-who { display: block; margin-top: 2px; font-weight: 500; color: rgba(244, 229, 212, 0.72); }
+/* The little point under the note, centered on the badge. */
+.folder-badge-tip::after {
+  content: "";
+  position: absolute; top: 100%; left: calc(var(--stamp-d) / 2 - 7px);
+  border: 7px solid transparent; border-top-color: var(--pf-ink);
+}
+.folder-badge:hover .folder-badge-tip,
+.folder-badge:focus-visible .folder-badge-tip { opacity: 1; visibility: visible; transform: none; }
 
 /* Delete: a small trash can in the top right corner of your own folders. */
 .folder-delete {
@@ -314,7 +387,7 @@ body[data-screen="profile"] { background: var(--pf-bg); }
 .np textarea { resize: vertical; min-height: 74px; }
 .np input[type="text"]:focus, .np textarea:focus, .np select:focus { outline: none; border-color: var(--pf-ink); }
 
-/* A line under the title, e.g. which project a listing is for. */
+/* A line under the title: which project a listing is for. */
 .np-sub { margin-top: 2px; font-size: 14px; font-weight: 600; color: rgba(255, 255, 255, 0.8); }
 
 /* Toggle chips for skills and for group member / mentor (listing window, listings.js). The real checkbox stays for
@@ -356,10 +429,8 @@ body[data-screen="profile"] { background: var(--pf-bg); }
 
 .pf .section-head h2 { color: var(--pf-cream); }
 .pf .card,
-.pf .cert,
 .pf .empty-state,
-.pf .status,
-.pf .level-pill { border-radius: 0; }
+.pf .status { border-radius: 0; }
 
 /* ---------- Small screens ---------- */
 
@@ -383,6 +454,10 @@ body[data-screen="profile"] { background: var(--pf-bg); }
   .pf-verified-small { display: block; }
   .pf-info { min-height: 0; border-radius: 0; padding: calc(var(--photo) / 2 + var(--gap) / 2 + 14px) 18px 18px; }
   .pf-stats { grid-column: 1; grid-row: 3; flex-direction: row; justify-content: flex-start; gap: 28px; padding: 14px 18px; }
+  /* The stats sit in a row here: the menu hangs under the whole strip, full width. */
+  .pf-stats { position: relative; }
+  .pf-certs { position: static; }
+  .pf-certs-menu { left: 0; right: 0; width: auto; top: calc(100% + 6px); }
   .pf-photo { left: calc(var(--gap) + 10px); }
 }
 

@@ -298,7 +298,7 @@ function teamStripHtml(other) {
       <div class="ms-team is-joined">
         <span class="ms-team-text"><span class="ms-check" aria-hidden="true">✓</span>
           ${iOwn ? `${esc(firstName(joiner))} is on your team for ${title}` : `You're on ${esc(firstName(owner))}'s team for ${title}`}</span>
-        <button class="ms-stamp ms-stamp-green" data-go="project" data-id="${esc(project.id)}">Open</button>
+        <button class="ms-stamp ms-stamp-green" data-go="folder" data-id="${esc(project.id)}">Open</button>
       </div>`;
   }
 

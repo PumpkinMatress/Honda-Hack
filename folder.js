@@ -6,13 +6,17 @@
 // showScreen("folder", { id, edit: "card" })                -> a team member editing the title card
 // showScreen("folder", { id, edit: "page", page: pageId })  -> a team member editing one page
 // showScreen("folder", { id, page: pageId })                -> scrolled to that page
+// showScreen("folder", { id, back: "review" })              -> a reviewer looking before scoring (review.js):
+//                                                              "Back" returns to the review queue
 //
 // The title card is the summary (the short version): title, date, description, a picture of
 // the project as it is now (or finished), and optional "Important links".
 // Below it are the project's pages, oldest first. The team adds a page as the project goes
 // ("+ Add page"), so a project can be as long as it needs to be. Each page is a free sheet
 // of notebook paper: text, headings, lists, pictures. Pages can be edited or deleted.
-// Tagging skills and submitting to a challenge happen on the skills page (project.js).
+// "Mark as completed" opens the skills page (project.js), where the team checks who used which
+// skill. Between the title card and the pages are project.js's skills and feedback cards.
+// Submitting to a challenge happens on the Challenges board (challenge.js).
 //
 // Project fields used here (see data.js):
 //   title, description, photos[0] (the title card picture), links: [{ label, url }],
@@ -41,8 +45,11 @@ registerScreen("folder", (box, params) => {
   box.innerHTML = `
     <div class="nb">
       ${folderTopHtml(p, params)}
+      ${projectProgressHtml(p)}
+      ${reviewPromptHtml(p)}
       ${noteCardHtml(p, edit === "card")}
       ${isMember && !editingPage ? cardActionsHtml(p, edit === "card") : ""}
+      ${editingPage ? "" : projectSkillsCardHtml(p) + projectFeedbackCardHtml(p)}
       ${pagesHtml(p, isMember, editingPage)}
     </div>`;
 
@@ -69,18 +76,30 @@ function projectPages(p) {
   return p.pages;
 }
 
-// Back link, plus the project's skills page (tag skills, submit to a challenge, reviews).
+// Back link, plus the challenge the project was submitted to.
 function folderTopHtml(p, params) {
   const viewer = currentUser();
   const from = findUser(params.from);
   const backLabel = !from || from.id === viewer.id ? "Back to your profile" : `Back to ${firstName(from)}'s profile`;
-  const challenge = projectChallenge(p);
-  const skillsLabel = challenge ? `🏁 ${challenge.company} challenge: skills and review` : "Skills and challenges";
+  const back = params.back === "review" && viewer.role === "mentor"
+    ? `<button class="nb-link" data-go="review">&larr; Back to review queue</button>`
+    : `<button class="nb-link" data-go="profile" ${from ? `data-user="${esc(from.id)}"` : ""}>&larr; ${esc(backLabel)}</button>`;
   return `
     <div class="nb-top">
-      <button class="nb-link" data-go="profile" ${from ? `data-user="${esc(from.id)}"` : ""}>&larr; ${esc(backLabel)}</button>
-      <button class="nb-link" data-go="project" data-id="${esc(p.id)}">${esc(skillsLabel)} &rarr;</button>
+      ${back}
+      ${folderChallengeLinkHtml(p, viewer)}
     </div>`;
+}
+
+// "🏁 Submitted: Honda challenge", or for the company's reviewer, a link to score it (or see the review).
+function folderChallengeLinkHtml(p, viewer) {
+  const ch = p.submittedTo && findChallenge(p.submittedTo);
+  if (!ch) return "";
+  const reviewed = reviewCerts(p).length > 0;
+  if (canReview(viewer, p)) {
+    return `<button class="nb-link" data-go="review" data-project="${esc(p.id)}">${reviewed ? "See your review" : "Score this submission"} &rarr;</button>`;
+  }
+  return `<button class="nb-link" data-go="challenges" data-id="${esc(ch.id)}">🏁 ${reviewed ? "Reviewed" : "Submitted"}: ${esc(ch.company)} challenge &rarr;</button>`;
 }
 
 // ---------- The title card ----------
@@ -158,7 +177,7 @@ function cardLinksEditHtml(links) {
 function linkEditRowHtml(link) {
   return `
     <div class="nc-link-edit">
-      <input class="nc-link-name" value="${esc(link.label)}" placeholder="Name, e.g. GitHub" aria-label="Link name">
+      <input class="nc-link-name" value="${esc(link.label)}" placeholder="Name" aria-label="Link name">
       <input class="nc-link-url" type="url" value="${esc(link.url)}" placeholder="https://…" aria-label="Link address">
       <button type="button" class="nc-link-remove" onclick="this.closest('.nc-link-edit').remove()" title="Remove link" aria-label="Remove link">✕</button>
     </div>`;

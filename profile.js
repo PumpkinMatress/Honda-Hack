@@ -8,7 +8,7 @@
 // as a manila folder. Current projects are full width and always come first.
 // Completed projects are half width, newest first, with the date on the tab.
 // On your own profile, "Create project" is always at the top right of your projects.
-// Each current project has "Create listing" (listings.js) and "Mark as completed",
+// Each current project has "Create listing" (listings.js) and "Mark as completed" (opens the skills page, project.js),
 // and each project you own has a trash can (top right of the folder) to delete it.
 
 registerScreen("profile", (box, params) => {
@@ -97,13 +97,12 @@ function studentProfileHtml(user, isOwn) {
     .map((p, i) => ({ p, i }))
     .sort((a, b) => projectDate(b.p).localeCompare(projectDate(a.p)) || b.i - a.i) // newest first
     .map((x) => x.p);
-  const skills = skillCount(user, mine);
 
   return `
     <div class="pf">
       ${profileHeaderHtml(user, isOwn, [
         { n: mine.length, label: mine.length === 1 ? "project" : "projects" },
-        { n: skills, label: skills === 1 ? "skill" : "skills" },
+        { html: certStatHtml(bestCertsBySkill(user.id)) },
       ])}
 
       <section class="pf-current" aria-label="Current projects">
@@ -120,12 +119,57 @@ function studentProfileHtml(user, isOwn) {
     </div>`;
 }
 
-// Skills they listed, plus any they used on a project or were certified in.
-function skillCount(user, mine) {
-  const used = mine.flatMap((p) => (p.skillTags || []).filter((t) => t.people.includes(user.id)).map((t) => t.skill));
-  const certified = certifications.filter((c) => c.user === user.id).map((c) => c.skill);
-  return new Set([...(user.skills || []), ...used, ...certified]).size;
+// ---------- Skill certifications (the stat in the header) ----------
+
+// A person's skill certifications, one per skill: the highest level they've earned in it
+// (the newest one if two are the same level). Highest level first.
+function bestCertsBySkill(userId) {
+  const best = new Map();
+  for (const c of certifications.filter((c) => c.user === userId)) {
+    const have = best.get(c.skill);
+    const higher = !have || levelInfo(c.level).rank > levelInfo(have.level).rank;
+    const newerSame = have && levelInfo(c.level).rank === levelInfo(have.level).rank && String(c.date) >= String(have.date);
+    if (higher || newerSame) best.set(c.skill, c);
+  }
+  return sortCerts([...best.values()]);
 }
+
+// "3 skill certifications ▾". The menu lists them, and each one opens its verifiable
+// credential (credential.js). It starts at 0 until a reviewer certifies a skill.
+function certStatHtml(certs) {
+  const n = certs.length;
+  const rows = certs.map((c) => {
+    const level = levelInfo(c.level);
+    const reviewer = certReviewer(c);
+    return `
+      <a class="pf-cert" href="#/verify?id=${esc(c.id)}" data-go="verify" data-id="${esc(c.id)}">
+        <img src="img/badges/${esc(level.id)}.png" alt="">
+        <span class="pf-cert-text">
+          <span class="pf-cert-name">${esc(level.label)} ${esc(c.skill)}</span>
+          <span class="pf-cert-by">Verified by ${esc(reviewer.company || reviewer.name)}</span>
+        </span>
+      </a>`;
+  }).join("");
+  return `
+    <details class="pf-stat pf-certs">
+      <summary>
+        <strong>${n}</strong>
+        <span>${n === 1 ? "skill certification" : "skill certifications"}</span>
+        <span class="pf-certs-arrow" aria-hidden="true">▾</span>
+      </summary>
+      <div class="pf-certs-menu">
+        ${rows || `<p class="pf-certs-none">No skill certifications yet.</p>`}
+      </div>
+    </details>`;
+}
+
+// Clicking anywhere else, or pressing Escape, closes the menu.
+document.addEventListener("click", (e) => {
+  document.querySelectorAll(".pf-certs[open]").forEach((menu) => { if (!menu.contains(e.target)) menu.open = false; });
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") document.querySelectorAll(".pf-certs[open]").forEach((menu) => (menu.open = false));
+});
 
 // When a project was finished: the date saved on it, or the day it was reviewed.
 function projectDate(p) {
@@ -149,6 +193,8 @@ function shortDate(text) {
 //   tab: "..."     -> different text on the tab
 //   inListing: true -> drawn next to its own listing post, so it doesn't repeat "Looking for"
 //   link: false    -> not clickable (a listing whose project no longer exists)
+//   go: {...}      -> where clicking it goes, as data-go params (default: the project view).
+//                     The review queue uses { go: "review", project: id }.
 function folderHtml(p, user, size, options = {}) {
   const others = p.members.filter((id) => id !== user.id).map(findUser).filter(Boolean);
   const challenge = p.submittedTo ? findChallenge(p.submittedTo) : null;
@@ -160,7 +206,8 @@ function folderHtml(p, user, size, options = {}) {
     listing && !options.inListing ? `Looking for: ${listing.role}` : "",
   ].filter(Boolean).join(" · ");
   const tab = options.tab || (size === "current" ? "Current Project" : shortDate(projectDate(p)) || "Completed");
-  const link = options.link === false ? "" : `data-go="folder" data-id="${esc(p.id)}" data-from="${esc(user.id)}"`;
+  const go = options.go || { go: "folder", id: p.id, from: user.id };
+  const link = options.link === false ? "" : Object.entries(go).map(([key, value]) => `data-${key}="${esc(value)}"`).join(" ");
 
   return `
     <article class="folder folder-${size}" ${link}>
@@ -205,6 +252,8 @@ function folderActionsHtml(p, listing) {
 // The skills on the outside of a folder: the ones this person worked on.
 // Each one is a circle with the skill's name in it. Once an industry reviewer certifies
 // it, the circle becomes that level's badge (img/badges/), with the skill's name underneath.
+// Hovering a badge pops up its level and that an industry professional verified it.
+// Clicking it opens its verifiable credential (the public page that can go on LinkedIn, credential.js).
 function folderStampsHtml(p, user) {
   const tags = (p.skillTags || []).filter((t) => !t.people.length || t.people.includes(user.id));
   if (!tags.length) return "";
@@ -218,31 +267,33 @@ function folderStampHtml(p, user, skill) {
   if (!cert) return `<span class="folder-stamp">${esc(skill)}</span>`;
   const level = levelInfo(cert.level);
   const reviewer = certReviewer(cert);
-  const label = `${level.label} ${skill}, verified by ${reviewer.company || reviewer.name}`;
+  const who = [reviewer.name, reviewer.company].filter(Boolean).join(", "); // "Jose Bonilla, Honda"
+  // A real link, so keyboard users can reach the badge (which shows the pop-up too).
+  // data-go makes the click open the credential instead of the folder around it.
   return `
-    <span class="folder-badge" title="${esc(label)}">
-      <img src="img/badges/${esc(level.id)}.png" alt="${esc(label)}">
+    <a class="folder-badge" href="#/verify?id=${esc(cert.id)}" data-go="verify" data-id="${esc(cert.id)}">
+      <img src="img/badges/${esc(level.id)}.png" alt="">
       <span class="folder-badge-name">${esc(skill)}</span>
-    </span>`;
+      <span class="folder-badge-tip" role="tooltip">
+        <strong>${esc(level.label)}</strong>
+        Verified by an industry professional
+        ${who ? `<span class="folder-badge-who">${esc(who)}</span>` : ""}
+      </span>
+    </a>`;
 }
 
 // ---------- Finishing and deleting projects ----------
 // Also used by the project view (folder.js).
 
-async function markProjectComplete(projectId) {
+// "Mark as completed" opens the skills page (project.js), where the team checks who used
+// which skill. That page's own "Mark as completed" button finishes the project, then
+// comes back here (or to the project view, if it was pressed there).
+function markProjectComplete(projectId) {
   const p = findProject(projectId);
   if (!p || p.status !== "open") return;
-  const ok = await confirmDialog({
-    title: "Mark as completed?",
-    text: `"${p.title}" moves to your completed projects, dated today. Any listing for it comes off the Listings page. ` +
-      "You can still add pages, and you can submit it to a challenge from the Challenges page.",
-    confirm: "Mark as completed",
-  });
-  if (!ok) return;
-  p.status = "done";
-  p.completedOn = today();
-  save();
-  refresh();
+  const { name, params } = readHash();
+  if (name === "folder") showScreen("project", { id: p.id, back: "folder", ...(params.from ? { from: params.from } : {}) });
+  else showScreen("project", { id: p.id, back: "profile" });
 }
 
 // Back to a current project. Not for projects in a challenge (their review depends on them).
@@ -344,7 +395,7 @@ function newProjectFormHtml() {
       <div class="np-body">
         <label class="np-field">
           <span class="np-label">Project name</span>
-          <input id="np-name" type="text" maxlength="80" autocomplete="off" placeholder="e.g. Pocket Battery Health Monitor">
+          <input id="np-name" type="text" maxlength="80" autocomplete="off">
         </label>
         <label class="np-field">
           <span class="np-label">What are you building?</span>
@@ -401,8 +452,7 @@ function createProject(event) {
 
 function mentorProfileHtml(user, isOwn) {
   const posted = challenges.filter((c) => c.postedBy === user.id);
-  const given = sortCerts(certifications.filter((c) => c.by === user.id));
-  const reviewedProjects = new Set(given.map((c) => c.project)).size;
+  const reviewedProjects = new Set(certifications.filter((c) => c.by === user.id).map((c) => c.project)).size;
 
   return `
     <div class="pf">
@@ -411,24 +461,12 @@ function mentorProfileHtml(user, isOwn) {
         { n: reviewedProjects, label: reviewedProjects === 1 ? "project reviewed" : "projects reviewed" },
       ])}
 
-      <div class="stack-lg">
-        <section class="section">
-          <div class="section-head"><h2>Challenges</h2></div>
-          ${posted.length
-            ? `<div class="project-grid">${posted.map(challengeCardHtml).join("")}</div>`
-            : `<div class="empty-state card"><p class="muted">No challenges posted.</p></div>`}
-        </section>
-
-        <section class="section">
-          <div class="section-head">
-            <h2>Certifications given</h2>
-            ${isOwn ? `<button class="pf-btn pf-btn-light" data-go="review">Open review queue</button>` : ""}
-          </div>
-          ${given.length
-            ? `<div class="cert-grid">${given.map((c) => certBadgeHtml(c, { showStudent: true })).join("")}</div>`
-            : `<div class="empty-state card"><p class="muted">No reviews yet.</p></div>`}
-        </section>
-      </div>
+      <section class="section">
+        <div class="section-head"><h2>Challenges</h2></div>
+        ${posted.length
+          ? `<div class="project-grid">${posted.map(challengeCardHtml).join("")}</div>`
+          : `<div class="empty-state card"><p class="muted">No challenges posted.</p></div>`}
+      </section>
     </div>`;
 }
 
@@ -450,6 +488,7 @@ function challengeCardHtml(ch) {
 
 // The photo sits in a big circle: green on top (the banner, with the name),
 // cream below (major and bio). The stats box is on the right, under the banner.
+// stats: [{ n, label }], or { html } for a stat drawn its own way (the skill certifications menu).
 function profileHeaderHtml(user, isOwn, stats) {
   const subtitle = user.role === "mentor"
     ? `${esc(user.title)} at ${esc(user.company)}`
@@ -469,36 +508,13 @@ function profileHeaderHtml(user, isOwn, stats) {
         ${user.bio ? user.bio.split("\n\n").map((para) => `<p class="pf-bio">${esc(para)}</p>`).join("") : ""}
       </div>
       <div class="pf-stats">
-        ${stats.map((s) => `<div class="pf-stat"><strong>${s.n}</strong> <span>${esc(s.label)}</span></div>`).join("")}
+        ${stats.map((s) => s.html || `<div class="pf-stat"><strong>${s.n}</strong> <span>${esc(s.label)}</span></div>`).join("")}
       </div>
       <div class="pf-photo">${avatarHtml(user, "xl")}</div>
     </section>`;
 }
 
 // ---------- Shared helpers (also used by project.js, review.js, messages.js) ----------
-
-// Used on project pages and the review screen.
-function feedbackItemHtml(f) {
-  const from = findUser(f.from);
-  const project = findProject(f.project);
-  // Person C may use doneWell/toImprove, or a single comment field.
-  const parts = [
-    f.doneWell && `<p><strong>Done well:</strong> ${esc(f.doneWell)}</p>`,
-    f.toImprove && `<p><strong>To improve:</strong> ${esc(f.toImprove)}</p>`,
-    f.comment && `<p>${esc(f.comment)}</p>`,
-  ].filter(Boolean).join("");
-  return `
-    <div class="feedback-item">
-      <div class="row">
-        ${avatarHtml(from, "sm")}
-        <div>
-          <div class="small"><strong>${esc(from ? from.name : "Reviewer")}</strong>${from && from.company ? ` · ${esc(from.company)}` : ""}</div>
-          <div class="muted xsmall">${project ? esc(project.title) + " · " : ""}${esc(formatDate(f.date))}</div>
-        </div>
-      </div>
-      ${parts}
-    </div>`;
-}
 
 // Highest level first, then newest first.
 function sortCerts(list) {
