@@ -295,6 +295,39 @@ const projects = [
     members: ["jordan"],
     status: "done",
     completedOn: "2025-12-06",
+    pages: [
+      {
+        id: "cnc-plotter-1",
+        title: "CAD and printed parts",
+        date: "10/11/25",
+        html:
+          "<h2>The design</h2>" +
+          "<p>I modeled the whole plotter in SolidWorks before buying anything, so I could check that the gantry cleared the paper and the belts lined up. The drawing area is <b>A4</b>.</p>" +
+          "<ul><li>8 printed parts in orange PETG: corner blocks, motor mounts, and the pen carriage</li>" +
+          "<li>Two NEMA 17 stepper motors and a GT2 belt</li>" +
+          "<li>A small servo lifts the pen between lines</li></ul>",
+      },
+      {
+        id: "cnc-plotter-2",
+        title: "Machining the rails",
+        date: "11/08/25",
+        html:
+          "<p>I cut the aluminum rails to length and drilled the mounting holes on the manual mill in the student shop. " +
+          "My first set was off by <b>0.4 mm</b>, and the carriage bound up at one end. " +
+          "I remade them using a stop block so every hole lined up.</p>",
+      },
+      {
+        id: "cnc-plotter-3",
+        title: "First drawings",
+        date: "12/06/25",
+        html:
+          "<h2>How it runs</h2>" +
+          "<p>An Arduino with a CNC shield runs GRBL. I turn SVG files into G-code and stream them over USB. " +
+          "A full spirograph takes about <mark>12 minutes</mark>.</p>" +
+          "<h2>Next time</h2>" +
+          "<p>Add limit switches so it can home itself instead of me lining it up by hand.</p>",
+      },
+    ],
     description: "I designed a two-axis pen plotter in SolidWorks, 3D printed the frame in PETG, and machined the aluminum rails on a manual mill. It runs GRBL firmware on an Arduino and can draw any SVG file.",
     photos: ["img/cnc-plotter.jpg"],
     links: [{ label: "GitHub", url: "https://github.com/example/pen-plotter" }],
@@ -312,6 +345,28 @@ const projects = [
     members: ["jordan"],
     status: "done",
     completedOn: "2026-03-21",
+    pages: [
+      {
+        id: "bike-mount-1",
+        title: "Revs 1 and 2",
+        date: "01/17/26",
+        html:
+          "<h2>The problem</h2>" +
+          "<p>Every store-bought mount I tried rattled loose on gravel, and one dropped my phone on the trail.</p>" +
+          "<h2>What happened</h2>" +
+          "<p>Rev 1 was printed in PLA and the clamp was too loose. Rev 2 was tighter, but it <b>cracked at the clamp</b> after about 20 miles, right where the bolt pulls the two halves together.</p>",
+      },
+      {
+        id: "bike-mount-2",
+        title: "Revs 3 and 4",
+        date: "03/21/26",
+        html:
+          "<ul><li><b>Rev 3:</b> switched to PETG, which bends a little instead of snapping, and added ribs around the clamp</li>" +
+          "<li><b>Rev 4:</b> added printed TPU pads between the clamp and the bar to soak up vibration</li></ul>" +
+          "<h2>Testing</h2>" +
+          "<p>I logged rides with my phone's accelerometer. The TPU pads cut the shaking at the phone by about <mark>40%</mark>. Rev 4 has more than 300 miles on it with no cracks.</p>",
+      },
+    ],
     description: "I designed a vibration-damped bike phone mount over four revisions. When version 2 cracked at the clamp, I added ribs and switched to PETG, then added TPU pads to absorb vibration. The final version has held up for more than 300 miles of gravel riding.",
     photos: ["img/bike-mount.jpg"],
     links: [{ label: "GitHub", url: "https://github.com/example/bike-mount" }],
@@ -332,6 +387,30 @@ const projects = [
     members: ["sam", "lena"],
     status: "done",
     completedOn: "2026-10-12",
+    pages: [
+      {
+        id: "solar-logger-1",
+        title: "Setting up the logger",
+        date: "08/24/26",
+        html:
+          "<h2>The setup</h2>" +
+          "<ul><li>A 100 W panel on a tilting stand on our balcony</li>" +
+          "<li>A charge controller and a small 12 V battery, so the panel always has a load</li>" +
+          "<li>A Raspberry Pi reads an INA219 sensor and a temperature probe on the back of the panel every minute</li></ul>" +
+          "<p>Readings go into a CSV file, and the Pi uploads it every night so we don't lose data if the SD card dies.</p>",
+      },
+      {
+        id: "solar-logger-2",
+        title: "Six weeks of data",
+        date: "10/12/26",
+        html:
+          "<h2>What we found</h2>" +
+          "<p>We lined up about 60,000 readings with local weather records. Clouds caused the biggest drops, but heat mattered too: " +
+          "on afternoons above 85 °F the panel made <mark>almost 10% less power</mark> than on cool, sunny days.</p>" +
+          "<h2>Next time</h2>" +
+          "<p>Calibrate the current sensor before starting. We found a small offset halfway through and had to correct the first three weeks.</p>",
+      },
+    ],
     description: "We built a Raspberry Pi data logger that recorded a 100 W solar panel's output every minute for six weeks, then compared it against local weather data. We found that heat alone cut the panel's output by almost 10% on hot afternoons.",
     photos: ["img/solar-logger.jpg"],
     links: [{ label: "GitHub", url: "https://github.com/example/solar-logger" }],
@@ -351,6 +430,29 @@ const projects = [
     members: ["sam"],
     status: "done",
     completedOn: "2026-09-10",
+    pages: [
+      {
+        id: "weather-station-1",
+        title: "Sensors and wiring",
+        date: "12/06/25",
+        html:
+          "<h2>Parts</h2>" +
+          "<ul><li>A BME280 for temperature, humidity, and pressure</li>" +
+          "<li>A cup anemometer and wind vane from a hobby kit</li>" +
+          "<li>An ESP32, soldered onto perfboard in a weatherproof box</li>" +
+          "<li>A small solar panel and a battery, so it doesn't need an outlet</li></ul>" +
+          "<p>The first temperature readings were <b>8 °F too high</b> on sunny days. I put the sensor in a louvered shield so the sun can't heat it directly.</p>",
+      },
+      {
+        id: "weather-station-2",
+        title: "The dashboard",
+        date: "09/10/26",
+        html:
+          "<p>The ESP32 posts readings every five minutes to a small Flask app I wrote in Python. The dashboard shows live values and graphs for the last week.</p>" +
+          "<h2>Results</h2>" +
+          "<p>It ran outdoors all winter, down to <mark>-6 °F</mark>, and only missed data during two power outages.</p>",
+      },
+    ],
     description: "I built a weather station that measures temperature, humidity, pressure, and wind speed with an ESP32, and posts readings every five minutes to a live dashboard I wrote in Python and Flask. It has run outdoors through a full Ohio winter.",
     photos: ["img/weather-station.jpg"],
     links: [{ label: "GitHub", url: "https://github.com/example/weather-station" }],

@@ -191,7 +191,7 @@ function projectProgressHtml(p) {
 }
 
 // What the project looks like after "Skip ahead 4 weeks" (the demo's battery monitor).
-// Photos fall back to colored boxes until these files are added to img/.
+// photos[0] is the picture on the project's title card and folder.
 const SAMPLE_PROGRESS = {
     description:
       "We built a pocket-sized monitor that clips onto a 4-cell lithium-ion pack. It reads each cell's voltage, " +
@@ -201,11 +201,7 @@ const SAMPLE_PROGRESS = {
       "To test it, we ran the pack through 40 charge and discharge cycles on a rig we put together in the makerspace and " +
       "checked every reading against a bench multimeter. Voltage readings stayed within 2% of the meter. " +
       "The enclosure took three printed versions before the board fit with enough room for airflow.",
-    photos: [
-      "img/battery-monitor-board.jpg",
-      "img/battery-monitor-enclosure.jpg",
-      "img/battery-monitor-testing.jpg",
-    ],
+    photos: ["img/battery-monitor.jpg"],
   links: [
     { label: "GitHub", url: "https://github.com/example/battery-monitor" },
     { label: "Enclosure CAD", url: "https://cad.onshape.com/documents/example-battery-monitor" },
