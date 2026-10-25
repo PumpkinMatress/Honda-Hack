@@ -1,7 +1,12 @@
 // profile.js — the profile page (demo screens 1 and 7). Owned by Person A.
+// Styles are in profile.css.
 //
 // showScreen("profile")                    -> the "Viewing as" person's own profile
 // showScreen("profile", { user: "jordan" }) -> someone else's profile
+//
+// Layout: a header (photo in a big circle, name box, stats box), then each project
+// as a manila folder. Current projects are full width and always come first.
+// Completed projects are half width, newest first, with the date on the tab.
 
 registerScreen("profile", (box, params) => {
   const viewer = currentUser();
@@ -18,86 +23,197 @@ registerScreen("profile", (box, params) => {
 function studentProfileHtml(user, isOwn) {
   const mine = projects.filter((p) => p.members.includes(user.id));
   const current = mine.filter((p) => p.status !== "done");
-  const past = mine.filter((p) => p.status === "done").reverse(); // newest first
-  const certs = sortCerts(certifications.filter((c) => c.user === user.id));
-  const myFeedback = feedback.filter((f) => f.to.includes(user.id)).reverse();
+  const completed = mine
+    .filter((p) => p.status === "done")
+    .map((p, i) => ({ p, i }))
+    .sort((a, b) => projectDate(b.p).localeCompare(projectDate(a.p)) || b.i - a.i) // newest first
+    .map((x) => x.p);
+  const skills = skillCount(user, mine);
 
   return `
-    ${profileHeaderHtml(user, isOwn, [
-      { n: mine.length, label: mine.length === 1 ? "project" : "projects" },
-      { n: certs.length, label: certs.length === 1 ? "certified skill" : "certified skills" },
-    ])}
+    <div class="pf">
+      ${profileHeaderHtml(user, isOwn, [
+        { n: mine.length, label: mine.length === 1 ? "project" : "projects" },
+        { n: skills, label: skills === 1 ? "skill" : "skills" },
+      ])}
 
-    <div class="profile-layout">
-      <div class="stack-lg">
-        <section class="section">
-          <div class="section-head">
-            <h2>Certifications</h2>
-            <span class="muted small">${isOwn && certs.length
-              ? "Signed by the reviewer's company. Share any badge to LinkedIn."
-              : "Skill ratings from verified industry reviewers"}</span>
-          </div>
-          ${certs.length
-            ? `<div class="cert-grid">${certs.map((c) => certBadgeHtml(c, { share: isOwn })).join("")}</div>`
-            : `<div class="empty-state card">
-                 <div class="empty-icon" aria-hidden="true">🏅</div>
-                 <p><strong>No certifications yet.</strong></p>
-                 <p class="muted">${isOwn ? "Submit a project to a challenge" : `${esc(firstName(user))} can submit a project to a challenge`}. An industry reviewer rates each tagged skill, and the badges show up here.</p>
-                 ${isOwn ? `<button class="btn btn-primary" data-go="challenges">Browse challenges</button>` : ""}
-               </div>`}
-        </section>
+      <section class="pf-current" aria-label="Current projects">
+        ${current.length
+          ? current.map((p) => folderHtml(p, user, "current")).join("")
+          : emptyFolderHtml(user, isOwn)}
+      </section>
 
-        <section class="section">
-          <div class="section-head"><h2>Current projects</h2></div>
-          ${current.length
-            ? `<div class="project-grid">${current.map(projectCardHtml).join("")}</div>`
-            : `<div class="empty-state card"><p class="muted">No open projects right now.</p></div>`}
-        </section>
-
-        <section class="section">
-          <div class="section-head"><h2>Past projects</h2></div>
-          ${past.length
-            ? `<div class="project-grid">${past.map(projectCardHtml).join("")}</div>`
-            : `<div class="empty-state card"><p class="muted">No finished projects yet.</p></div>`}
-        </section>
-      </div>
-
-      <aside class="stack-lg">
-        <section class="card">
-          <h3>Skills</h3>
-          <p class="muted small">Skills marked ✓ are certified by industry reviewers.</p>
-          <div class="chips">${skillListHtml(user, certs)}</div>
-        </section>
-
-        ${isOwn ? privateFeedbackHtml(myFeedback) : ""}
-      </aside>
+      ${completed.length ? `
+        <section class="pf-completed" aria-label="Completed projects">
+          ${completed.map((p) => folderHtml(p, user, "completed")).join("")}
+        </section>` : ""}
     </div>`;
 }
 
-// Self-listed skills plus any skill they've been certified in, best level shown.
-function skillListHtml(user, certs) {
-  const best = {};
-  for (const c of certs) {
-    if (!best[c.skill] || levelInfo(c.level).rank > levelInfo(best[c.skill]).rank) best[c.skill] = c.level;
-  }
-  const all = [...new Set([...(user.skills || []), ...Object.keys(best)])];
-  if (!all.length) return `<span class="muted small">No skills listed.</span>`;
-  return all
-    .map((skill) => best[skill]
-      ? `<span class="chip chip-certified level-${esc(best[skill])}" title="${esc(levelInfo(best[skill]).label)}, certified">✓ ${esc(skill)}</span>`
-      : skillChip(skill))
-    .join("");
+// Skills they listed, plus any they used on a project or were certified in.
+function skillCount(user, mine) {
+  const used = mine.flatMap((p) => (p.skillTags || []).filter((t) => t.people.includes(user.id)).map((t) => t.skill));
+  const certified = certifications.filter((c) => c.user === user.id).map((c) => c.skill);
+  return new Set([...(user.skills || []), ...used, ...certified]).size;
 }
 
-function privateFeedbackHtml(list) {
+// When a project was finished: the date saved on it, or the day it was reviewed.
+function projectDate(p) {
+  if (p.completedOn) return p.completedOn;
+  const reviewed = certifications.filter((c) => c.project === p.id).map((c) => c.date).sort();
+  return reviewed[reviewed.length - 1] || p.submittedOn || "";
+}
+
+// "2026-01-03" -> "01/03/26"
+function shortDate(text) {
+  const [y, m, d] = String(text || "").slice(0, 10).split("-");
+  return y && m && d ? `${m}/${d}/${y.slice(2)}` : "";
+}
+
+// ---------- Project folders ----------
+
+// size: "current" (full width) or "completed" (half width)
+function folderHtml(p, user, size) {
+  const others = p.members.filter((id) => id !== user.id).map(findUser).filter(Boolean);
+  const challenge = p.submittedTo ? findChallenge(p.submittedTo) : null;
+  const meta = [
+    others.length ? `with ${others.map((u) => u.name).join(", ")}` : "",
+    challenge ? `Submitted to the ${challenge.company} challenge` : "",
+  ].filter(Boolean).join(" · ");
+  const tab = size === "current" ? "Current Project" : shortDate(projectDate(p)) || "Completed";
+
   return `
-    <section class="card">
-      <h3>Reviewer feedback</h3>
-      <p class="muted small">🔒 Only you can see this.</p>
-      ${list.length ? list.map(feedbackItemHtml).join("") : `<p class="muted small">No feedback yet.</p>`}
+    <article class="folder folder-${size}" data-go="project" data-id="${esc(p.id)}">
+      <div class="folder-tab">${esc(tab)}</div>
+      <div class="folder-back">
+        <div class="folder-front">
+          <div class="folder-info">
+            <h2 class="folder-title">${esc(p.title)}</h2>
+            ${meta ? `<div class="folder-meta">${esc(meta)}</div>` : ""}
+            ${p.description ? `<p class="folder-desc">${esc(p.description)}</p>` : ""}
+          </div>
+          ${folderPhotoHtml(p)}
+          ${folderStampsHtml(p)}
+        </div>
+      </div>
+    </article>`;
+}
+
+// The big square for an uploaded photo. Empty until a photo exists.
+function folderPhotoHtml(p) {
+  const src = p.photos && p.photos[0];
+  return `<div class="folder-photo">${src ? `<img src="${esc(src)}" alt="${esc(p.title)}" onerror="this.remove()">` : ""}</div>`;
+}
+
+// One empty stamp per skill tagged on the project.
+// TODO: these become certification stamps (designed later).
+function folderStampsHtml(p) {
+  const tags = p.skillTags || [];
+  if (!tags.length) return "";
+  return `<div class="folder-stamps" aria-hidden="true">
+    ${tags.map((t) => `<span class="folder-stamp" title="${esc(t.skill)}"></span>`).join("")}
+  </div>`;
+}
+
+// Shown in place of the current project when there isn't one.
+function emptyFolderHtml(user, isOwn) {
+  return `
+    <article class="folder folder-current folder-empty">
+      <div class="folder-tab">Current Project</div>
+      <div class="folder-back">
+        <div class="folder-front">
+          <div class="folder-info">
+            <h2 class="folder-title">No open project right now</h2>
+            <p class="folder-desc">${isOwn
+              ? "Find a company challenge and start a project for it."
+              : `${esc(firstName(user))} isn't working on a project at the moment.`}</p>
+            ${isOwn ? `<button class="pf-btn" data-go="challenges">Browse challenges</button>` : ""}
+          </div>
+        </div>
+      </div>
+    </article>`;
+}
+
+// ---------- Mentors ----------
+
+function mentorProfileHtml(user, isOwn) {
+  const posted = challenges.filter((c) => c.postedBy === user.id);
+  const given = sortCerts(certifications.filter((c) => c.by === user.id));
+  const reviewedProjects = new Set(given.map((c) => c.project)).size;
+
+  return `
+    <div class="pf">
+      ${profileHeaderHtml(user, isOwn, [
+        { n: posted.length, label: posted.length === 1 ? "challenge posted" : "challenges posted" },
+        { n: reviewedProjects, label: reviewedProjects === 1 ? "project reviewed" : "projects reviewed" },
+      ])}
+
+      <div class="stack-lg">
+        <section class="section">
+          <div class="section-head"><h2>Challenges</h2></div>
+          ${posted.length
+            ? `<div class="project-grid">${posted.map(challengeCardHtml).join("")}</div>`
+            : `<div class="empty-state card"><p class="muted">No challenges posted.</p></div>`}
+        </section>
+
+        <section class="section">
+          <div class="section-head">
+            <h2>Certifications given</h2>
+            ${isOwn ? `<button class="pf-btn pf-btn-light" data-go="review">Open review queue</button>` : ""}
+          </div>
+          ${given.length
+            ? `<div class="cert-grid">${given.map((c) => certBadgeHtml(c, { showStudent: true })).join("")}</div>`
+            : `<div class="empty-state card"><p class="muted">No reviews yet.</p></div>`}
+        </section>
+      </div>
+    </div>`;
+}
+
+function challengeCardHtml(ch) {
+  const open = today() <= ch.closes;
+  return `
+    <article class="card card-link" data-go="challenges" data-id="${esc(ch.id)}">
+      <div class="row-between">
+        <span class="company-tag">${esc(ch.company)}</span>
+        <span class="status ${open ? "status-open" : "status-done"}">${open ? "Open" : "Closed"}</span>
+      </div>
+      <h3>${esc(ch.title)}</h3>
+      <p class="muted small clamp-2">${esc(ch.prompt)}</p>
+      <div class="muted xsmall">${ch.weeks} weeks · closes ${esc(formatDate(ch.closes))}</div>
+    </article>`;
+}
+
+// ---------- Header ----------
+
+// The photo sits in a big circle: green on top (the banner), cream below (the name box).
+// The stats box is on the right, under the banner.
+function profileHeaderHtml(user, isOwn, stats) {
+  const subtitle = user.role === "mentor"
+    ? `${esc(user.title)} at ${esc(user.company)}`
+    : `${esc(user.major)}${user.year ? " · " + esc(user.year) : ""}`;
+  return `
+    <section class="pf-header">
+      <div class="pf-banner">
+        ${isOwn ? "" : `<button class="pf-btn pf-btn-light" data-go="messages" data-with="${esc(user.id)}">Message</button>`}
+      </div>
+      <div class="pf-info">
+        <div class="pf-name">
+          <h1>${esc(user.name)}</h1>
+          ${user.role === "mentor" ? verifiedHtml(user) : ""}
+        </div>
+        <div class="pf-sub">${subtitle}</div>
+        ${user.bio ? user.bio.split("\n\n").map((para) => `<p class="pf-bio">${esc(para)}</p>`).join("") : ""}
+      </div>
+      <div class="pf-stats">
+        ${stats.map((s) => `<div class="pf-stat"><strong>${s.n}</strong> <span>${esc(s.label)}</span></div>`).join("")}
+      </div>
+      <div class="pf-photo">${avatarHtml(user, "xl")}</div>
     </section>`;
 }
 
+// ---------- Shared helpers (also used by project.js, review.js, messages.js) ----------
+
+// Used on project pages and the review screen.
 function feedbackItemHtml(f) {
   const from = findUser(f.from);
   const project = findProject(f.project);
@@ -118,118 +234,6 @@ function feedbackItemHtml(f) {
       </div>
       ${parts}
     </div>`;
-}
-
-// ---------- Mentors ----------
-
-function mentorProfileHtml(user, isOwn) {
-  const posted = challenges.filter((c) => c.postedBy === user.id);
-  const given = sortCerts(certifications.filter((c) => c.by === user.id));
-  const reviewedProjects = new Set(given.map((c) => c.project)).size;
-
-  return `
-    ${profileHeaderHtml(user, isOwn, [
-      { n: posted.length, label: posted.length === 1 ? "challenge posted" : "challenges posted" },
-      { n: reviewedProjects, label: reviewedProjects === 1 ? "project reviewed" : "projects reviewed" },
-    ])}
-
-    <div class="stack-lg">
-      <section class="section">
-        <div class="section-head"><h2>Challenges</h2></div>
-        ${posted.length
-          ? `<div class="project-grid">${posted.map(challengeCardHtml).join("")}</div>`
-          : `<div class="empty-state card"><p class="muted">No challenges posted.</p></div>`}
-      </section>
-
-      <section class="section">
-        <div class="section-head">
-          <h2>Certifications given</h2>
-          ${isOwn ? `<button class="btn btn-primary btn-sm" data-go="review">Open review queue</button>` : ""}
-        </div>
-        ${given.length
-          ? `<div class="cert-grid">${given.map((c) => certBadgeHtml(c, { showStudent: true })).join("")}</div>`
-          : `<div class="empty-state card"><p class="muted">No reviews yet.</p></div>`}
-      </section>
-    </div>`;
-}
-
-function challengeCardHtml(ch) {
-  const open = today() <= ch.closes;
-  return `
-    <article class="card card-link" data-go="challenges" data-id="${esc(ch.id)}">
-      <div class="row-between">
-        <span class="company-tag">${esc(ch.company)}</span>
-        <span class="status ${open ? "status-open" : "status-done"}">${open ? "Open" : "Closed"}</span>
-      </div>
-      <h3>${esc(ch.title)}</h3>
-      <p class="muted small clamp-2">${esc(ch.prompt)}</p>
-      <div class="muted xsmall">${ch.weeks} weeks · closes ${esc(formatDate(ch.closes))}</div>
-    </article>`;
-}
-
-// ---------- Shared pieces ----------
-
-function profileHeaderHtml(user, isOwn, stats) {
-  const subtitle = user.role === "mentor"
-    ? `${esc(user.title)} at <strong>${esc(user.company)}</strong>`
-    : `${esc(user.major)}${user.year ? " · " + esc(user.year) : ""}`;
-  return `
-    <section class="profile-header card">
-      <div class="profile-banner" style="--hue:${hueFor(user.id)}"></div>
-      <div class="profile-header-body">
-        ${avatarHtml(user, "xl")}
-        <div class="grow">
-          <div class="row wrap">
-            <h1>${esc(user.name)}</h1>
-            ${user.role === "mentor" ? verifiedHtml(user) : `<span class="role-tag">Student</span>`}
-          </div>
-          <div class="muted">${subtitle}</div>
-          ${user.bio ? user.bio.split("\n\n").map((para) => `<p class="bio">${esc(para)}</p>`).join("") : ""}
-          <div class="stats">
-            ${stats.map((s) => `<div class="stat"><strong>${s.n}</strong> ${esc(s.label)}</div>`).join("")}
-          </div>
-        </div>
-        <div class="profile-actions">
-          ${isOwn
-            ? ""
-            : `<button class="btn btn-primary" data-go="messages" data-with="${esc(user.id)}">Message</button>`}
-        </div>
-      </div>
-    </section>`;
-}
-
-// Used on profiles. Also fine to reuse on a projects feed.
-function projectCardHtml(p) {
-  const projectCerts = sortCerts(certifications.filter((c) => c.project === p.id));
-  const challenge = p.submittedTo ? findChallenge(p.submittedTo) : null;
-  const team = p.members.map(findUser).filter(Boolean);
-  const statusLabel = p.status === "done" ? "Completed" : p.status === "open" ? "Open" : capitalize(p.status);
-
-  return `
-    <article class="card card-link project-card" data-go="project" data-id="${esc(p.id)}">
-      ${photoHtml(p.photos && p.photos[0], p.title)}
-      <div class="project-card-body">
-        <div class="row-between">
-          <span class="status status-${p.status === "done" ? "done" : "open"}">${esc(statusLabel)}</span>
-          <span class="avatar-stack">${team.map((u) => avatarHtml(u, "sm")).join("")}</span>
-        </div>
-        <h3>${esc(p.title)}</h3>
-        <p class="muted small clamp-2">${esc(p.description)}</p>
-        ${challenge ? `<div class="challenge-tag">🏁 Submitted to ${esc(challenge.company)}: ${esc(challenge.title)}</div>` : ""}
-        <div class="chips">${(p.skillTags || []).map((t) => skillChip(t.skill)).join("")}</div>
-        ${projectCerts.length
-          ? `<div class="mini-certs">${projectCerts.map(miniCertHtml).join("")}</div>`
-          : ""}
-      </div>
-    </article>`;
-}
-
-function miniCertHtml(cert) {
-  const person = findUser(cert.user);
-  const level = levelInfo(cert.level);
-  return `<span class="mini-cert level-${esc(level.id)}" title="${esc(level.label)} ${esc(cert.skill)}, ${esc(person ? person.name : "")}">
-    ${esc(level.label)} · ${esc(cert.skill)}${person ? ` · ${esc(firstName(person))}` : ""}
-  </span>`;
 }
 
 // Highest level first, then newest first.

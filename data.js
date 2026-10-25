@@ -138,6 +138,7 @@ const challenges = [
 
 // ---------- Projects ----------
 // status: "open" (still being worked on) or "done"
+// completedOn: the day it was finished (shown on the folder tab on profiles)
 // members: who worked on it
 // skillTags: which skill each person did. Filled in by Person C's screen.
 // submittedTo: the challenge id it was submitted to, or null
@@ -150,6 +151,7 @@ const projects = [
     owner: "maya",
     members: ["maya"],
     status: "done",
+    completedOn: "2025-04-19",
     description: "I designed and built an 8x8x8 LED cube with 512 hand-soldered LEDs, driven by an Arduino Nano through a chain of shift registers. I also wrote the animation firmware in C, including a rain effect and a playable 3D snake game.",
     photos: ["img/led-cube.jpg"],
     link: "https://github.com/example/led-cube",
@@ -165,6 +167,7 @@ const projects = [
     owner: "maya",
     members: ["maya"],
     status: "done",
+    completedOn: "2025-11-15",
     description: "I built a battery-powered soil moisture sensor that sends a text when a plant needs water. It uses a capacitive sensor and an ESP32 that sleeps between hourly readings. After two power-circuit redesigns, it now runs about six months on two AA batteries.",
     photos: ["img/plant-sensor.jpg"],
     link: "https://github.com/example/plant-sensor",
@@ -179,6 +182,7 @@ const projects = [
     owner: "maya",
     members: ["maya"],
     status: "done",
+    completedOn: "2026-01-03",
     description: "I built an adjustable 0 to 24 V bench power supply from a salvaged 19 V laptop charger, with current limiting and a live OLED readout. Tested against lab-grade supplies, it's accurate to within 1%, at about a third of the cost of buying one.",
     photos: ["img/bench-psu.jpg"],
     link: "https://github.com/example/bench-psu",
@@ -197,6 +201,7 @@ const projects = [
     owner: "jordan",
     members: ["jordan"],
     status: "done",
+    completedOn: "2025-12-06",
     description: "I designed a two-axis pen plotter in SolidWorks, 3D printed the frame in PETG, and machined the aluminum rails on a manual mill. It runs GRBL firmware on an Arduino and can draw any SVG file.",
     photos: ["img/cnc-plotter.jpg"],
     link: "https://github.com/example/pen-plotter",
@@ -213,6 +218,7 @@ const projects = [
     owner: "jordan",
     members: ["jordan"],
     status: "done",
+    completedOn: "2026-03-21",
     description: "I designed a vibration-damped bike phone mount over four revisions. When version 2 cracked at the clamp, I added ribs and switched to PETG, then added TPU pads to absorb vibration. The final version has held up for more than 300 miles of gravel riding.",
     photos: ["img/bike-mount.jpg"],
     link: "https://github.com/example/bike-mount",
@@ -232,6 +238,7 @@ const projects = [
     owner: "sam",
     members: ["sam", "lena"],
     status: "done",
+    completedOn: "2026-10-12",
     description: "We built a Raspberry Pi data logger that recorded a 100 W solar panel's output every minute for six weeks, then compared it against local weather data. We found that heat alone cut the panel's output by almost 10% on hot afternoons.",
     photos: ["img/solar-logger.jpg"],
     link: "https://github.com/example/solar-logger",
@@ -250,6 +257,7 @@ const projects = [
     owner: "sam",
     members: ["sam"],
     status: "done",
+    completedOn: "2026-09-10",
     description: "I built a weather station that measures temperature, humidity, pressure, and wind speed with an ESP32, and posts readings every five minutes to a live dashboard I wrote in Python and Flask. It has run outdoors through a full Ohio winter.",
     photos: ["img/weather-station.jpg"],
     link: "https://github.com/example/weather-station",

@@ -10,7 +10,7 @@ Use the **Viewing as** dropdown (top right) to switch between Maya, Jordan and P
 
 | Person | Files |
 | --- | --- |
-| A: Platform and Profile | `index.html`, `style.css`, `data.js`, `core.js`, `profile.js` |
+| A: Platform and Profile | `index.html`, `style.css`, `data.js`, `core.js`, `profile.js`, `profile.css` |
 | B: Challenge to Team | `challenge.js`, `listings.js`, `messages.js`, `teams.css` |
 | C: Project to Review | `project.js`, `review.js`, `review.css` |
 | Shareable certificates | `credential.js`, `credential.css` (see below) |
@@ -88,7 +88,7 @@ Every certification can be shared as a public link that anyone can check, for ex
 
 1. When the Honda reviewer submits a review, each certification gets an ID (like `BRG-7F3K-9Q2M`)
    and is **digitally signed with Honda's key**. The signed version is a standard JSON Web Token (JWT).
-2. On their own profile, a student clicks **Share** on a badge. The window has:
+2. On a project page, a student clicks **Share** on one of their own certifications. The window has:
    - **Copy link**: the public certificate page
    - **Add to LinkedIn profile**: opens LinkedIn's "Add certification" form already filled in
    - **Download image**: a 1200 × 630 PNG of the badge for posts or slides

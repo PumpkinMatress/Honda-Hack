@@ -1,0 +1,267 @@
+/* profile.css — the profile page (profile.js). Owned by Person A.
+ *
+ * No rounded corners on this page. The only curves are the profile photo
+ * and the big circle around it.
+ */
+
+:root {
+  --pf-bg: #091B2A;       /* page background */
+  --pf-green: #123C1D;    /* banner above the photo */
+  --pf-cream: #F4E5D4;    /* name box and stats box */
+  --pf-folder: #F1CC8C;   /* folder front */
+  --pf-folder-dark: #D9B87E; /* folder tab and back, a little darker */
+  --pf-ink: #091B2A;      /* text on cream and folders */
+  --pf-ink-soft: rgba(9, 27, 42, 0.72);
+}
+
+/* core.js sets data-screen on <body>, so only the profile gets the dark background. */
+body[data-screen="profile"] { background: var(--pf-bg); }
+
+.pf {
+  --front-h: 330px; /* height of every folder's front, so current and completed folders match */
+  display: flex; flex-direction: column;
+}
+
+/* Square buttons for this page. */
+.pf-btn {
+  font: inherit; font-size: 14px; font-weight: 700;
+  padding: 9px 16px;
+  border: 2px solid var(--pf-ink);
+  border-radius: 0;
+  background: var(--pf-ink);
+  color: var(--pf-cream);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.pf-btn:hover { background: #163049; border-color: #163049; }
+.pf-btn-light { background: var(--pf-cream); border-color: var(--pf-cream); color: var(--pf-ink); }
+.pf-btn-light:hover { background: #fff; border-color: #fff; }
+
+/* ---------- Header ----------
+ *
+ *   ( photo )=========== green banner ==========
+ *   (       )  name box (cream)     | stats box
+ *
+ * The banner's top-left corner and the name box's bottom-left corner are
+ * quarter circles of the same size, so together they make one big circle
+ * around the photo, split by the gap. The sizes below fit a two-paragraph
+ * bio. A longer bio (or a narrow window) makes the name box grow downward,
+ * and the circle stretches a little instead of covering the text.
+ */
+
+.pf-header {
+  --half: 186px;    /* banner height = radius of the big circle */
+  --gap: 24px;      /* dark gap between the banner and the boxes below, and the ring around the photo */
+  --photo: 190px;   /* profile photo size */
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 180px;
+  grid-template-rows: var(--half) auto;
+  gap: var(--gap);
+  margin-bottom: 44px;
+}
+
+.pf-banner {
+  grid-column: 1 / -1;
+  background: var(--pf-green);
+  border-top-left-radius: var(--half);
+  display: flex; align-items: flex-start; justify-content: flex-end;
+  padding: 18px;
+}
+
+.pf-info {
+  grid-column: 1; grid-row: 2;
+  min-height: var(--half);
+  background: var(--pf-cream);
+  color: var(--pf-ink);
+  border-bottom-left-radius: var(--half);
+  padding: 14px 26px 16px calc(var(--half) + var(--photo) / 2 + var(--gap) + 16px); /* clear of the photo and its ring */
+  display: flex; flex-direction: column; justify-content: center;
+}
+.pf-name { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.pf-name h1 { font-size: 30px; color: var(--pf-ink); }
+.pf-name .verified { border-radius: 0; }
+.pf-sub { font-size: 14.5px; font-weight: 600; color: var(--pf-ink-soft); margin-top: 2px; }
+.pf-bio { font-size: 13.5px; line-height: 1.45; margin-top: 7px; max-width: 640px; }
+
+.pf-stats {
+  grid-column: 2; grid-row: 2;
+  background: var(--pf-cream);
+  color: var(--pf-ink);
+  padding: 20px 22px;
+  display: flex; flex-direction: column; justify-content: center; gap: 14px;
+}
+.pf-stat { display: flex; align-items: baseline; gap: 8px; font-size: 15px; font-weight: 600; color: var(--pf-ink-soft); }
+.pf-stat strong { font-size: 34px; font-weight: 800; line-height: 1; color: var(--pf-ink); }
+
+/* The photo, centered on the gap at the big circle's center. */
+.pf-photo {
+  position: absolute;
+  display: flex;
+  left: calc(var(--half) - var(--photo) / 2);
+  top: calc(var(--half) + var(--gap) / 2 - var(--photo) / 2);
+}
+/* The dark ring around the photo is as wide as the gap, so it reads as the same stripe. */
+.pf-photo .avatar {
+  --size: var(--photo);
+  box-shadow: 0 0 0 var(--gap) var(--pf-bg);
+}
+
+/* ---------- Folders ---------- */
+
+.pf-current { display: flex; flex-direction: column; gap: 36px; margin-bottom: 40px; }
+.pf-completed { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 36px 28px; align-items: start; }
+
+.folder {
+  display: flex; flex-direction: column;
+  color: var(--pf-ink);
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.35));
+  transition: transform 0.15s, filter 0.15s;
+}
+.folder[data-go] { cursor: pointer; }
+.folder[data-go]:hover { transform: translateY(-3px); filter: drop-shadow(0 14px 24px rgba(0, 0, 0, 0.45)); }
+
+/* Tab: cut corner on the top left, slanted right side. Same size on every folder,
+   with the label filling it. */
+.folder-tab {
+  align-self: flex-start;
+  height: 46px;
+  display: flex; align-items: center;
+  min-width: 160px;
+  margin-bottom: -1px; /* no seam between the tab and the folder */
+  padding: 2px 54px 0 24px;
+  background: var(--pf-folder-dark);
+  font-size: 22px; font-weight: 800; letter-spacing: 0.01em; white-space: nowrap;
+  clip-path: polygon(16px 0, calc(100% - 34px) 0, 100% 100%, 0 100%, 0 16px);
+}
+
+/* Back of the folder: shows as a darker strip above the front, with a cut top-right corner. */
+.folder-back {
+  flex: 1;
+  display: flex;
+  padding-top: 14px;
+  background: var(--pf-folder-dark);
+  clip-path: polygon(0 0, calc(100% - 32px) 0, 100% 32px, 100% 100%, 0 100%);
+}
+
+/* Front of the folder. Its cut corners line up with the back's.
+   Every front is the same height; the photo square is sized to fit inside it. */
+.folder-front {
+  flex: 1;
+  height: var(--front-h);
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  background: var(--pf-folder);
+  clip-path: polygon(26px 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%, 0 26px);
+}
+
+.folder-info { grid-area: info; min-width: 0; min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: 8px; }
+.folder-title { color: var(--pf-ink); font-weight: 800; }
+.folder-meta { font-size: 13px; font-weight: 600; color: var(--pf-ink-soft); }
+/* The description fills the space left and fades out if it's too long. */
+.folder-desc {
+  flex: 1 1 0; min-height: 0;
+  overflow: hidden;
+  color: var(--pf-ink-soft);
+  line-height: 1.5;
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 1.5em), transparent);
+          mask-image: linear-gradient(to bottom, #000 calc(100% - 1.5em), transparent);
+}
+.folder-info .pf-btn { align-self: flex-start; margin-top: 6px; }
+
+/* Square for an uploaded photo (empty until there is one). */
+.folder-photo {
+  grid-area: photo;
+  align-self: start;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  background: rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(9, 27, 42, 0.28);
+  overflow: hidden;
+}
+.folder-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+/* Placeholder rectangles for certification stamps (to be designed). */
+.folder-stamps { grid-area: stamps; display: flex; flex-wrap: wrap; gap: 14px; align-self: end; }
+.folder-stamp { border: 2px solid rgba(9, 27, 42, 0.45); }
+
+/* Current project: full width. Title, text and stamps on the left,
+   photo on the right as tall as the folder allows. */
+.folder-current .folder-tab { min-width: 250px; }
+.folder-current .folder-front {
+  --pad-y: 28px;
+  grid-template-columns: minmax(0, 1fr) calc(var(--front-h) - 2 * var(--pad-y));
+  grid-template-areas: "info photo" "stamps photo";
+  gap: 20px 36px;
+  padding: var(--pad-y) 34px;
+}
+.folder-current .folder-title { font-size: 32px; }
+.folder-current .folder-desc { font-size: 15px; max-width: 600px; }
+.folder-current .folder-stamp { width: 76px; height: 84px; }
+
+/* Completed projects: half width. Photo on the right, stamps along the bottom. */
+.folder-completed .folder-front {
+  --pad-y: 22px;
+  --row-gap: 16px;
+  --stamp-h: 66px;
+  grid-template-columns: minmax(0, 1fr) calc(var(--front-h) - 2 * var(--pad-y) - var(--row-gap) - var(--stamp-h));
+  grid-template-areas: "info photo" "stamps stamps";
+  gap: var(--row-gap) 22px;
+  padding: var(--pad-y) 24px;
+}
+.folder-completed .folder-title { font-size: 21px; }
+.folder-completed .folder-desc { font-size: 13px; }
+.folder-completed .folder-stamp { width: 60px; height: var(--stamp-h); }
+
+/* No current project yet. */
+.folder-empty .folder-front { grid-template-columns: 1fr; grid-template-rows: auto; grid-template-areas: "info"; align-content: center; padding: 28px 34px; }
+.folder-empty .folder-title { font-size: 26px; }
+.folder-empty .folder-desc { flex: none; -webkit-mask-image: none; mask-image: none; }
+
+/* ---------- Mentor profiles: their sections sit on the dark background ---------- */
+
+.pf .section-head h2 { color: var(--pf-cream); }
+.pf .card,
+.pf .cert,
+.pf .empty-state,
+.pf .status,
+.pf .level-pill { border-radius: 0; }
+
+/* ---------- Small screens ---------- */
+
+@media (max-width: 1060px) {
+  .pf { --front-h: 300px; }
+  .pf-header { --half: 160px; --photo: 150px; grid-template-columns: minmax(0, 1fr) 160px; }
+  .pf-name h1 { font-size: 28px; }
+}
+
+@media (max-width: 860px) {
+  /* Stack everything: banner, then the name box with the photo on top, then stats. */
+  .pf-header { --half: 96px; --gap: 16px; --photo: 128px; grid-template-columns: 1fr; }
+  .pf-banner { border-radius: 0; }
+  .pf-info { min-height: 0; border-radius: 0; padding: calc(var(--photo) / 2 + var(--gap) / 2 + 16px) 18px 20px; }
+  .pf-stats { grid-column: 1; grid-row: 3; flex-direction: row; justify-content: flex-start; gap: 28px; padding: 16px 18px; }
+  .pf-photo { left: calc(var(--gap) + 10px); }
+}
+
+@media (max-width: 720px) {
+  /* One folder per row, and folders grow to fit instead of a fixed height. */
+  .pf-completed { grid-template-columns: 1fr; }
+  .folder-front { height: auto; grid-template-rows: auto; }
+  .folder-desc {
+    flex: none;
+    -webkit-mask-image: none; mask-image: none;
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 5;
+  }
+  .folder-tab { height: 40px; font-size: 18px; min-width: 130px; }
+  .folder-current .folder-tab { min-width: 200px; }
+  .folder-completed .folder-front { grid-template-columns: minmax(0, 1fr) 40%; }
+  .folder-current .folder-front {
+    grid-template-columns: 1fr;
+    grid-template-areas: "info" "photo" "stamps";
+    padding: 26px 20px 22px;
+  }
+  .folder-current .folder-title { font-size: 26px; }
+  .folder-current .folder-stamp { width: 64px; height: 70px; }
+}

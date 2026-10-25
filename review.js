@@ -237,8 +237,9 @@ function submitReview(projectId) {
     });
   }
 
-  // Reviewed: the project moves to the team's "Past projects".
+  // Reviewed: the project moves to the team's completed projects, dated today.
   p.status = "done";
+  p.completedOn = today();
   save();
   refresh(); // same screen, now showing the finished review
 

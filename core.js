@@ -92,6 +92,8 @@ function refresh() {
   currentParams = params;
   const info = SCREENS.find((s) => s.name === name);
 
+  // Lets a screen's CSS style the whole page, e.g. body[data-screen="profile"].
+  document.body.dataset.screen = name;
   // Public pages (like a shared certificate link) look the way a visitor without an account sees them.
   document.body.classList.toggle("is-public", Boolean(info.public));
   document.body.classList.toggle("is-embed", Boolean(info.public) && params.embed === "1");

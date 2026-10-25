@@ -412,7 +412,7 @@ function projectCertsHtml(p) {
         <h2>Certified skills</h2>
         <span class="muted small">Rated by ${esc(joinNames(reviewers.map((r) => `${r.name}, ${r.company}`)))}</span>
       </div>
-      <div class="cert-grid">${certs.map((c) => certBadgeHtml(c, { showStudent: true })).join("")}</div>
+      <div class="cert-grid">${certs.map((c) => certBadgeHtml(c, { showStudent: true, share: c.user === currentUser().id })).join("")}</div>
     </section>`;
 }
 
