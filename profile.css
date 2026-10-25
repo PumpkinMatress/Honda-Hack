@@ -119,7 +119,10 @@ body[data-screen="profile"] { background: var(--pf-bg); }
 
 /* ---------- Folders ---------- */
 
-.pf-current { display: flex; flex-direction: column; gap: 36px; margin-bottom: 40px; }
+.pf-current { position: relative; display: flex; flex-direction: column; gap: 36px; margin-bottom: 40px; }
+
+/* "Create project": on the dark background, level with the first folder's tab. */
+.pf-new { position: absolute; top: 0; right: 0; height: 46px; display: flex; align-items: center; }
 .pf-completed { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 36px 28px; align-items: start; }
 
 .folder {
@@ -177,7 +180,7 @@ body[data-screen="profile"] { background: var(--pf-bg); }
   -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 1.5em), transparent);
           mask-image: linear-gradient(to bottom, #000 calc(100% - 1.5em), transparent);
 }
-.folder-info .pf-btn { align-self: flex-start; margin-top: 6px; }
+.folder-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
 
 /* Square for an uploaded photo (empty until there is one). */
 .folder-photo {
@@ -192,9 +195,20 @@ body[data-screen="profile"] { background: var(--pf-bg); }
 }
 .folder-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 
-/* Placeholder rectangles for certification stamps (to be designed). */
+/* One white box per tagged skill, with its name inside.
+   Placeholders until the certification stamps are designed.
+   Widths fit the longest word in SKILLS ("Management") without splitting it. */
 .folder-stamps { grid-area: stamps; display: flex; flex-wrap: wrap; gap: 14px; align-self: end; }
-.folder-stamp { border: 2px solid rgba(9, 27, 42, 0.45); }
+.folder-stamp {
+  display: flex; align-items: center; justify-content: center;
+  padding: 4px;
+  border: 2px solid rgba(9, 27, 42, 0.45);
+  background: #fff;
+  color: var(--pf-ink);
+  font-size: 11px; font-weight: 600; line-height: 1.2;
+  text-align: center;
+  overflow-wrap: break-word;
+}
 
 /* Current project: full width. Title, text and stamps on the left,
    photo on the right as tall as the folder allows. */
@@ -208,7 +222,7 @@ body[data-screen="profile"] { background: var(--pf-bg); }
 }
 .folder-current .folder-title { font-size: 32px; }
 .folder-current .folder-desc { font-size: 15px; max-width: 600px; }
-.folder-current .folder-stamp { width: 76px; height: 84px; }
+.folder-current .folder-stamp { width: 92px; height: 84px; font-size: 12px; }
 
 /* Completed projects: half width. Photo on the right, stamps along the bottom. */
 .folder-completed .folder-front {
@@ -222,7 +236,7 @@ body[data-screen="profile"] { background: var(--pf-bg); }
 }
 .folder-completed .folder-title { font-size: 21px; }
 .folder-completed .folder-desc { font-size: 13px; }
-.folder-completed .folder-stamp { width: 60px; height: var(--stamp-h); }
+.folder-completed .folder-stamp { width: 82px; height: var(--stamp-h); }
 
 /* No current project yet. */
 .folder-empty .folder-front { grid-template-columns: 1fr; grid-template-rows: auto; grid-template-areas: "info"; align-content: center; padding: 28px 34px; }
@@ -252,7 +266,7 @@ body[data-screen="profile"] { background: var(--pf-bg); }
   background: var(--pf-green);
   color: #fff;
 }
-.np-title { font-family: "Lora", Georgia, serif; font-size: 28px; font-weight: 700; color: #fff; }
+.np-title { font-family: var(--font); font-size: 28px; font-weight: 700; color: #fff; }
 .np-x { font: inherit; font-size: 17px; padding: 4px 8px; border: 0; background: none; color: #fff; cursor: pointer; }
 .np-x:hover { background: rgba(255, 255, 255, 0.12); }
 
@@ -271,13 +285,10 @@ body[data-screen="profile"] { background: var(--pf-bg); }
 .np textarea { resize: vertical; min-height: 74px; }
 .np input[type="text"]:focus, .np textarea:focus, .np select:focus { outline: none; border-color: var(--pf-ink); }
 
-/* The listing part sits on a manila card, like a folder insert. */
-.np-team { padding: 14px 16px 16px; background: var(--pf-folder); display: flex; flex-direction: column; gap: 14px; }
-.np-toggle { display: flex; align-items: center; gap: 10px; font-weight: 700; cursor: pointer; }
-.np-toggle input { width: 18px; height: 18px; accent-color: var(--pf-ink); }
-.np-team-body { display: flex; flex-direction: column; gap: 14px; }
+/* A line under the title, e.g. which project a listing is for. */
+.np-sub { margin-top: 2px; font-size: 14px; font-weight: 600; color: rgba(255, 255, 255, 0.8); }
 
-/* Toggle chips for skills and for student / mentor. The real checkbox stays for
+/* Toggle chips for skills and for group member / mentor (listing window, listings.js). The real checkbox stays for
    keyboards and screen readers, just out of sight. */
 .np-chips, .np-seg { display: flex; flex-wrap: wrap; gap: 6px; }
 .np-chip { position: relative; cursor: pointer; }
@@ -294,8 +305,10 @@ body[data-screen="profile"] { background: var(--pf-bg); }
 .np-chip input:focus-visible + span { outline: 2px solid var(--pf-ink); outline-offset: 2px; }
 .np-seg .np-chip span { min-width: 96px; text-align: center; }
 
+.np-hint { font-size: 13px; color: var(--pf-ink-soft); }
 .np-error { min-height: 1.2em; font-size: 13px; font-weight: 700; color: #9b2c1f; }
 .np-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 4px 28px 24px; }
+.np-foot .np-remove { margin-right: auto; color: #9b2c1f; border-color: #9b2c1f; }
 
 @media (max-width: 560px) {
   .np-head { padding: 14px 14px 12px 18px; }
@@ -348,6 +361,8 @@ body[data-screen="profile"] { background: var(--pf-bg); }
     display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 5;
   }
   .folder-tab { height: 40px; font-size: 18px; min-width: 130px; }
+  /* No room beside the tab: the button sits above the folders. */
+  .pf-new { position: static; height: auto; align-self: flex-end; margin-bottom: -20px; }
   .folder-current .folder-tab { min-width: 200px; }
   .folder-completed .folder-front { grid-template-columns: minmax(0, 1fr) 40%; }
   .folder-current .folder-front {
@@ -356,5 +371,5 @@ body[data-screen="profile"] { background: var(--pf-bg); }
     padding: 26px 20px 22px;
   }
   .folder-current .folder-title { font-size: 26px; }
-  .folder-current .folder-stamp { width: 64px; height: 70px; }
+  .folder-current .folder-stamp { width: 82px; height: 70px; font-size: 11px; }
 }

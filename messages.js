@@ -4,13 +4,13 @@
 // showScreen("messages")                                -> your chats (on a computer, the newest one is open)
 // showScreen("messages", { with: "maya" })              -> your chat with Maya
 // showScreen("messages", { with: "maya", listing: id }) -> same, with a starter message typed in
-//                                                          (used by "Message owner" in listings.js)
+//                                                          (used by the Message button on a listing, listings.js)
 //
 // Looks like a desk: your contacts on an index card on the left, and the open chat
 // on graph paper held by a clipboard on the right. Messages are paper notes:
 // theirs are white, yours are yellow.
 //
-// Joining a team: a message sent from "Message owner" saves the listing's id on the
+// Joining a team: a message sent from a listing's Message button saves the listing's id on the
 // message (m.listing). The listing's owner then sees "Add to team" in that chat.
 
 registerScreen("messages", (box, params) => {
@@ -196,7 +196,7 @@ function noChatHtml() {
   return `
     <div class="ms-blank">
       <h2 class="ms-name">No chats yet</h2>
-      <p>Press <strong>Message</strong> on someone's profile, or <strong>Message owner</strong> on a listing, to start one.</p>
+      <p>Press <strong>Message</strong> on someone's profile or on a listing to start one.</p>
       <button class="ms-stamp" data-go="listings">Listings</button>
     </div>`;
 }
@@ -212,7 +212,7 @@ function attachedListingHtml(m) {
     </button>`;
 }
 
-// Coming from "Message owner": type a friendly first message for them,
+// Coming from a listing's Message button: type a friendly first message for them,
 // mentioning any skills the sender has that the listing asks for.
 function starterMessage(other, listingId) {
   const listing = findListing(listingId);
@@ -220,7 +220,9 @@ function starterMessage(other, listingId) {
   const mySkills = currentUser().skills || [];
   const matching = listing.skillsNeeded.filter((s) => mySkills.includes(s));
   const role = listing.role.charAt(0).toLowerCase() + listing.role.slice(1);
-  return `Hi ${firstName(other)}! I'd love to join ${listing.projectTitle} as your ${role}. ` +
+  // "Group member or mentor" reads oddly after "as your", so leave the role out.
+  const as = listing.lookingFor === "any" ? "" : ` as your ${role}`;
+  return `Hi ${firstName(other)}! I'd love to join ${listing.projectTitle}${as}. ` +
     (matching.length ? `I have ${andList(matching)} experience. ` : "") +
     `Are you free to talk this week?`;
 }

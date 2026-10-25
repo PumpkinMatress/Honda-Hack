@@ -80,7 +80,7 @@ body[data-screen="challenges"]::before {
 
 .ch-title {
   margin-top: 18px;
-  font-family: "Lora", Georgia, "Times New Roman", serif;
+  font-family: var(--font);
   font-size: 36px; font-weight: 500; line-height: 1.2; letter-spacing: -0.01em;
 }
 .ch-prompt { max-width: 680px; margin-top: 12px; font-size: 14px; line-height: 1.6; color: var(--ch-ink-soft); }
@@ -120,7 +120,7 @@ body[data-screen="challenges"]::before {
 .ch-dialog::backdrop { background: rgba(11, 26, 43, 0.6); }
 .ch-dialog-inner { padding: 26px 28px 24px; display: flex; flex-direction: column; gap: 16px; }
 .ch-dialog-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
-.ch-dialog-title { margin-top: 6px; font-family: "Lora", Georgia, serif; font-size: 26px; font-weight: 500; line-height: 1.25; }
+.ch-dialog-title { margin-top: 6px; font-family: var(--font); font-size: 26px; font-weight: 500; line-height: 1.25; }
 .ch-dialog-text { font-size: 14px; line-height: 1.55; color: var(--ch-ink-soft); }
 .ch-x { font: inherit; font-size: 16px; padding: 4px 8px; border: 0; background: none; color: var(--ch-ink); cursor: pointer; }
 .ch-dialog-foot { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }

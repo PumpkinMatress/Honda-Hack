@@ -7,6 +7,8 @@
 // Layout: a header (photo in a big circle, name box, stats box), then each project
 // as a manila folder. Current projects are full width and always come first.
 // Completed projects are half width, newest first, with the date on the tab.
+// On your own profile, "Create project" is always at the top right of your projects,
+// and each current project has a "Create listing" button (listings.js).
 
 registerScreen("profile", (box, params) => {
   const viewer = currentUser();
@@ -104,8 +106,9 @@ function studentProfileHtml(user, isOwn) {
       ])}
 
       <section class="pf-current" aria-label="Current projects">
+        ${isOwn ? `<div class="pf-new"><button class="pf-btn pf-btn-light" onclick="openNewProjectDialog()">+ Create project</button></div>` : ""}
         ${current.length
-          ? current.map((p) => folderHtml(p, user, "current")).join("")
+          ? current.map((p) => folderHtml(p, user, "current", { actions: isOwn })).join("")
           : emptyFolderHtml(user, isOwn)}
       </section>
 
@@ -138,21 +141,27 @@ function shortDate(text) {
 
 // ---------- Project folders ----------
 
-// size: "current" (full width) or "completed" (half width)
-function folderHtml(p, user, size) {
+// size: "current" (full width) or "completed" (half width, also used on the Listings page)
+// options:
+//   actions: true  -> "Create listing" / "Edit listing" buttons (your own current projects)
+//   tab: "..."     -> different text on the tab
+//   inListing: true -> drawn next to its own listing post, so it doesn't repeat "Looking for"
+//   link: false    -> not clickable (a listing whose project no longer exists)
+function folderHtml(p, user, size, options = {}) {
   const others = p.members.filter((id) => id !== user.id).map(findUser).filter(Boolean);
   const challenge = p.submittedTo ? findChallenge(p.submittedTo) : null;
-  // A project nobody has joined yet says who it's looking for (from its listing).
-  const listing = p.status !== "done" && p.members.length === 1 ? projectListing(p) : null;
+  // A current project with a listing says who it's looking for.
+  const listing = p.status !== "done" ? projectListing(p) : null;
   const meta = [
     others.length ? `with ${others.map((u) => u.name).join(", ")}` : "",
     challenge ? `Submitted to the ${challenge.company} challenge` : "",
-    listing ? `Looking for: ${listing.role}` : "",
+    listing && !options.inListing ? `Looking for: ${listing.role}` : "",
   ].filter(Boolean).join(" · ");
-  const tab = size === "current" ? "Current Project" : shortDate(projectDate(p)) || "Completed";
+  const tab = options.tab || (size === "current" ? "Current Project" : shortDate(projectDate(p)) || "Completed");
+  const link = options.link === false ? "" : `data-go="folder" data-id="${esc(p.id)}" data-from="${esc(user.id)}"`;
 
   return `
-    <article class="folder folder-${size}" data-go="folder" data-id="${esc(p.id)}" data-from="${esc(user.id)}">
+    <article class="folder folder-${size}" ${link}>
       <div class="folder-tab">${esc(tab)}</div>
       <div class="folder-back">
         <div class="folder-front">
@@ -160,6 +169,7 @@ function folderHtml(p, user, size) {
             <h2 class="folder-title">${esc(p.title)}</h2>
             ${meta ? `<div class="folder-meta">${esc(meta)}</div>` : ""}
             ${p.description ? `<p class="folder-desc">${esc(p.description)}</p>` : ""}
+            ${options.actions ? folderActionsHtml(p, listing) : ""}
           </div>
           ${folderPhotoHtml(p)}
           ${folderStampsHtml(p)}
@@ -174,13 +184,26 @@ function folderPhotoHtml(p) {
   return `<div class="folder-photo">${src ? `<img src="${esc(src)}" alt="${esc(p.title)}" onerror="this.remove()">` : ""}</div>`;
 }
 
-// One empty stamp per skill tagged on the project.
-// TODO: these become certification stamps (designed later).
+// "Create listing" on a current project, or "Edit listing" and "View" once it has one.
+// stopPropagation: pressing a button shouldn't also open the folder.
+function folderActionsHtml(p, listing) {
+  const id = esc(p.id);
+  return `
+    <div class="folder-actions">
+      ${listing
+        ? `<button class="pf-btn" onclick="event.stopPropagation(); openListingDialog('${id}')">Edit listing</button>
+           <button class="pf-btn pf-btn-ghost" onclick="event.stopPropagation(); showScreen('listings', { id: '${esc(listing.id)}' })">View on Listings</button>`
+        : `<button class="pf-btn" onclick="event.stopPropagation(); openListingDialog('${id}')">Create listing</button>`}
+    </div>`;
+}
+
+// One white box per skill tagged on the project, with the skill's name in it.
+// TODO: placeholders until the certification stamps are designed.
 function folderStampsHtml(p) {
   const tags = p.skillTags || [];
   if (!tags.length) return "";
-  return `<div class="folder-stamps" aria-hidden="true">
-    ${tags.map((t) => `<span class="folder-stamp" title="${esc(t.skill)}"></span>`).join("")}
+  return `<div class="folder-stamps" aria-label="Skills">
+    ${tags.map((t) => `<span class="folder-stamp">${esc(t.skill)}</span>`).join("")}
   </div>`;
 }
 
@@ -192,11 +215,15 @@ function emptyFolderHtml(user, isOwn) {
       <div class="folder-back">
         <div class="folder-front">
           <div class="folder-info">
-            <h2 class="folder-title">No open project right now</h2>
+            <h2 class="folder-title">No current project</h2>
             <p class="folder-desc">${isOwn
-              ? "Start a new project, and post a listing if you want a teammate or a mentor."
+              ? "Create a new project to get started. Need an idea? Look through the Challenges page for inspiration."
               : `${esc(firstName(user))} isn't working on a project at the moment.`}</p>
-            ${isOwn ? `<button class="pf-btn" onclick="openNewProjectDialog()">Create project</button>` : ""}
+            ${isOwn ? `
+              <div class="folder-actions">
+                <button class="pf-btn" onclick="openNewProjectDialog()">Create project</button>
+                <button class="pf-btn pf-btn-ghost" data-go="challenges">Browse challenges</button>
+              </div>` : ""}
           </div>
         </div>
       </div>
@@ -204,9 +231,9 @@ function emptyFolderHtml(user, isOwn) {
 }
 
 // ---------- Create project ----------
-// The empty "Current Project" folder's button opens this window. It makes an open
-// project with you as the only member, plus (if you tick it) a listing so others can
-// find it. "Message owner" on that listing, then "Add to team" in messages.js, adds them.
+// "Create project" on your own profile opens this window. It makes an open project
+// with you as the only member. You can have as many current projects as you like.
+// To find a group member or mentor, press "Create listing" on the new folder (listings.js).
 
 function openNewProjectDialog() {
   closeNewProjectDialog();
@@ -233,8 +260,6 @@ window.addEventListener("hashchange", closeNewProjectDialog);
 
 function newProjectFormHtml() {
   const open = challenges.filter((c) => today() <= c.closes);
-  const skillBoxes = SKILLS.map((s) => `
-    <label class="np-chip"><input type="checkbox" name="np-skill" value="${esc(s)}"><span>${esc(s)}</span></label>`).join("");
 
   return `
     <form class="np" onsubmit="createProject(event)" novalidate>
@@ -259,34 +284,6 @@ function newProjectFormHtml() {
             ${open.map((c) => `<option value="${esc(c.id)}">${esc(c.company)}: ${esc(c.title)}</option>`).join("")}
           </select>
         </label>
-
-        <section class="np-team">
-          <label class="np-toggle">
-            <input type="checkbox" id="np-listing" checked onchange="document.getElementById('np-team-body').hidden = !this.checked">
-            <span>Post a listing to find a teammate</span>
-          </label>
-          <div class="np-team-body" id="np-team-body">
-            <div class="np-field">
-              <span class="np-label" id="np-looking-label">Looking for a</span>
-              <div class="np-seg" role="radiogroup" aria-labelledby="np-looking-label">
-                <label class="np-chip"><input type="radio" name="np-looking" value="student" checked><span>Student</span></label>
-                <label class="np-chip"><input type="radio" name="np-looking" value="mentor"><span>Mentor</span></label>
-              </div>
-            </div>
-            <label class="np-field">
-              <span class="np-label">Role</span>
-              <input id="np-role" type="text" maxlength="80" autocomplete="off" placeholder="e.g. Mechanical designer for the enclosure">
-            </label>
-            <label class="np-field">
-              <span class="np-label">What will they do?</span>
-              <textarea id="np-details" rows="3" placeholder="The work, and roughly how many hours a week."></textarea>
-            </label>
-            <div class="np-field">
-              <span class="np-label">Skills needed</span>
-              <div class="np-chips">${skillBoxes}</div>
-            </div>
-          </div>
-        </section>
         <p class="np-error" id="np-error" role="alert"></p>
       </div>
 
@@ -297,27 +294,19 @@ function newProjectFormHtml() {
     </form>`;
 }
 
-// "Create project" was pressed: check the form, save the project (and listing), redraw.
+// "Create project" was pressed: check the form, save the project, redraw.
 function createProject(event) {
   event.preventDefault(); // stop the form from reloading the page
   const me = currentUser();
   const value = (id) => document.getElementById(id).value.trim();
   const title = value("np-name");
-  const wantsListing = document.getElementById("np-listing").checked;
-  const role = value("np-role");
-  const skillsNeeded = [...document.querySelectorAll('input[name="np-skill"]:checked')].map((box) => box.value);
 
-  // The listing and the project are matched by owner and title, so titles can't repeat.
+  // Older listings find their project by owner and title, so titles can't repeat.
   const taken = projects.some((p) => p.owner === me.id && p.title.toLowerCase() === title.toLowerCase());
-  const problem =
-    !title ? ["Give your project a name.", "np-name"] :
-    taken ? ["You already have a project with that name.", "np-name"] :
-    wantsListing && !role ? ["Say what role you need, or untick the listing.", "np-role"] :
-    wantsListing && !skillsNeeded.length ? ["Pick at least one skill for the listing.", null] :
-    null;
+  const problem = !title ? "Give your project a name." : taken ? "You already have a project with that name." : "";
   if (problem) {
-    document.getElementById("np-error").textContent = problem[0];
-    if (problem[1]) document.getElementById(problem[1]).focus();
+    document.getElementById("np-error").textContent = problem;
+    document.getElementById("np-name").focus();
     return;
   }
 
@@ -338,24 +327,9 @@ function createProject(event) {
     startedOn: today(),
   });
 
-  if (wantsListing) {
-    listings.push({
-      id: "listing-" + Date.now(),
-      project: id,
-      projectTitle: title,
-      owner: me.id,
-      challenge: challengeId,
-      lookingFor: document.querySelector('input[name="np-looking"]:checked').value,
-      role,
-      details: value("np-details"),
-      skillsNeeded,
-      postedOn: today(),
-    });
-  }
-
   save();
   closeNewProjectDialog();
-  refresh(); // the new project fills the Current Project folder
+  refresh(); // the new project shows as a Current Project folder
 }
 
 // ---------- Mentors ----------

@@ -48,8 +48,8 @@ Screen names and the box each one draws into:
 | --- | --- | --- |
 | `profile` | profile.js | `{ user: "jordan" }` (blank = the viewer) |
 | `challenges` | challenge.js | `{ id: "honda-battery" }` (the corkboard of challenges, scrolled to that one; **Submit** enters a completed project) |
-| `listings` | listings.js | `{ id: "listing-drone" }` |
-| `messages` | messages.js | `{ with: "maya" }` (the profile's Message button sends this); `{ with: "maya", listing: "listing-..." }` from a listing's Message owner button |
+| `listings` | listings.js | `{ id: "listing-drone" }` (the forum, scrolled to that post) |
+| `messages` | messages.js | `{ with: "maya" }` (the profile's Message button sends this); `{ with: "maya", listing: "listing-..." }` from the Message button on a listing |
 | `project` | project.js | `{ id: "led-cube" }` (project cards and badges send this) |
 | `review` | review.js | `{ project: "solar-logger" }` |
 | `verify` | credential.js | `{ t: "<token>" }` or `{ id: "BRG-K7QM-4XPA" }` (the public certificate page) |
@@ -85,14 +85,22 @@ and the color variables (`var(--primary)` etc.). Put anything extra in your own 
 
 ## Starting a project and building a team
 
-1. **Create project** (profile.js): on your own profile, the empty Current Project folder has a
-   **Create project** button. The window asks for a name, a short description, an optional challenge,
-   and (ticked by default) a listing: student or mentor, the role, what they'll do, and the skills needed.
-   It adds an open project with you as the only member, and a listing with that project's id (`listing.project`).
-2. **Message owner** (listings.js): another student opens the listing and messages the owner.
-   A starter message is typed in for them, and the message they send keeps the listing's id (`message.listing`),
+1. **Create project** (profile.js): on your own profile, **+ Create project** is always at the top right
+   of your projects, and the empty Current Project folder has one too (plus a link to the Challenges page
+   for ideas). The window asks for a name, a short description, and an optional challenge. You can have
+   as many current projects as you like.
+2. **Create listing** (listings.js): every current project folder on your own profile has a
+   **Create listing** button. The window asks who you're looking for (group member, mentor, or either),
+   a few sentences about what you need, and the skills needed. Posting it adds a listing with the
+   project's id (`listing.project`) and opens the Listings page. Once a project has a listing, the
+   folder shows **Edit listing** (which can also take it down) and **View on Listings**.
+3. **Listings page** (listings.js): a forum. Each post is the project's folder, the same one as on the
+   profile, with a box beside it showing who posted it, what they're looking for, and the skills needed.
+   Listings for completed projects are hidden.
+4. **Message** (listings.js): another student presses **Message Bennett** on a post. A starter message
+   is typed in for them, and the message they send keeps the listing's id (`message.listing`),
    shown as a paper-clipped tag on the note.
-3. **Add to team** (messages.js): the owner sees "Jaron wants to join …" with an **Add to team** stamp in that chat.
+5. **Add to team** (messages.js): the owner sees "Jaron wants to join …" with an **Add to team** stamp in that chat.
    Pressing it adds them to the project's `members` and sends a welcome note. Both people then see
    "on the team" with an **Open** stamp that goes to the project page.
 

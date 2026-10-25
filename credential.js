@@ -563,7 +563,7 @@ function badgeSvg(c) {
   const primary = cssVar("--primary", "#2453d6");
   const ink = cssVar("--text", "#17202b");
   const muted = cssVar("--muted", "#5d6877");
-  const font = "Inter, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+  const font = "'IBM Plex Sans', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
 
   const skill = String(c.skill || "");
   const skillSize = Math.min(78, Math.floor(760 / (Math.max(skill.length, 1) * 0.6)));

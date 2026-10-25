@@ -323,16 +323,57 @@ const projects = [
     submittedTo: "aep-sensor",
   },
 
-  // NOTE: Maya and Jordan's new team project does NOT exist yet.
-  // Person B's "Add to project" button creates it during the demo.
+  // Open projects other students posted listings for (shown on the Listings page).
+  {
+    id: "delivery-drone",
+    title: "Autonomous Delivery Drone",
+    owner: "sam",
+    members: ["sam"],
+    status: "open",
+    description: "A quadcopter that carries a small package across campus on its own. The frame is printed, the motors are tuned, and it flies well in manual mode. Next up: waypoint missions and a safe landing routine.",
+    photos: ["img/delivery-drone.jpg"],
+    link: "https://github.com/example/delivery-drone",
+    skillTags: [
+      { skill: "Soldering", people: ["sam"] },
+      { skill: "Python", people: ["sam"] },
+    ],
+    challenge: null,
+    submittedTo: null,
+    startedOn: "2026-09-28",
+  },
+  {
+    id: "dorm-energy",
+    title: "Dorm Energy Audit",
+    owner: "lena",
+    members: ["lena"],
+    status: "open",
+    description: "I put plug-in power meters on 20 dorm rooms to find out where the energy actually goes. Three weeks in, mini fridges and gaming PCs left on overnight are leading by a lot.",
+    photos: ["img/dorm-energy.jpg"],
+    link: "",
+    skillTags: [
+      { skill: "Data Analysis", people: ["lena"] },
+      { skill: "Project Management", people: ["lena"] },
+    ],
+    challenge: null,
+    submittedTo: null,
+    startedOn: "2026-10-01",
+  },
+
+  // NOTE: Maya's new project does NOT exist yet. She makes it with
+  // "Create project" on her profile during the demo.
 ];
 
-// ---------- Listings (open positions on projects) ----------
-// Person B's listing form adds Maya's new listing here during the demo.
+// ---------- Listings (posts on the Listings page) ----------
+// "Create listing" on a current project's folder (listings.js) adds one here.
+// project:     the project's id (its folder shows next to the post)
+// lookingFor:  "student" (a group member), "mentor", or "any" (either)
+// role:        a short name for who they want, e.g. "Mentor" or "Flight controller programmer"
+// details:     the post itself: what they're looking for, in their own words
 
 const listings = [
   {
     id: "listing-drone",
+    project: "delivery-drone",
     projectTitle: "Autonomous Delivery Drone",
     owner: "sam",
     challenge: null,
@@ -344,13 +385,14 @@ const listings = [
   },
   {
     id: "listing-mentor",
-    projectTitle: "Solar Panel Efficiency Logger",
+    project: "dorm-energy",
+    projectTitle: "Dorm Energy Audit",
     owner: "lena",
     challenge: null,
     lookingFor: "mentor",
     role: "Energy industry mentor",
-    details: "We have six weeks of solar data and want someone who works in energy to look over our measurement setup before we write it up. Even one 30-minute call would help a lot.",
-    skillsNeeded: ["Data Analysis"],
+    details: "I have three weeks of power data from 20 dorm rooms and want someone who works in energy to look over my measurement setup before I collect more. Even one 30-minute call would help a lot.",
+    skillsNeeded: ["Data Analysis", "Testing & Validation"],
     postedOn: "2026-10-18",
   },
 ];
