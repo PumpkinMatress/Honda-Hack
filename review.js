@@ -61,8 +61,6 @@ function reviewQueueHtml(me) {
     <div class="rv">
       <header class="rv-head">
         <h1 class="rv-title">Review queue</h1>
-        <p class="rv-intro">Projects submitted to ${esc(me.company)} challenges. Rate each skill the team checked.
-          Every rating becomes a skill certification on that student's profile.</p>
       </header>
 
       <section class="rv-section" aria-label="Waiting for review">
@@ -129,7 +127,6 @@ function reviewPromptHtml(p) {
     <div class="rv-strip">
       <span class="rv-strip-kicker">🏁 ${esc(ch.company)} challenge${p.submittedOn ? ` · Submitted ${esc(formatDate(p.submittedOn))}` : ""}</span>
       <div class="rv-strip-title">You're reviewing ${esc(p.title)}</div>
-      <p class="rv-strip-text">Look through the title card and the pages first, then score each skill the team checked.</p>
     </div>`;
 }
 

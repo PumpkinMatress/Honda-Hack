@@ -7,7 +7,7 @@
 // Layout: a header (photo in a big circle, name box, stats box), then each project
 // as a manila folder. Current projects are full width and always come first.
 // Completed projects are half width, newest first, with the date on the tab.
-// On your own profile, "Create project" is always at the top right of your projects.
+// On your own profile with no current project, the empty folder has a "Create project" button.
 // Each current project has "Create listing" (listings.js) and "Mark as completed" (opens the skills page, project.js),
 // and each project you own has a trash can (top right of the folder) to delete it.
 
@@ -106,7 +106,6 @@ function studentProfileHtml(user, isOwn) {
       ])}
 
       <section class="pf-current" aria-label="Current projects">
-        ${isOwn ? `<div class="pf-new"><button class="pf-btn pf-btn-light" onclick="openNewProjectDialog()">+ Create project</button></div>` : ""}
         ${current.length
           ? current.map((p) => folderHtml(p, user, "current", { actions: isOwn, canDelete: isOwn && p.owner === user.id })).join("")
           : emptyFolderHtml(user, isOwn)}

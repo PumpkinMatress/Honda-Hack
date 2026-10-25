@@ -236,7 +236,7 @@ function saveListing(event, projectId) {
   });
   save();
   closeListingDialog();
-  showScreen("listings", { id }); // see the new post on the Listings page
+  showScreen("profile"); // back to your profile, where the project now has its listing
 }
 
 async function removeListing(listingId) {

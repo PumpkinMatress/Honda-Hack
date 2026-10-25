@@ -83,7 +83,7 @@ function skillsPageHtml(p, params) {
           <span class="nc-date">${esc(shortDate(today()))}</span>
         </header>
 
-        <div class="sk-body">
+        <div class="sk-body sk-body-1">
           <div class="nc-box sk-box">
             <h2 class="nc-box-title">Skills used</h2>
             <p>${solo
@@ -100,16 +100,6 @@ function skillsPageHtml(p, params) {
                 <tbody>${rows}</tbody>
               </table>
             </div>
-          </div>
-
-          <div class="nc-box sk-box">
-            <h2 class="nc-box-title">When you mark it as completed</h2>
-            <ul class="sk-list">
-              <li>It moves to your completed projects, dated today.</li>
-              <li>Each checked skill shows as a stamp on that person's folder.</li>
-              ${listing ? `<li>Its listing comes off the Listings page.</li>` : ""}
-              <li>Then you can submit it to a challenge from the Challenges page. An industry reviewer certifies each check, and the stamps become badges.</li>
-            </ul>
           </div>
         </div>
         <p class="nc-error" id="sk-error" role="alert"></p>
@@ -169,24 +159,16 @@ function projectProgressHtml(p) {
   if (p.status !== "open" || !p.members.includes(currentUser().id)) return "";
 
   if (p.fastForwarded) {
-    const names = p.members.map(findUser).filter(Boolean).map(firstName);
     return `
       <div class="sk-later">
         <div class="sk-later-title">4 weeks later…</div>
-        <div class="sk-later-sub">${esc(joinNames(names))} ${names.length > 1 ? "have" : "has"} a working prototype.
-          Press <strong>Mark as completed</strong> to check who used which skills.</div>
       </div>`;
   }
 
   if (p.members.length < 2) return "";
   return `
     <div class="sk-skip">
-      <div class="sk-skip-text">
-        <span class="sk-demo-tag">Demo</span>
-        <strong>Skip ahead 4 weeks</strong>
-        <p>Fills in the summary, photos, links and pages the team would have added while building.</p>
-      </div>
-      <button class="pf-btn pf-btn-light" onclick="skipAheadFourWeeks('${esc(p.id)}')">⏩ Skip ahead</button>
+      <button class="pf-btn pf-btn-light" onclick="skipAheadFourWeeks('${esc(p.id)}')">Skip ahead 4 weeks</button>
     </div>`;
 }
 

@@ -80,7 +80,9 @@ body[data-screen="profile"] { background: var(--pf-bg); }
 .pf-banner .pf-btn { align-self: flex-start; }
 .pf-name { flex: 1; min-width: 0; display: flex; align-items: flex-end; gap: 12px; }
 .pf-name h1 { font-size: 30px; line-height: 1.15; color: #fff; white-space: nowrap; letter-spacing: -0.02em; }
-.pf-name .verified { flex: none; border-radius: 0; margin-bottom: 2px; }
+/* Twice the normal tag size, centered on the middle of the name's letters
+   (fitProfileName makes the h1 exactly as tall as its letters). */
+.pf-name .verified { flex: none; align-self: center; border-radius: 0; font-size: 24px; padding: 6px 20px; }
 
 .pf-info {
   grid-column: 1; grid-row: 2;
@@ -166,9 +168,6 @@ body[data-screen="profile"] { background: var(--pf-bg); }
 /* ---------- Folders ---------- */
 
 .pf-current { position: relative; display: flex; flex-direction: column; gap: 36px; margin-bottom: 40px; }
-
-/* "Create project": on the dark background, level with the first folder's tab. */
-.pf-new { position: absolute; top: 0; right: 0; height: 46px; display: flex; align-items: center; }
 .pf-completed { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 36px 28px; align-items: start; }
 
 .folder {
@@ -471,8 +470,6 @@ body[data-screen="profile"] { background: var(--pf-bg); }
     display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 5;
   }
   .folder-tab { height: 40px; font-size: 18px; min-width: 130px; }
-  /* No room beside the tab: the button sits above the folders. */
-  .pf-new { position: static; height: auto; align-self: flex-end; margin-bottom: -20px; }
   .folder-current .folder-tab { min-width: 200px; }
   .folder-completed .folder-front { grid-template-columns: minmax(0, 1fr) 40%; }
   .folder-current .folder-front {
