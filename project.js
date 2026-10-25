@@ -82,7 +82,7 @@ function skillsPageHtml(p, params) {
           <span class="nc-date">${esc(shortDate(today()))}</span>
         </header>
 
-        <div class="sk-body">
+        <div class="sk-body sk-body-1">
           <div class="nc-box sk-box">
             <h2 class="nc-box-title">Skills used</h2>
             <p>${solo
@@ -99,16 +99,6 @@ function skillsPageHtml(p, params) {
                 <tbody>${rows}</tbody>
               </table>
             </div>
-          </div>
-
-          <div class="nc-box sk-box">
-            <h2 class="nc-box-title">When you mark it as completed</h2>
-            <ul class="sk-list">
-              <li>It moves to your completed projects, dated today.</li>
-              <li>Each checked skill shows as a stamp on that person's folder.</li>
-              ${listing ? `<li>Its listing comes off the Listings page.</li>` : ""}
-              <li>Then you can submit it to a challenge from the Challenges page. An industry reviewer certifies each check, and the stamps become badges.</li>
-            </ul>
           </div>
         </div>
         <p class="nc-error" id="sk-error" role="alert"></p>

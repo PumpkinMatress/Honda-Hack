@@ -42,10 +42,10 @@ const users = [
     id: "maya",
     name: "Bennett Dial",
     role: "student",
-    major: "Electrical & Computer Engineering",
-    year: "3rd year",
-    bio: "I'm an ECE student who loves building hardware that solves everyday problems.\n\n" +
-      "I work mostly in circuit design, soldering, and embedded C, and I don't call a project finished until I've tested it against real lab equipment. Looking for a Summer 2027 co-op in embedded systems or power electronics.",
+    major: "Economics",
+    year: "2nd year",
+    bio: "I'm an Economics student who builds hardware on the side, mostly small electronics that solve everyday problems.\n\n" +
+      "I taught myself circuit design, soldering, and embedded C in the makerspace, and I don't call a project finished until I've tested it against real lab equipment. Looking for a Summer 2027 internship where I can work between business and engineering.",
     photo: "img/maya.jpg",
     skills: ["Soldering", "Circuit Design", "Embedded C", "Python", "Testing & Validation"],
   },
@@ -53,10 +53,10 @@ const users = [
     id: "jordan",
     name: "Jaron Jordan",
     role: "student",
-    major: "Mechanical Engineering",
+    major: "Electrical Engineering",
     year: "2nd year",
-    bio: "I'm a Mechanical Engineering student focused on product design and manufacturing.\n\n" +
-      "I've used SolidWorks since high school robotics and work part time in our student machine shop. I love taking a part from sketch to tested prototype. Looking for a Summer 2027 internship in automotive or product design.",
+    bio: "I'm an Electrical Engineering student who loves the mechanical side of hardware too.\n\n" +
+      "I've used SolidWorks since high school robotics and work part time in our student machine shop, so I can take a project from circuit to finished enclosure. Looking for a Summer 2027 internship in automotive or product design.",
     photo: "img/jordan.jpg",
     skills: ["CAD (SolidWorks)", "3D Printing", "Machining", "Testing & Validation"],
   },
@@ -78,9 +78,9 @@ const users = [
     name: "Max Long",
     role: "student",
     major: "Computer Science & Engineering",
-    year: "4th year",
-    bio: "I'm a CSE senior who turns messy real-world data into something people can use.\n\n" +
-      "My projects pair sensors and microcontrollers with Python data pipelines and dashboards. Graduating May 2027 and looking for full-time roles in data engineering or analytics.",
+    year: "2nd year",
+    bio: "I'm a Computer Science & Engineering student who turns messy real-world data into something people can use.\n\n" +
+      "My projects pair sensors and microcontrollers with Python data pipelines and dashboards. Looking for a Summer 2027 internship in data engineering or analytics.",
     photo: "img/sam.jpg",
     skills: ["Python", "Data Analysis", "Soldering"],
   },
@@ -88,10 +88,10 @@ const users = [
     id: "lena",
     name: "Henry McGee",
     role: "student",
-    major: "Industrial & Systems Engineering",
-    year: "3rd year",
-    bio: "I'm an ISE student who keeps team projects organized and on schedule.\n\n" +
-      "I usually own the timeline, budget, and documentation so my team can focus on building. Looking for a Summer 2027 internship in operations or project management.",
+    major: "Mechatronics",
+    year: "2nd year",
+    bio: "I'm a Mechatronics student who keeps team projects organized and on schedule.\n\n" +
+      "I usually own the timeline, budget, and documentation so my team can focus on building, and I'm happy to jump in on the mechanical and electrical work too. Looking for a Summer 2027 internship in operations or project management.",
     photo: "img/lena.jpg",
     skills: ["Project Management", "Technical Writing", "Data Analysis"],
   },

@@ -27,7 +27,6 @@ body[data-screen="project"] { background: var(--pf-bg); }
 .sk-body.sk-body-1 { grid-template-columns: minmax(0, 1fr); }
 .sk-box { display: flex; flex-direction: column; gap: 12px; font-size: 15px; line-height: 1.55; }
 .sk-box p a { color: #1B4FB8; text-decoration: underline; } /* links in the text, not the badge links */
-.sk-list { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
 
 /* ---------- Who did which skill ---------- */
 /* A red line under the names, blue rules between the rows, like an index card. */
