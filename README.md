@@ -1,10 +1,26 @@
 # Nexus — Honda Hack demo
 
-A browser-only demo. No server, no logins, no database. All fake data lives in `data.js`.
+**Live demo: [https://main.d34rt9ehmo5hek.amplifyapp.com/](https://main.d34rt9ehmo5hek.amplifyapp.com/)**
 
-**Run it:** open the folder in VS Code, right-click `index.html`, choose **Open with Live Server**.
+A browser-only demo. No server, no logins, no database. All fake data lives in `data.js`, and changes
+you make are saved in your own browser.
+
+**Run it locally:** open the folder in VS Code, right-click `index.html`, choose **Open with Live Server**.
 Use the **Viewing as** switch (in the top bar, between Search and Reset) to change whose screen you see.
 **Reset** in the top bar clears every saved change. **Search** in the top bar finds people, projects, challenges and listings.
+
+## Who's who
+
+The **Viewing as** switch has the three people in the demo. Their ids in `data.js` are the original placeholder names.
+
+| Viewing as | id in `data.js` | Role |
+| --- | --- | --- |
+| Bennett Dial | `maya` | Student, Economics. Starts the project and posts the listing |
+| Jaron Jordan | `jordan` | Student, Electrical Engineering. Joins from the listing |
+| Jose Bonilla · Honda | `priya` | Battery Systems Engineer at Honda. Reviews submissions to the Honda challenge |
+
+Also in the data: Max Long (`sam`) and Henry McGee (`lena`), students with their own projects and listings, and
+Marcus Lee (`marcus`), a Test Engineer at AEP who posted the AEP challenge.
 
 ## Who owns what
 
@@ -135,7 +151,7 @@ Mentors only. Same look as the rest of the site:
 - **The queue** is laid out like the Listings page: each submission is the project's folder with a cream box beside it
   showing the challenge, the team and the skills to rate.
 - **Review** (or the folder) opens the **project's pages first**, so the reviewer looks at the work before scoring it.
-  A cream strip at the top says so, and **Score this submission →** in the top right opens the scoring page.
+  A cream strip at the top names the challenge and the project, and **Score this submission →** in the top right opens the scoring page.
   "Back" there returns to the queue.
 - **The scoring page** has no title card (the project's pages are one click back): index cards for **Rate each skill**
   (a legend with each level's badge, then four level buttons per person per skill) and **Private feedback**.
@@ -176,8 +192,8 @@ Every skill certification can be shared as a public link that anyone can check, 
    and **Embed on your own website** (an `<iframe>` badge that checks its own signature).
 
 The skill certification's details travel inside the link, so it opens on any computer, even with no server.
-The link only works for other people once the site is published (Netlify Drop or GitHub Pages).
-While you run it on Live Server, the link only opens on your computer, and the Share window says so.
+Links made on the [live demo](https://main.d34rt9ehmo5hek.amplifyapp.com/) work for anyone. Links made while you run
+it on Live Server only open on your own computer.
 
 **Demo only:** the companies' private signing keys sit in `credential.js` so this works without a server.
 In a real product each company would keep its private key on its own server.
@@ -190,7 +206,9 @@ Until a file exists, the logo box on the challenges board shows the company name
 ## Things to know
 
 - **Editing `data.js` wipes saved demo changes** the next time the page loads, so new data always shows up. Ask Person A for new fields.
-- **Photos:** put images in an `img/` folder using the names in `data.js` (like `img/maya.jpg`). Missing photos show colored initials instead.
-- **Statuses:** a project with `status: "done"` shows under Past projects. Anything else (`"open"`, `"submitted"`, ...) shows under Current projects.
+- **Photos:** images live in `img/` under the names in `data.js` (like `img/maya.jpg`). Missing profile photos show colored initials instead.
+  The project photos come from free-to-use sources; [img/CREDITS.md](img/CREDITS.md) lists each one's author and license.
+  Keep that file, since some of the licenses require the credit.
+- **Statuses:** a project with `status: "done"` shows as a completed folder (dated). Anything else (`"open"`, ...) shows as a current project.
 - **Feedback** shows on the project view, only to the team members it was written to. Use `doneWell` / `toImprove`, or a single `comment` field.
 - **Something blank or broken?** Press F12 and open the Console tab. A crashing screen shows its error message on the page instead of going blank.
