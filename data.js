@@ -302,10 +302,16 @@ const messages = [
 // ---------- Certifications (skill ratings from reviewers) ----------
 // Person C's review form adds entries here. Person A's profile page shows them.
 // Maya has none at the start of the demo; that's the point of the demo.
+//
+// id: the credential ID shown on the public certificate page and on LinkedIn.
+// The review form also saves two more fields on each one:
+//   reviewer: { name, title, company }  the reviewer as they were that day
+//   token:    the signed version used in the public link (made by credential.js)
 
 const certifications = [
   // SAMPLE so Person A can design the badge before Person C's form exists.
   {
+    id: "BRG-K7QM-4XPA",
     user: "sam",
     skill: "Data Analysis",
     level: "advanced",

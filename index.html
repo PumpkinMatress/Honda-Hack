@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="teams.css">   <!-- Person B -->
   <link rel="stylesheet" href="review.css">  <!-- Person C -->
+  <link rel="stylesheet" href="credential.css"> <!-- shareable certificates -->
 </head>
 <body>
 
@@ -45,6 +46,7 @@
     <section class="screen" id="screen-messages"   hidden></section> <!-- messages.js  (Person B) -->
     <section class="screen" id="screen-project"    hidden></section> <!-- project.js   (Person C) -->
     <section class="screen" id="screen-review"     hidden></section> <!-- review.js    (Person C) -->
+    <section class="screen" id="screen-verify"     hidden></section> <!-- credential.js: public certificate page -->
   </main>
 
   <!-- Order matters: data first, then core, then the screens. -->
@@ -56,6 +58,7 @@
   <script src="messages.js"></script>  <!-- Person B -->
   <script src="project.js"></script>   <!-- Person C -->
   <script src="review.js"></script>    <!-- Person C -->
+  <script src="credential.js"></script> <!-- signed, shareable certificates -->
   <script>startApp();</script>
 </body>
 </html>

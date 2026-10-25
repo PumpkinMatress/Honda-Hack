@@ -32,6 +32,9 @@
 //     levelPill(levelId)        colored pill, e.g. "Advanced"
 //     certBadgeHtml(cert)       the full certification badge used on profiles
 //                               certBadgeHtml(cert, { showStudent: true }) names the student instead of the reviewer
+//                               certBadgeHtml(cert, { share: true }) adds a "Share" button (credential.js)
+//     certReviewer(cert)        -> { name, title, company } of whoever gave the certification
+//     newCredentialId()         -> a new certification ID like "BRG-7F3K-9Q2M"
 //     photoHtml(src, label)     project photo with a colored fallback if the file is missing
 //     verifiedHtml(user)        "✓ Verified · Honda" tag for mentors
 //     formatDate("2026-10-24")  -> "Oct 24, 2026"
@@ -43,6 +46,7 @@
 
 // The nav bar is built from this list.
 // mentorOnly: only shown when a mentor is the viewer.
+// public: a page for people without an account (hides the nav and "Viewing as").
 const SCREENS = [
   { name: "profile",    label: "Profile",      file: "profile.js",   owner: "Person A", nav: true },
   { name: "challenges", label: "Challenges",   file: "challenge.js", owner: "Person B", nav: true },
@@ -50,6 +54,7 @@ const SCREENS = [
   { name: "messages",   label: "Messages",     file: "messages.js",  owner: "Person B", nav: true },
   { name: "project",    label: "Project",      file: "project.js",   owner: "Person C", nav: false },
   { name: "review",     label: "Review queue", file: "review.js",    owner: "Person C", nav: true, mentorOnly: true },
+  { name: "verify",     label: "Verify",       file: "credential.js", owner: "Person A", nav: false, public: true },
 ];
 
 const screenDrawers = {};
@@ -85,6 +90,11 @@ function refresh() {
   const { name, params } = readHash();
   currentScreen = name;
   currentParams = params;
+  const info = SCREENS.find((s) => s.name === name);
+
+  // Public pages (like a shared certificate link) look the way a visitor without an account sees them.
+  document.body.classList.toggle("is-public", Boolean(info.public));
+  document.body.classList.toggle("is-embed", Boolean(info.public) && params.embed === "1");
 
   document.querySelectorAll(".screen").forEach((s) => (s.hidden = true));
   const box = document.getElementById("screen-" + name);
@@ -92,7 +102,6 @@ function refresh() {
 
   const draw = screenDrawers[name];
   if (!draw) {
-    const info = SCREENS.find((s) => s.name === name);
     box.innerHTML = `
       <div class="empty-state card">
         <h2>${esc(info.label)}</h2>
@@ -287,17 +296,47 @@ function verifiedHtml(user) {
   return `<span class="verified" title="Identity and employer verified">✓ Verified · ${esc(user.company)}</span>`;
 }
 
-// The full certification badge: "Advanced Soldering — certified by Priya Shah, Honda".
+// Who gave a certification, as they were on the day it was given (saved on the
+// certification by review.js). Falls back to their current profile.
+function certReviewer(cert) {
+  const saved = cert.reviewer || {};
+  const live = findUser(cert.by) || {};
+  return {
+    name: saved.name || live.name || "a reviewer",
+    title: saved.title || live.title || "",
+    company: saved.company || live.company || "",
+  };
+}
+
+// A short, readable certification ID like "BRG-7F3K-9Q2M".
+// No 0/O or 1/I, so it's easy to read out loud or type.
+function newCredentialId() {
+  const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const block = () => Array.from({ length: 4 }, () => letters[Math.floor(Math.random() * letters.length)]).join("");
+  let id;
+  do id = `BRG-${block()}-${block()}`; while (certifications.some((c) => c.id === id));
+  return id;
+}
+
+// The full certification badge:
+//   "Advanced Soldering — Verified by Honda · Priya Shah, Battery Systems Engineer".
 // certBadgeHtml(cert, { showStudent: true }) says who received it instead (for reviewers).
+// certBadgeHtml(cert, { share: true }) adds the "Share" button (only on your own profile).
 function certBadgeHtml(cert, options = {}) {
   const level = levelInfo(cert.level);
-  const reviewer = findUser(cert.by);
+  const reviewer = certReviewer(cert);
   const student = findUser(cert.user);
   const project = findProject(cert.project);
-  const by = reviewer ? `${reviewer.name}${reviewer.company ? ", " + reviewer.company : ""}` : "a reviewer";
+  const reviewerLine = reviewer.name + (reviewer.title ? ", " + reviewer.title : "");
   const who = options.showStudent && student
     ? `Awarded to <strong>${esc(student.name)}</strong>`
-    : `Certified by ${esc(by)}`;
+    : reviewer.company
+      ? `Verified by <strong>${esc(reviewer.company)}</strong> <span class="cert-reviewer">${esc(reviewerLine)}</span>`
+      : `Verified by ${esc(reviewerLine)}`;
+  // stopPropagation: clicking Share shouldn't also open the project.
+  const share = options.share && cert.id && typeof openShareDialog === "function"
+    ? `<button class="cert-share" type="button" onclick="event.stopPropagation(); openShareDialog('${esc(cert.id)}')">Share ↗</button>`
+    : "";
   return `
     <div class="cert level-${esc(level.id)}" ${project ? `data-go="project" data-id="${esc(project.id)}"` : ""}>
       <div class="cert-seal" aria-hidden="true">${esc(level.label[0])}</div>
@@ -307,7 +346,10 @@ function certBadgeHtml(cert, options = {}) {
           ${levelMeter(cert.level)}
         </div>
         <div class="cert-by">${who}</div>
-        <div class="cert-meta">${project ? esc(project.title) + " · " : ""}${esc(formatDate(cert.date))}</div>
+        <div class="cert-foot">
+          <div class="cert-meta">${project ? esc(project.title) + " · " : ""}${esc(formatDate(cert.date))}</div>
+          ${share}
+        </div>
       </div>
     </div>`;
 }
@@ -334,6 +376,8 @@ let appStarted = false;
 
 function startApp() {
   loadSaved();
+  // Every certification needs an ID for its public link (older saved ones may not have one).
+  certifications.forEach((c) => { if (!c.id) c.id = newCredentialId(); });
   try {
     const savedViewer = localStorage.getItem(VIEWER_KEY);
     if (savedViewer && findUser(savedViewer)) viewerId = savedViewer;

@@ -13,6 +13,7 @@ Use the **Viewing as** dropdown (top right) to switch between Maya, Jordan and P
 | A: Platform and Profile | `index.html`, `style.css`, `data.js`, `core.js`, `profile.js` |
 | B: Challenge to Team | `challenge.js`, `listings.js`, `messages.js`, `teams.css` |
 | C: Project to Review | `project.js`, `review.js`, `review.css` |
+| Shareable certificates | `credential.js`, `credential.css` (see below) |
 
 `index.html` already loads all of these files, so B and C don't need to edit it.
 Until your file exists, its screen shows a grey "hasn't been added yet" box.
@@ -51,6 +52,7 @@ Screen names and the box each one draws into:
 | `messages` | messages.js | `{ with: "maya" }` (the profile's Message button sends this) |
 | `project` | project.js | `{ id: "led-cube" }` (project cards and badges send this) |
 | `review` | review.js | `{ project: "solar-logger" }` |
+| `verify` | credential.js | `{ t: "<token>" }` or `{ id: "BRG-K7QM-4XPA" }` (the public certificate page) |
 
 You choose your own params, except the ones in the table that other screens already send.
 
@@ -79,6 +81,28 @@ showScreen("project", { id: "battery-buddy" });
 
 Use the classes listed at the top of `style.css` (`card`, `btn btn-primary`, `chip`, `field`, `banner`, `grid`, `row`, ...)
 and the color variables (`var(--primary)` etc.). Put anything extra in your own CSS file.
+
+## Shareable certificates (credential.js)
+
+Every certification can be shared as a public link that anyone can check, for example from LinkedIn.
+
+1. When the Honda reviewer submits a review, each certification gets an ID (like `BRG-7F3K-9Q2M`)
+   and is **digitally signed with Honda's key**. The signed version is a standard JSON Web Token (JWT).
+2. On their own profile, a student clicks **Share** on a badge. The window has:
+   - **Copy link**: the public certificate page
+   - **Add to LinkedIn profile**: opens LinkedIn's "Add certification" form already filled in
+   - **Download image**: a 1200 × 630 PNG of the badge for posts or slides
+   - **Embed on your own website**: an `<iframe>` badge that checks its own signature
+3. The public page (`#/verify?t=...`) checks the signature and shows **✓ Verified credential**.
+   If anyone edits the link (say, Beginner to Advanced), it shows **✕ Not valid** instead.
+   The **Edit this badge** button on that page shows this happening, which works well in the video.
+
+The certificate's details travel inside the link, so it opens on any computer, even with no server.
+The link only works for other people once the site is published (Netlify Drop or GitHub Pages).
+While you run it on Live Server, the link only opens on your computer, and the Share window says so.
+
+**Demo only:** the companies' private signing keys sit in `credential.js` so this works without a server.
+In a real product each company would keep its private key on its own server.
 
 ## Things to know
 

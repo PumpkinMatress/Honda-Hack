@@ -33,10 +33,12 @@ function studentProfileHtml(user, isOwn) {
         <section class="section">
           <div class="section-head">
             <h2>Certifications</h2>
-            <span class="muted small">Skill ratings from verified industry reviewers</span>
+            <span class="muted small">${isOwn && certs.length
+              ? "Signed by the reviewer's company. Share any badge to LinkedIn."
+              : "Skill ratings from verified industry reviewers"}</span>
           </div>
           ${certs.length
-            ? `<div class="cert-grid">${certs.map(certBadgeHtml).join("")}</div>`
+            ? `<div class="cert-grid">${certs.map((c) => certBadgeHtml(c, { share: isOwn })).join("")}</div>`
             : `<div class="empty-state card">
                  <div class="empty-icon" aria-hidden="true">🏅</div>
                  <p><strong>No certifications yet.</strong></p>

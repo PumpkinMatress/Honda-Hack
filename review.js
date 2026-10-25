@@ -206,16 +206,22 @@ function submitReview(projectId) {
   }
 
   // One certification per person per skill (same fields as the sample in data.js).
+  // Each gets its own ID, plus the reviewer's name, title and company as they are today.
+  const awarded = [];
   for (const r of ratings) {
-    certifications.push({
+    const cert = {
+      id: newCredentialId(),
       user: r.user,
       skill: r.skill,
       level: r.level,
       by: me.id,
+      reviewer: { name: me.name, title: me.title || "", company: me.company || "" },
       project: p.id,
       challenge: p.submittedTo,
       date: today(),
-    });
+    };
+    certifications.push(cert);
+    awarded.push(cert);
   }
 
   const doneWell = document.getElementById("rev-done-well").value.trim();
@@ -235,6 +241,10 @@ function submitReview(projectId) {
   p.status = "done";
   save();
   refresh(); // same screen, now showing the finished review
+
+  // Sign each new certification with the company's key (credential.js),
+  // so the students can share a link that anyone can check.
+  if (typeof signCertifications === "function") signCertifications(awarded);
 }
 
 // ---------- After the review ----------
@@ -260,6 +270,8 @@ function reviewDoneHtml(p) {
           <span class="muted small">Certified by ${esc(reviewer.name)}, ${esc(reviewer.company)}</span>
         </div>
         <div class="cert-grid">${certs.map((c) => certBadgeHtml(c, { showStudent: true })).join("")}</div>
+        <p class="muted small rev-signed">🔏 Each one is digitally signed with ${esc(reviewer.company)}'s key.
+          ${esc(joinNames(team.map(firstName)))} can add ${certs.length === 1 ? "it" : "them"} to LinkedIn, and anyone with the link can check ${certs.length === 1 ? "it's" : "they're"} real.</p>
       </section>
 
       ${notes.length ? `
